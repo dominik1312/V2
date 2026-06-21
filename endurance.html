@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="topbar.js" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
+<title>Endurance Coach</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --card-1: #161616;
+    --card-2: #111111;
+    --card-2b: #101010;
+    --card-3a: #141414;
+    --card-3b: #0f0f0f;
+    --border: rgba(255,255,255,0.06);
+    --border-soft: rgba(255,255,255,0.05);
+    --text-1: #f5f3ee;
+    --text-2: #ededed;
+    --text-3: #9a9a9a;
+    --text-4: #8a8a8a;
+    --text-5: #7c7c7c;
+    --text-6: #6b6b6b;
+    --gold: #caa75f;
+    --gold-pill-bg: #f1ece0;
+    --gold-pill-text: #191919;
+    --good: #62c193;
+    --good-bg: rgba(98,193,147,0.12);
+    --neutral-bg: rgba(255,255,255,0.05);
+    --font: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text-1);
+    font-family: var(--font);
+    -webkit-font-smoothing: antialiased;
+    width: 100%; max-width: 100vw; overflow-x: hidden;
+  }
+  .ec-shell {
+    min-height: 100vh;
+    padding: 34px 24px calc(48px + env(safe-area-inset-bottom));
+    display: flex; justify-content: center;
+  }
+  .ec-inner { width: 100%; max-width: 880px; }
+
+  /* Header */
+  .ec-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+  .ec-title { margin: 0; font-size: 27px; font-weight: 800; letter-spacing: -0.02em; color: var(--text-1); }
+  .ec-subtitle { margin-top: 6px; font-size: 13px; color: var(--text-5); }
+  .ec-settings-btn {
+    flex: none; width: 40px; height: 40px; border-radius: 11px;
+    background: #1a1a1a; border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text-3);
+  }
+
+  /* Week progress */
+  .ec-progress-row { display: flex; align-items: center; gap: 14px; margin-top: 16px; }
+  .ec-week-chip { flex: none; font-size: 11px; font-weight: 700; letter-spacing: .14em; color: var(--gold); white-space: nowrap; }
+  .ec-progress-track { flex: 1; height: 4px; background: rgba(255,255,255,0.07); border-radius: 999px; overflow: hidden; }
+  .ec-progress-fill { height: 100%; background: var(--gold); border-radius: 999px; transition: width .25s ease; }
+
+  /* Selector card */
+  .ec-selector-card {
+    margin-top: 18px;
+    background: linear-gradient(180deg, var(--card-1), var(--card-2));
+    border: 1px solid var(--border); border-radius: 22px;
+    padding: 22px 24px; display: flex; flex-direction: column; gap: 16px;
+  }
+  .ec-selector-row { display: grid; grid-template-columns: 62px 1fr; align-items: center; gap: 16px; }
+  .ec-selector-label { font-size: 12px; font-weight: 700; letter-spacing: .14em; color: var(--gold); }
+  .ec-pill-group {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border-soft);
+    border-radius: 14px; padding: 6px;
+  }
+  .ec-pill {
+    flex: 1; min-width: max-content; text-align: center;
+    padding: 11px 12px; border-radius: 10px; font-size: 14px; line-height: 1;
+    cursor: pointer; border: none; font-family: inherit; font-weight: 600;
+    background: transparent; color: var(--gold);
+    transition: all .18s ease; white-space: nowrap;
+  }
+  .ec-pill.active {
+    background: var(--gold-pill-bg); color: var(--gold-pill-text);
+    font-weight: 700; box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  }
+
+  /* Week heading */
+  .ec-week-head { margin-top: 20px; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .ec-week-title { margin: 0; font-size: 17px; font-weight: 700; color: var(--text-2); letter-spacing: -0.01em; }
+  .ec-week-note { font-size: 12px; color: var(--text-4); }
+
+  /* Metric cards */
+  .ec-metrics-grid {
+    margin-top: 14px; display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px;
+  }
+  .ec-metric-card {
+    background: linear-gradient(180deg, var(--card-1), var(--card-2b));
+    border: 1px solid var(--border); border-radius: 16px; padding: 16px 18px;
+  }
+  .ec-metric-label {
+    font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--gold);
+  }
+  .ec-metric-value-row { margin-top: 10px; display: flex; align-items: baseline; gap: 6px; }
+  .ec-metric-value { font-size: 30px; font-weight: 800; color: var(--text-1); letter-spacing: -0.02em; }
+  .ec-metric-unit { font-size: 14px; font-weight: 500; color: var(--text-5); }
+  .ec-tag {
+    display: inline-block; margin-top: 12px; padding: 4px 10px; border-radius: 999px;
+    font-size: 11px; font-weight: 600; letter-spacing: .02em;
+  }
+  .ec-tag.up { color: var(--good); background: var(--good-bg); }
+  .ec-tag.neutral { color: var(--text-3); background: var(--neutral-bg); }
+
+  /* Weekly bar chart */
+  .ec-chart-card {
+    margin-top: 16px;
+    background: linear-gradient(180deg, var(--card-3a), var(--card-3b));
+    border: 1px solid var(--border); border-radius: 18px; padding: 20px 24px 18px;
+  }
+  .ec-chart-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .ec-chart-label {
+    font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3);
+  }
+  .ec-chart-badge { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; color: var(--gold); }
+  .ec-chart-badge .dot { width: 8px; height: 8px; border-radius: 2px; background: var(--gold); display: inline-block; }
+  .ec-bars-row { margin-top: 18px; display: flex; align-items: flex-end; gap: 10px; }
+  .ec-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .ec-bar-val { font-size: 12px; font-weight: 500; color: var(--text-6); }
+  .ec-bar-val.current { font-weight: 700; color: var(--gold); }
+  .ec-bar-track { width: 60%; height: 96px; display: flex; align-items: flex-end; justify-content: center; }
+  .ec-bar-fill { width: 100%; border-radius: 6px 6px 3px 3px; background: rgba(255,255,255,0.13); transition: height .25s ease; }
+  .ec-bar-fill.current { background: var(--gold); }
+  .ec-bar-week { font-size: 11px; font-weight: 500; color: var(--text-6); }
+
+  @media (max-width: 480px) {
+    .ec-shell { padding: 24px 14px 40px; }
+    .ec-selector-row { grid-template-columns: 1fr; gap: 8px; }
+    .ec-selector-label { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+<div class="ec-shell">
+  <div class="ec-inner">
+
+    <div class="ec-head">
+      <div>
+        <h1 class="ec-title">Progressive Endurance Coach</h1>
+        <div class="ec-subtitle" id="ecSubtitle">Pool training block</div>
+      </div>
+      <button class="ec-settings-btn" type="button" aria-label="Settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </button>
+    </div>
+
+    <div class="ec-progress-row">
+      <span class="ec-week-chip" id="ecWeekChip">WEEK 4 OF 6</span>
+      <div class="ec-progress-track"><div class="ec-progress-fill" id="ecProgressFill"></div></div>
+    </div>
+
+    <div class="ec-selector-card">
+      <div class="ec-selector-row">
+        <span class="ec-selector-label">SPORT</span>
+        <div class="ec-pill-group" id="ecSportPills"></div>
+      </div>
+      <div class="ec-selector-row">
+        <span class="ec-selector-label">FOCUS</span>
+        <div class="ec-pill-group" id="ecTypePills"></div>
+      </div>
+    </div>
+
+    <div class="ec-week-head">
+      <h2 class="ec-week-title">This week&rsquo;s prescription</h2>
+      <span class="ec-week-note" id="ecPlanNote"></span>
+    </div>
+
+    <div class="ec-metrics-grid" id="ecMetrics"></div>
+
+    <div class="ec-chart-card">
+      <div class="ec-chart-head">
+        <span class="ec-chart-label" id="ecChartLabel">WEEKLY DISTANCE</span>
+        <span class="ec-chart-badge"><span class="dot"></span>this week</span>
+      </div>
+      <div class="ec-bars-row" id="ecBars"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ============================================================
+  // CONFIG — week-of-block and default sport. Edit if needed.
+  // ============================================================
+  const WEEK_OF_BLOCK = 4; // 1-6
+  const DEFAULT_SPORT = 'swim'; // 'swim' | 'run'
+
+  const swimTypes = ['Endurance', 'Intervals', 'Technique', 'Sprint', 'Recovery'];
+  const runTypes  = ['Easy', 'Tempo', 'Intervals', 'Long', 'Recovery'];
+
+  const swimBase = {
+    Endurance: { dist: 1600, dur: 48, pool: 25, step: 100 },
+    Intervals: { dist: 1200, dur: 42, pool: 25, step: 75 },
+    Technique: { dist: 900,  dur: 35, pool: 25, step: 50 },
+    Sprint:    { dist: 800,  dur: 30, pool: 50, step: 50 },
+    Recovery:  { dist: 1000, dur: 30, pool: 25, step: 0 },
+  };
+  const runBase = {
+    Easy:      { dist: 6.0,  dur: 38, pace: '6:20', hr: 'Z2 · 138', step: 0.4 },
+    Tempo:     { dist: 8.0,  dur: 42, pace: '5:15', hr: 'Z3 · 158', step: 0.5 },
+    Intervals: { dist: 7.0,  dur: 40, pace: '4:30', hr: 'Z4 · 172', step: 0.4 },
+    Long:      { dist: 14.0, dur: 85, pace: '6:40', hr: 'Z2 · 142', step: 1.0 },
+    Recovery:  { dist: 4.0,  dur: 26, pace: '7:05', hr: 'Z1 · 122', step: 0 },
+  };
+
+  // ============================================================
+  // STATE
+  // ============================================================
+  let state = { sport: DEFAULT_SPORT, swimType: 'Endurance', runType: 'Easy' };
+
+  function currentSport() { return state.sport; }
+  function currentType() { return currentSport() === 'swim' ? state.swimType : state.runType; }
+  function setSport(s) { state.sport = s; render(); }
+  function setType(t) {
+    if (currentSport() === 'swim') state.swimType = t; else state.runType = t;
+    render();
+  }
+
+  // ============================================================
+  // PLAN BUILDER — same ramp/step logic as the design reference
+  // ============================================================
+  function ramp(center, step, currentWeek, fmt) {
+    const vals = [];
+    let min = Infinity, max = -Infinity;
+    for (let i = 1; i <= 6; i++) {
+      const v = center + step * (i - currentWeek);
+      vals.push(v);
+      if (v < min) min = v;
+      if (v > max) max = v;
+    }
+    return vals.map((v, idx) => {
+      const isCurrent = (idx + 1) === currentWeek;
+      const h = (max === min) ? 66 : (40 + (v - min) / (max - min) * 60);
+      return { label: 'W' + (idx + 1), valText: fmt(v), heightPct: h, current: isCurrent };
+    });
+  }
+
+  function buildPlan(sport, type, week) {
+    if (sport === 'swim') {
+      const b = swimBase[type];
+      const lengths = Math.round(b.dist / b.pool);
+      const up = b.step > 0;
+      const metrics = [
+        { label: 'Distance', value: b.dist.toLocaleString(), unit: 'm', tag: up ? ('↑ +' + b.step + ' m') : 'maintain', up },
+        { label: 'Duration', value: String(b.dur), unit: 'min', tag: 'steady', up: false },
+        { label: 'Pool length', value: String(b.pool), unit: 'm', tag: lengths + ' lengths', up: false },
+      ];
+      const weeks = ramp(b.dist, b.step, week, v => v >= 1000 ? (v / 1000).toFixed(1) + 'k' : String(Math.round(v)));
+      return { metrics, weeks, chartLabel: 'WEEKLY DISTANCE · METRES' };
+    }
+    const b = runBase[type];
+    const up = b.step > 0;
+    const hr = b.hr.split(' · ');
+    const metrics = [
+      { label: 'Distance', value: b.dist.toFixed(1), unit: 'km', tag: up ? ('↑ +' + b.step.toFixed(1) + ' km') : 'maintain', up },
+      { label: 'Duration', value: String(b.dur), unit: 'min', tag: 'per session', up: false },
+      { label: 'Pace', value: b.pace, unit: '/km', tag: 'goal pace', up: false },
+      { label: 'Heart rate', value: hr[0], unit: hr[1] + ' bpm', tag: 'target zone', up: false },
+    ];
+    const weeks = ramp(b.dist, b.step, week, v => v.toFixed(1));
+    return { metrics, weeks, chartLabel: 'WEEKLY DISTANCE · KM' };
+  }
+
+  // ============================================================
+  // RENDER
+  // ============================================================
+  function pillsHtml(items, activeKey, dataAttr) {
+    return items.map(it =>
+      '<button type="button" class="ec-pill ' + (it.key === activeKey ? 'active' : '') + '" data-' + dataAttr + '="' + it.key + '">' + it.label + '</button>'
+    ).join('');
+  }
+
+  function render() {
+    const sport = currentSport();
+    const type = currentType();
+    const typeList = sport === 'swim' ? swimTypes : runTypes;
+    const week = Math.min(6, Math.max(1, WEEK_OF_BLOCK));
+
+    document.getElementById('ecSubtitle').textContent = sport === 'swim' ? 'Pool training block' : 'Road & track block';
+    document.getElementById('ecWeekChip').textContent = 'WEEK ' + week + ' OF 6';
+    document.getElementById('ecProgressFill').style.width = Math.round(week / 6 * 100) + '%';
+
+    document.getElementById('ecSportPills').innerHTML = pillsHtml(
+      [{ key: 'swim', label: 'Swimming' }, { key: 'run', label: 'Running' }], sport, 'sport'
+    );
+    document.getElementById('ecTypePills').innerHTML = pillsHtml(
+      typeList.map(n => ({ key: n, label: n })), type, 'type'
+    );
+
+    document.getElementById('ecPlanNote').textContent = type + ' · progressive build';
+
+    const plan = buildPlan(sport, type, week);
+
+    document.getElementById('ecMetrics').innerHTML = plan.metrics.map(m =>
+      '<div class="ec-metric-card">' +
+        '<div class="ec-metric-label">' + m.label + '</div>' +
+        '<div class="ec-metric-value-row"><span class="ec-metric-value">' + m.value + '</span><span class="ec-metric-unit">' + m.unit + '</span></div>' +
+        '<div><span class="ec-tag ' + (m.up ? 'up' : 'neutral') + '">' + m.tag + '</span></div>' +
+      '</div>'
+    ).join('');
+
+    document.getElementById('ecChartLabel').textContent = plan.chartLabel;
+    document.getElementById('ecBars').innerHTML = plan.weeks.map(w =>
+      '<div class="ec-bar-col">' +
+        '<span class="ec-bar-val ' + (w.current ? 'current' : '') + '">' + w.valText + '</span>' +
+        '<div class="ec-bar-track"><div class="ec-bar-fill ' + (w.current ? 'current' : '') + '" style="height:' + w.heightPct + '%;"></div></div>' +
+        '<span class="ec-bar-week">' + w.label + '</span>' +
+      '</div>'
+    ).join('');
+
+    document.querySelectorAll('#ecSportPills .ec-pill').forEach(btn =>
+      btn.addEventListener('click', () => setSport(btn.dataset.sport))
+    );
+    document.querySelectorAll('#ecTypePills .ec-pill').forEach(btn =>
+      btn.addEventListener('click', () => setType(btn.dataset.type))
+    );
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

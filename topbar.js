@@ -96,6 +96,32 @@
   opacity: 0.85;
 }
 
+/* Strength / Endurance switcher — only injected on gym.html and
+   endurance.html. margin-right:auto absorbs the leftover space in the
+   flex-end topbar row, pushing this to the far left while the water
+   pill + finance button stay flush right exactly as on every other page. */
+.topbar-subnav {
+  display: flex; gap: 6px;
+  margin-right: auto;
+}
+.topbar-subnav-pill {
+  display: inline-flex; align-items: center;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 12.5px; font-weight: 600;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s, color 0.15s;
+}
+.topbar-subnav-pill:hover { background: rgba(255, 255, 255, 0.08); }
+.topbar-subnav-pill.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #FAFAFA;
+}
+
 /* Bottom tab bar — Instagram-style */
 .bottombar {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 40;
@@ -195,8 +221,15 @@ body.topbar-modal-open {
 `;
 
   // -------- HTML --------
+  const fitnessSubnavHtml = `
+  <nav class="topbar-subnav" id="topbarSubnav" aria-label="Fitness mode">
+    <a href="gym.html" class="topbar-subnav-pill" data-mode="strength">Strength</a>
+    <a href="endurance.html" class="topbar-subnav-pill" data-mode="endurance">Endurance</a>
+  </nav>
+`;
   const topbarHtml = `
 <header class="topbar" id="topbar" role="navigation" aria-label="Quick actions">
+  ${isFitnessPage() ? fitnessSubnavHtml : ''}
   <div class="topbar-water-wrap">
     <a href="health.html#water" class="topbar-water-pill" id="topbarWater" aria-label="Water progress">
       <span class="topbar-pill-dot"></span>
@@ -233,6 +266,12 @@ body.topbar-modal-open {
     const p = (window.location.pathname || '').toLowerCase();
     return p.endsWith('/finance.html') || p.endsWith('finance.html');
   }
+  // gym.html (strength) and endurance.html (cardio plans) share one
+  // "Fitness" tab — show the Strength/Endurance switcher pills on both.
+  function isFitnessPage() {
+    const p = (window.location.pathname || '').toLowerCase();
+    return p.endsWith('gym.html') || p.endsWith('endurance.html');
+  }
   // When the water tracker is iframed inside health.html, the embedded
   // page shouldn't render its own chrome again.
   function isEmbedded() {
@@ -244,7 +283,7 @@ body.topbar-modal-open {
   function currentPageKey() {
     const p = (window.location.pathname || '').toLowerCase();
     if (p.endsWith('health.html')) return 'health';
-    if (p.endsWith('gym.html')) return 'fitness';
+    if (p.endsWith('gym.html') || p.endsWith('endurance.html')) return 'fitness';
     return 'main'; // index.html, /, or anything else falls back to main
   }
 
@@ -270,6 +309,15 @@ body.topbar-modal-open {
     document.querySelectorAll('.bottombar-tab').forEach((t) => {
       t.classList.toggle('active', t.getAttribute('data-page') === active);
     });
+
+    // Highlight the active Strength/Endurance subnav pill, if present.
+    if (isFitnessPage()) {
+      const mode = (window.location.pathname || '').toLowerCase().endsWith('endurance.html')
+        ? 'endurance' : 'strength';
+      document.querySelectorAll('.topbar-subnav-pill').forEach((p) => {
+        p.classList.toggle('active', p.getAttribute('data-mode') === mode);
+      });
+    }
 
     // Reserve room above the fixed bottom bar so page content can scroll
     // past it without being hidden.
