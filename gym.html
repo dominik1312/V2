@@ -32,16 +32,10 @@ const CONFIG = {
 
   // Training split. Most people use Push/Pull/Legs but you can rename
   // these to "Upper", "Lower", "Full Body", "Day A", anything.
-  // `type` controls which panel renders below the day filter:
-  // "strength" shows the exercise/weight/reps coach, "cardio" shows
-  // the distance/duration logger. Days without a `type` are treated
-  // as "strength" for backward compatibility with old saved state.
   days: [
-    { id: "push", name: "Push", type: "strength" },
-    { id: "pull", name: "Pull", type: "strength" },
-    { id: "legs", name: "Legs", type: "strength" },
-    { id: "run",  name: "Running",  type: "cardio" },
-    { id: "swim", name: "Swimming", type: "cardio" }
+    { id: "push", name: "Push" },
+    { id: "pull", name: "Pull" },
+    { id: "legs", name: "Legs" }
   ],
 
   // Split rotation — the order your training days cycle through. Use day
@@ -1450,7 +1444,7 @@ img, video, canvas, svg { max-width: 100%; }
   <div class="card">
     <!-- Filters -->
     <div class="po-filters">
-      <div class="po-seg-row" id="gymSegRow">
+      <div class="po-seg-row">
         <span class="po-seg-label">Gym</span>
         <div class="po-seg-control" id="gymSeg"></div>
       </div>
@@ -1460,9 +1454,6 @@ img, video, canvas, svg { max-width: 100%; }
       </div>
     </div>
 
-    <!-- Strength panel — exercise picker, weight/reps logging, Rx,
-         stats, trend, history, today's workout. Hidden on cardio days. -->
-    <div id="strengthBody">
     <!-- Exercise -->
     <div class="po-sub-section">
       <div class="po-sub-title">Exercise</div>
@@ -1591,41 +1582,6 @@ img, video, canvas, svg { max-width: 100%; }
         <span class="po-tw-past-arrow" id="poTwPastArrow">▾</span>
       </button>
       <div class="po-tw-past-body" id="poTwPastBody" style="display:none"></div>
-    </div>
-    </div><!-- /strengthBody -->
-
-    <!-- Cardio panel (Running / Swimming) — shown instead of strengthBody
-         when the selected day's type is "cardio". -->
-    <div id="cardioBody" style="display:none">
-      <div class="po-sub-section">
-        <div class="po-sub-title" id="cardioTitle">Log today's session</div>
-        <div class="po-log-grid">
-          <div class="po-field">
-            <label>Distance (km)</label>
-            <input type="number" id="cardioDist" step="0.01" min="0" inputmode="decimal" placeholder="0">
-          </div>
-          <div class="po-field">
-            <label>Duration (mm:ss)</label>
-            <input type="text" id="cardioDur" inputmode="numeric" placeholder="32:15">
-          </div>
-        </div>
-        <div class="po-rx-card" id="cardioPaceCard">
-          <div class="po-rx-label">Pace</div>
-          <div class="po-rx-headline"><span class="po-accent" id="cardioPaceVal">—</span></div>
-        </div>
-        <div class="po-field">
-          <label>Notes</label>
-          <input type="text" id="cardioNotes" placeholder="optional">
-        </div>
-        <button class="po-btn-primary" id="cardioLogBtn">Log session</button>
-      </div>
-
-      <div class="po-sub-section">
-        <div class="po-sub-title">History</div>
-        <div id="cardioHistoryCard">
-          <div class="po-empty">No sessions yet.</div>
-        </div>
-      </div>
     </div>
   </div>
 </div>
@@ -1760,13 +1716,6 @@ img, video, canvas, svg { max-width: 100%; }
     s.units = s.units || CONFIG.units || 'kg';
     s.gyms  = (Array.isArray(s.gyms)  && s.gyms.length)  ? s.gyms  : CONFIG.gyms.slice();
     s.days  = (Array.isArray(s.days)  && s.days.length)  ? s.days  : CONFIG.days.slice();
-    // Backward-compat: merge in any CONFIG day (e.g. Running/Swimming) that
-    // isn't already present, by id. Additive only — never touches, renames,
-    // or reorders a day the user already has saved.
-    (CONFIG.days || []).forEach(d => {
-      if (!s.days.find(x => x.id === d.id)) s.days.push(Object.assign({}, d));
-    });
-    s.cardioLogs = (s.cardioLogs && typeof s.cardioLogs === 'object') ? s.cardioLogs : {};
     s.exercises = Array.isArray(s.exercises) ? s.exercises : buildDefaultExercises();
     s.logs = (s.logs && typeof s.logs === 'object') ? s.logs : {};
     s.filterGym = s.filterGym || s.gyms[0].id;
@@ -1811,7 +1760,6 @@ img, video, canvas, svg { max-width: 100%; }
   function uid() { return 'ex_' + Date.now() + '_' + Math.floor(Math.random() * 9999); }
   function gymName(id) { const g = state.gyms.find(x => x.id === id); return g ? g.name : id; }
   function dayName(id) { const d = state.days.find(x => x.id === id); return d ? d.name : id; }
-  function dayType(id) { const d = state.days.find(x => x.id === id); return (d && d.type) || 'strength'; }
   function estimate1RM(w, r) { if (r < 2) return w; return w * (1 + r / 30); }
   function roundToStep(v, s) { return Math.round(v / s) * s; }
   function getFiltered() {
@@ -1854,45 +1802,6 @@ img, video, canvas, svg { max-width: 100%; }
     if (reps >= upgradeAt) return { type: 'up', weight: weight + step, reps: repMin, tag: 'Add weight', reason: 'You hit ' + reps + ' reps — time to add ' + step + unit() + '. Expect ' + repMin + '-' + (repMin + 1) + ' next session.' };
     if (reps >= repMin && reps < upgradeAt) return { type: 'hold', weight: weight, reps: reps + 1, tag: 'Add a rep', reason: reps + ' reps in target. Stay at ' + weight + unit() + ', push for ' + (reps + 1) + '.' };
     return { type: 'hold', weight: weight, reps: repMin, tag: 'Repeat', reason: reps + ' reps short of ' + repMin + '-' + upgradeAt + '. Repeat ' + weight + unit() + ' until you hit ' + repMin + '+ clean.' };
-  }
-
-  // ============================================================
-  // CARDIO (Running / Swimming) — fully separate from the strength
-  // data above. Never reads/writes state.exercises or state.logs.
-  // ============================================================
-  function getCardioLogs(dayId) { return (state.cardioLogs[dayId] || []).slice(); }
-  function cardioUid() { return 'cardio_' + Date.now() + '_' + Math.floor(Math.random() * 9999); }
-  // "32:15" -> 1935 seconds. A bare number with no colon is treated as
-  // whole minutes (e.g. "32" -> 32:00), which is the common shorthand.
-  function parseMMSS(str) {
-    str = (str || '').trim();
-    if (!str) return 0;
-    const parts = str.split(':').map(s => parseInt(s, 10));
-    if (parts.some(isNaN)) return 0;
-    if (parts.length === 1) return parts[0] * 60;
-    if (parts.length === 2) return parts[0] * 60 + parts[1];
-    if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
-    return 0;
-  }
-  function fmtMMSS(totalSec) {
-    totalSec = Math.max(0, Math.round(totalSec || 0));
-    const m = Math.floor(totalSec / 60);
-    const s = totalSec % 60;
-    return m + ':' + String(s).padStart(2, '0');
-  }
-  // Running pace: minutes per km.
-  function paceRun(distanceKm, durationSec) {
-    if (!distanceKm || !durationSec) return null;
-    return fmtMMSS(durationSec / distanceKm) + ' /km';
-  }
-  // Swimming pace: time per 100m.
-  function paceSwim(distanceKm, durationSec) {
-    if (!distanceKm || !durationSec) return null;
-    const meters = distanceKm * 1000;
-    return fmtMMSS(durationSec / (meters / 100)) + ' /100m';
-  }
-  function cardioPace(dayId, distanceKm, durationSec) {
-    return dayId === 'swim' ? paceSwim(distanceKm, durationSec) : paceRun(distanceKm, durationSec);
   }
 
   // ============================================================
@@ -2150,56 +2059,6 @@ img, video, canvas, svg { max-width: 100%; }
     row.dataset.value = String(active);
   }
 
-  // Toggle strength vs. cardio panel based on the selected day's type.
-  // Strength's own render functions still run underneath either way —
-  // this only controls which panel is visible, never their data.
-  function renderDayMode() {
-    const isCardio = dayType(state.filterDay) === 'cardio';
-    $('strengthBody').style.display = isCardio ? 'none' : '';
-    $('cardioBody').style.display = isCardio ? '' : 'none';
-    $('gymSegRow').style.display = isCardio ? 'none' : '';
-    if (isCardio) {
-      $('cardioTitle').textContent = "Log today's " + dayName(state.filterDay).toLowerCase() + ' session';
-      renderCardioPace();
-      renderCardioHistory();
-    }
-  }
-  function renderCardioPace() {
-    const dist = parseFloat($('cardioDist').value) || 0;
-    const dur = parseMMSS($('cardioDur').value);
-    const p = (dist > 0 && dur > 0) ? cardioPace(state.filterDay, dist, dur) : null;
-    $('cardioPaceVal').textContent = p || '—';
-  }
-  function renderCardioHistory() {
-    const wrap = $('cardioHistoryCard');
-    const logs = getCardioLogs(state.filterDay).slice().reverse();
-    if (!logs.length) { wrap.innerHTML = '<div class="po-empty">No sessions yet.</div>'; return; }
-    wrap.innerHTML = logs.slice(0, 12).map((l, i) => {
-      const d = new Date(l.date);
-      const dStr = (d.getMonth() + 1) + '/' + d.getDate();
-      const pace = cardioPace(state.filterDay, l.distanceKm, l.durationSec);
-      const setStr = (l.distanceKm || 0) + 'km · ' + fmtMMSS(l.durationSec) + (pace ? ' · ' + pace : '');
-      const realIdx = logs.length - 1 - i; // since we reversed
-      return '<div class="po-hist-row">'
-        + '<div class="po-hist-date">' + dStr + '</div>'
-        + '<div class="po-hist-set">' + setStr + '</div>'
-        + '<button class="po-hist-del" data-idx="' + realIdx + '" aria-label="Delete">×</button>'
-        + '</div>';
-    }).join('');
-    wrap.querySelectorAll('.po-hist-del').forEach(b => {
-      b.addEventListener('click', () => {
-        if (!confirm('Delete this session?')) return;
-        const realIdx = parseInt(b.dataset.idx, 10);
-        const arr = state.cardioLogs[state.filterDay] || [];
-        const origIdx = arr.length - 1 - realIdx;
-        arr.splice(origIdx, 1);
-        if (!arr.length) delete state.cardioLogs[state.filterDay];
-        else state.cardioLogs[state.filterDay] = arr;
-        saveState(); renderCardioHistory();
-      });
-    });
-  }
-
   function renderAll() {
     renderDayPill();
     renderFilters(); renderSelect(); renderForm(); renderLastSet();
@@ -2207,7 +2066,6 @@ img, video, canvas, svg { max-width: 100%; }
     renderRx(); renderStats(); renderSparkline(); renderHistory();
     renderTodaysWorkout();
     renderPastWorkouts();
-    renderDayMode();
     // Pre-fill weight input with last logged weight (or starting weight)
     const ex = getCurrentEx();
     if (ex && !ex.bw) {
@@ -2433,33 +2291,6 @@ img, video, canvas, svg { max-width: 100%; }
     btn.style.transition = 'transform 0.15s';
     btn.style.transform = 'scale(0.96)';
     setTimeout(() => { btn.style.transform = ''; }, 160);
-  });
-
-  // ============================================================
-  // CARDIO LOGGING (Running / Swimming)
-  // ============================================================
-  $('cardioDist').addEventListener('input', renderCardioPace);
-  $('cardioDur').addEventListener('input', renderCardioPace);
-  $('cardioLogBtn').addEventListener('click', () => {
-    const dayId = state.filterDay;
-    const dist = parseFloat($('cardioDist').value) || 0;
-    const dur = parseMMSS($('cardioDur').value);
-    if (dist <= 0) { alert('Enter a distance.'); return; }
-    if (dur <= 0) { alert('Enter a duration.'); return; }
-    const notes = $('cardioNotes').value.trim();
-    const arr = state.cardioLogs[dayId] || [];
-    const entry = { id: cardioUid(), date: new Date().toISOString(), distanceKm: dist, durationSec: dur };
-    if (notes) entry.notes = notes;
-    arr.push(entry);
-    state.cardioLogs[dayId] = arr;
-    saveState();
-    $('cardioDist').value = ''; $('cardioDur').value = ''; $('cardioNotes').value = '';
-    renderCardioPace();
-    renderCardioHistory();
-    const cbtn = $('cardioLogBtn');
-    cbtn.style.transition = 'transform 0.15s';
-    cbtn.style.transform = 'scale(0.96)';
-    setTimeout(() => { cbtn.style.transform = ''; }, 160);
   });
 
   // ============================================================
@@ -3820,7 +3651,7 @@ img, video, canvas, svg { max-width: 100%; }
     return s;
   }
   const SYS = "You are Nova, the user's personal gym coach living inside their fitness dashboard. "
-    + "You can see their body profile, bodyweight log (entries have dateKey + weight), strength workout logs, cardio sessions (running/swimming — distance, duration, pace), and progress-photo timeline (dates + bodyweight; the actual images are not included). "
+    + "You can see their body profile, bodyweight log (entries have dateKey + weight), workout logs, and progress-photo timeline (dates + bodyweight; the actual images are not included). "
     + "Coach concisely and specifically. For an overview, cover: bodyweight trend, training consistency, standout progress, and 1-2 concrete next steps. "
     + "Use short markdown bullets, be encouraging but honest. Weights may be kg or lb per their profile. Keep replies under ~180 words. Their data as JSON: ";
 
