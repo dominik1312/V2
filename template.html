@@ -462,14 +462,20 @@ body::after {
   // Mirrors STORE_KEY to all your devices. `appKey` is this page's row
   // in Supabase — give each NEW page its own appKey. onApplied re-draws
   // the list when an update arrives from another device.
-  if (window.initCloudSync) {
-    window.initCloudSync({
+  //
+  // initCloudSync is defined by sync.js, which loads with `defer` — its
+  // global isn't available yet while this inline script runs during the
+  // initial parse, so the call waits for DOMContentLoaded (fires after
+  // deferred scripts have run).
+  document.addEventListener('DOMContentLoaded', function () {
+    if (typeof initCloudSync !== 'function') return;
+    initCloudSync({
       appKey: 'template',          // 👈 unique per page (e.g. 'reading', 'habits')
       syncedKeys: [STORE_KEY],     // exact localStorage keys to sync
       // syncedPrefixes: ['tpl:'], // …or sync every key starting with a prefix
       onApplied: render
     });
-  }
+  });
 })();
 </script>
 

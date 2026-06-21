@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="sync.js" defer></script>
 <script src="topbar.js" defer></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -112,11 +114,11 @@
   .ec-metric-value-row { margin-top: 10px; display: flex; align-items: baseline; gap: 6px; }
   .ec-metric-value { font-size: 30px; font-weight: 800; color: var(--text-1); letter-spacing: -0.02em; }
   .ec-metric-unit { font-size: 14px; font-weight: 500; color: var(--text-5); }
+  .ec-metric-card-empty .ec-metric-value { color: var(--text-4); }
   .ec-tag {
     display: inline-block; margin-top: 12px; padding: 4px 10px; border-radius: 999px;
     font-size: 11px; font-weight: 600; letter-spacing: .02em;
   }
-  .ec-tag.up { color: var(--good); background: var(--good-bg); }
   .ec-tag.neutral { color: var(--text-3); background: var(--neutral-bg); }
 
   /* Weekly bar chart */
@@ -129,16 +131,68 @@
   .ec-chart-label {
     font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3);
   }
+  .ec-chart-badges { display: flex; align-items: center; gap: 12px; }
   .ec-chart-badge { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; color: var(--gold); }
   .ec-chart-badge .dot { width: 8px; height: 8px; border-radius: 2px; background: var(--gold); display: inline-block; }
+  .ec-chart-badge.actual { color: var(--good); }
+  .ec-chart-badge.actual .dot { background: var(--good); border-radius: 50%; }
   .ec-bars-row { margin-top: 18px; display: flex; align-items: flex-end; gap: 10px; }
   .ec-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
   .ec-bar-val { font-size: 12px; font-weight: 500; color: var(--text-6); }
   .ec-bar-val.current { font-weight: 700; color: var(--gold); }
-  .ec-bar-track { width: 60%; height: 96px; display: flex; align-items: flex-end; justify-content: center; }
+  .ec-bar-actual-label { font-size: 10.5px; font-weight: 700; color: var(--good); margin-top: -4px; }
+  .ec-bar-track { position: relative; width: 60%; height: 96px; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; }
   .ec-bar-fill { width: 100%; border-radius: 6px 6px 3px 3px; background: rgba(255,255,255,0.13); transition: height .25s ease; }
   .ec-bar-fill.current { background: var(--gold); }
+  .ec-bar-actual {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 0%;
+    background: var(--good); opacity: 0.55;
+    border-radius: 6px 6px 3px 3px;
+    transition: height .25s ease;
+  }
   .ec-bar-week { font-size: 11px; font-weight: 500; color: var(--text-6); }
+
+  /* Log this session */
+  .ec-log-card {
+    margin-top: 14px;
+    background: linear-gradient(180deg, var(--card-1), var(--card-2b));
+    border: 1px solid var(--border); border-radius: 16px; overflow: hidden;
+  }
+  .ec-log-toggle {
+    width: 100%; display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px; background: transparent; border: 0; cursor: pointer;
+    font-family: inherit; font-size: 13px; font-weight: 700; color: var(--gold);
+  }
+  .ec-log-toggle-icon { font-size: 16px; line-height: 1; color: var(--text-4); transition: transform .18s ease; }
+  .ec-log-card.open .ec-log-toggle-icon { transform: rotate(45deg); }
+  .ec-log-panel { display: none; padding: 0 18px 18px; }
+  .ec-log-card.open .ec-log-panel { display: block; }
+  .ec-log-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+  .ec-log-field { display: flex; flex-direction: column; gap: 6px; }
+  .ec-log-field-label { font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-4); }
+  .ec-log-input {
+    padding: 10px 12px; border-radius: 10px;
+    border: 1px solid var(--border); background: rgba(255,255,255,0.03);
+    color: var(--text-1); font-family: inherit; font-size: 13px; outline: none;
+  }
+  .ec-log-input:focus { border-color: var(--gold); }
+  .ec-log-save {
+    width: 100%; margin-top: 14px; padding: 12px; border: 0; border-radius: 11px;
+    background: var(--gold-pill-bg); color: var(--gold-pill-text);
+    font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
+  }
+  .ec-log-save:hover { filter: brightness(1.03); }
+  .ec-log-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+  .ec-log-empty { font-size: 12px; color: var(--text-5); text-align: center; padding: 6px 0; }
+  .ec-log-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 9px 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-soft);
+  }
+  .ec-log-row-main { display: flex; flex-direction: column; gap: 2px; }
+  .ec-log-row-date { font-size: 11px; color: var(--text-5); }
+  .ec-log-row-detail { font-size: 13px; color: var(--text-2); font-weight: 600; }
+  .ec-log-row-del { border: 0; background: transparent; color: var(--text-5); font-size: 16px; cursor: pointer; padding: 0 4px; }
+  .ec-log-row-del:hover { color: var(--text-1); }
 
   @media (max-width: 480px) {
     .ec-shell { padding: 24px 14px 40px; }
@@ -184,10 +238,50 @@
 
     <div class="ec-metrics-grid" id="ecMetrics"></div>
 
+    <div class="ec-log-card" id="ecLogCard">
+      <button class="ec-log-toggle" id="ecLogToggle" type="button">
+        <span>Log this session</span>
+        <span class="ec-log-toggle-icon" id="ecLogToggleIcon">+</span>
+      </button>
+      <div class="ec-log-panel">
+        <div class="ec-log-grid">
+          <label class="ec-log-field">
+            <span class="ec-log-field-label">Date</span>
+            <input type="date" class="ec-log-input" id="ecLogDate">
+          </label>
+          <label class="ec-log-field">
+            <span class="ec-log-field-label" id="ecLogDistLabel">Distance (m)</span>
+            <input type="number" class="ec-log-input" id="ecLogDistance" min="0" step="50" inputmode="decimal" placeholder="0">
+          </label>
+          <label class="ec-log-field">
+            <span class="ec-log-field-label">Duration (min)</span>
+            <input type="number" class="ec-log-input" id="ecLogDuration" min="0" step="1" inputmode="decimal" placeholder="optional">
+          </label>
+          <label class="ec-log-field" id="ecLogPoolField">
+            <span class="ec-log-field-label">Pool length (m)</span>
+            <input type="number" class="ec-log-input" id="ecLogPool" min="0" step="5" inputmode="decimal" placeholder="optional">
+          </label>
+          <label class="ec-log-field" id="ecLogPaceField">
+            <span class="ec-log-field-label">Pace (optional)</span>
+            <input type="text" class="ec-log-input" id="ecLogPace" placeholder="e.g. 5:40">
+          </label>
+          <label class="ec-log-field" id="ecLogHrField">
+            <span class="ec-log-field-label">Heart rate (optional)</span>
+            <input type="text" class="ec-log-input" id="ecLogHr" placeholder="e.g. Z3 · 152">
+          </label>
+        </div>
+        <button class="ec-log-save" id="ecLogSave" type="button">Save session</button>
+        <div class="ec-log-list" id="ecLogList"></div>
+      </div>
+    </div>
+
     <div class="ec-chart-card">
       <div class="ec-chart-head">
         <span class="ec-chart-label" id="ecChartLabel">WEEKLY DISTANCE</span>
-        <span class="ec-chart-badge"><span class="dot"></span>this week</span>
+        <div class="ec-chart-badges">
+          <span class="ec-chart-badge actual"><span class="dot"></span>logged</span>
+          <span class="ec-chart-badge"><span class="dot"></span>this week</span>
+        </div>
       </div>
       <div class="ec-bars-row" id="ecBars"></div>
     </div>
@@ -237,6 +331,87 @@
   }
 
   // ============================================================
+  // LOGGED SESSIONS — manual entry today; same localStorage key a
+  // future Garmin sync could also write into, since it's just an
+  // array of {date, sport, type, distance, duration, ...} entries.
+  // ============================================================
+  const LOGS_KEY = 'po_endurance_logs_v1';
+
+  function loadLogs() {
+    try { return JSON.parse(localStorage.getItem(LOGS_KEY)) || []; }
+    catch (e) { return []; }
+  }
+  function saveLogs(logs) { localStorage.setItem(LOGS_KEY, JSON.stringify(logs)); }
+  function addLog(entry) { const logs = loadLogs(); logs.push(entry); saveLogs(logs); }
+  function deleteLog(id) { saveLogs(loadLogs().filter(l => l.id !== id)); }
+
+  function dateKey(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  // Monday-start week containing `d`.
+  function mondayOf(d) {
+    const date = new Date(d);
+    const day = date.getDay(); // 0=Sun..6=Sat
+    date.setDate(date.getDate() + (day === 0 ? -6 : 1 - day));
+    date.setHours(0, 0, 0, 0);
+    return date;
+  }
+  function thisWeekRange() {
+    const start = mondayOf(new Date());
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    end.setHours(23, 59, 59, 999);
+    return { start, end };
+  }
+  function logsThisWeek(sport) {
+    const { start, end } = thisWeekRange();
+    return loadLogs().filter(l => {
+      if (l.sport !== sport) return false;
+      const d = new Date(l.date + 'T00:00:00');
+      return d >= start && d <= end;
+    });
+  }
+  function sumThisWeek(sport) {
+    const logs = logsThisWeek(sport);
+    return {
+      distance: logs.reduce((s, l) => s + (Number(l.distance) || 0), 0),
+      duration: logs.reduce((s, l) => s + (Number(l.duration) || 0), 0),
+      count: logs.length
+    };
+  }
+
+  // Sport+type-scoped actual data for the metric cards (the weekly bar
+  // chart stays sport-only, per the prior change — this is separate).
+  // Distance/duration are summed across this week's matching sessions;
+  // pool/pace/hr are descriptive, not summable, so we take the most
+  // recently logged value instead.
+  function actualForCard(sport, type) {
+    const { start, end } = thisWeekRange();
+    const logs = loadLogs().filter(l => {
+      if (l.sport !== sport || l.type !== type) return false;
+      const d = new Date(l.date + 'T00:00:00');
+      return d >= start && d <= end;
+    });
+    if (!logs.length) return null;
+
+    const durLogs = logs.filter(l => l.duration != null && !isNaN(l.duration));
+    function latest(field) {
+      const withField = logs.filter(l => l[field] != null && l[field] !== '')
+        .sort((a, b) => b.loggedAt - a.loggedAt);
+      return withField.length ? withField[0][field] : null;
+    }
+
+    return {
+      count: logs.length,
+      distance: logs.reduce((s, l) => s + (Number(l.distance) || 0), 0),
+      duration: durLogs.length ? durLogs.reduce((s, l) => s + Number(l.duration), 0) : null,
+      pool: latest('pool'),
+      pace: latest('pace'),
+      hr: latest('hr')
+    };
+  }
+
+  // ============================================================
   // PLAN BUILDER — same ramp/step logic as the design reference
   // ============================================================
   function ramp(center, step, currentWeek, fmt) {
@@ -255,30 +430,44 @@
     });
   }
 
-  function buildPlan(sport, type, week) {
+  // A metric card shows the actual logged value when one exists for this
+  // sport+type+week; otherwise it's an explicit "not logged" state rather
+  // than silently falling back to the plan target (that's the confusion
+  // this whole change is meant to fix). No tag once real data is showing —
+  // the tag is only ever "Not logged this week" now.
+  function metricCard(label, value, unit, fmt) {
+    if (value == null) return { label, value: '—', unit: '', tag: 'Not logged this week' };
+    return { label, value: fmt(value), unit, tag: null };
+  }
+  function metricCardHr(value) {
+    if (value == null) return { label: 'Heart rate', value: '—', unit: '', tag: 'Not logged this week' };
+    const parts = value.split(' · ');
+    if (parts.length === 2) return { label: 'Heart rate', value: parts[0], unit: parts[1] + ' bpm', tag: null };
+    return { label: 'Heart rate', value, unit: '', tag: null };
+  }
+
+  function buildPlan(sport, type, week, actual) {
     if (sport === 'swim') {
       const b = swimBase[type];
-      const lengths = Math.round(b.dist / b.pool);
-      const up = b.step > 0;
       const metrics = [
-        { label: 'Distance', value: b.dist.toLocaleString(), unit: 'm', tag: up ? ('↑ +' + b.step + ' m') : 'maintain', up },
-        { label: 'Duration', value: String(b.dur), unit: 'min', tag: 'steady', up: false },
-        { label: 'Pool length', value: String(b.pool), unit: 'm', tag: lengths + ' lengths', up: false },
+        metricCard('Distance', actual && actual.distance, 'm', v => v.toLocaleString()),
+        metricCard('Duration', actual && actual.duration, 'min', v => String(v)),
+        metricCard('Pool length', actual && actual.pool, 'm', v => String(v)),
       ];
-      const weeks = ramp(b.dist, b.step, week, v => v >= 1000 ? (v / 1000).toFixed(1) + 'k' : String(Math.round(v)));
-      return { metrics, weeks, chartLabel: 'WEEKLY DISTANCE · METRES' };
+      const fmt = v => v >= 1000 ? (v / 1000).toFixed(1) + 'k' : String(Math.round(v));
+      const weeks = ramp(b.dist, b.step, week, fmt);
+      return { metrics, weeks, chartLabel: 'WEEKLY DISTANCE · METRES', targetDist: b.dist, fmt, unit: 'm' };
     }
     const b = runBase[type];
-    const up = b.step > 0;
-    const hr = b.hr.split(' · ');
     const metrics = [
-      { label: 'Distance', value: b.dist.toFixed(1), unit: 'km', tag: up ? ('↑ +' + b.step.toFixed(1) + ' km') : 'maintain', up },
-      { label: 'Duration', value: String(b.dur), unit: 'min', tag: 'per session', up: false },
-      { label: 'Pace', value: b.pace, unit: '/km', tag: 'goal pace', up: false },
-      { label: 'Heart rate', value: hr[0], unit: hr[1] + ' bpm', tag: 'target zone', up: false },
+      metricCard('Distance', actual && actual.distance, 'km', v => v.toFixed(1)),
+      metricCard('Duration', actual && actual.duration, 'min', v => String(v)),
+      metricCard('Pace', actual && actual.pace, '/km', v => v),
+      metricCardHr(actual && actual.hr),
     ];
-    const weeks = ramp(b.dist, b.step, week, v => v.toFixed(1));
-    return { metrics, weeks, chartLabel: 'WEEKLY DISTANCE · KM' };
+    const fmt = v => v.toFixed(1);
+    const weeks = ramp(b.dist, b.step, week, fmt);
+    return { metrics, weeks, chartLabel: 'WEEKLY DISTANCE · KM', targetDist: b.dist, fmt, unit: 'km' };
   }
 
   // ============================================================
@@ -309,24 +498,36 @@
 
     document.getElementById('ecPlanNote').textContent = type + ' · progressive build';
 
-    const plan = buildPlan(sport, type, week);
+    const plan = buildPlan(sport, type, week, actualForCard(sport, type));
 
     document.getElementById('ecMetrics').innerHTML = plan.metrics.map(m =>
-      '<div class="ec-metric-card">' +
+      '<div class="ec-metric-card' + (m.tag ? ' ec-metric-card-empty' : '') + '">' +
         '<div class="ec-metric-label">' + m.label + '</div>' +
         '<div class="ec-metric-value-row"><span class="ec-metric-value">' + m.value + '</span><span class="ec-metric-unit">' + m.unit + '</span></div>' +
-        '<div><span class="ec-tag ' + (m.up ? 'up' : 'neutral') + '">' + m.tag + '</span></div>' +
+        (m.tag ? '<div><span class="ec-tag neutral">' + m.tag + '</span></div>' : '') +
       '</div>'
     ).join('');
 
     document.getElementById('ecChartLabel').textContent = plan.chartLabel;
-    document.getElementById('ecBars').innerHTML = plan.weeks.map(w =>
-      '<div class="ec-bar-col">' +
+
+    // Actual logged distance this week, scaled against the current week's
+    // own bar height so "logged == target" lines the overlay up exactly
+    // with the gold prescription bar.
+    const actual = sumThisWeek(sport);
+    const currentWeekEntry = plan.weeks.find(w => w.current);
+    const actualPct = plan.targetDist > 0 ? Math.min(100, (actual.distance / plan.targetDist) * 100) : 0;
+    const actualHeightPct = currentWeekEntry ? (actualPct / 100) * currentWeekEntry.heightPct : 0;
+
+    document.getElementById('ecBars').innerHTML = plan.weeks.map(w => {
+      const actualOverlay = w.current ? '<div class="ec-bar-actual" style="height:' + actualHeightPct.toFixed(1) + '%;"></div>' : '';
+      const actualLabel = w.current ? '<span class="ec-bar-actual-label">● ' + plan.fmt(actual.distance) + '</span>' : '';
+      return '<div class="ec-bar-col">' +
         '<span class="ec-bar-val ' + (w.current ? 'current' : '') + '">' + w.valText + '</span>' +
-        '<div class="ec-bar-track"><div class="ec-bar-fill ' + (w.current ? 'current' : '') + '" style="height:' + w.heightPct + '%;"></div></div>' +
+        actualLabel +
+        '<div class="ec-bar-track"><div class="ec-bar-fill ' + (w.current ? 'current' : '') + '" style="height:' + w.heightPct + '%;"></div>' + actualOverlay + '</div>' +
         '<span class="ec-bar-week">' + w.label + '</span>' +
-      '</div>'
-    ).join('');
+      '</div>';
+    }).join('');
 
     document.querySelectorAll('#ecSportPills .ec-pill').forEach(btn =>
       btn.addEventListener('click', () => setSport(btn.dataset.sport))
@@ -334,9 +535,91 @@
     document.querySelectorAll('#ecTypePills .ec-pill').forEach(btn =>
       btn.addEventListener('click', () => setType(btn.dataset.type))
     );
+
+    updateLogFormFields(sport);
+    renderLogList(sport, plan.unit);
   }
 
+  // ============================================================
+  // LOG FORM — sport-specific fields + this week's logged sessions.
+  // ============================================================
+  function updateLogFormFields(sport) {
+    document.getElementById('ecLogDistLabel').textContent = sport === 'swim' ? 'Distance (m)' : 'Distance (km)';
+    document.getElementById('ecLogPoolField').style.display = sport === 'swim' ? '' : 'none';
+    document.getElementById('ecLogPaceField').style.display = sport === 'run' ? '' : 'none';
+    document.getElementById('ecLogHrField').style.display = sport === 'run' ? '' : 'none';
+  }
+
+  function renderLogList(sport, unit) {
+    const logs = logsThisWeek(sport).sort((a, b) => b.date.localeCompare(a.date) || b.loggedAt - a.loggedAt);
+    const listEl = document.getElementById('ecLogList');
+    if (!logs.length) {
+      listEl.innerHTML = '<div class="ec-log-empty">No sessions logged this week yet.</div>';
+      return;
+    }
+    listEl.innerHTML = logs.map(l => {
+      const durText = l.duration ? ' · ' + l.duration + ' min' : '';
+      return '<div class="ec-log-row">' +
+        '<div class="ec-log-row-main">' +
+          '<span class="ec-log-row-detail">' + l.type + ' · ' + l.distance + unit + durText + '</span>' +
+          '<span class="ec-log-row-date">' + l.date + '</span>' +
+        '</div>' +
+        '<button class="ec-log-row-del" type="button" data-del="' + l.id + '">×</button>' +
+      '</div>';
+    }).join('');
+    listEl.querySelectorAll('[data-del]').forEach(btn =>
+      btn.addEventListener('click', () => { deleteLog(btn.dataset.del); render(); })
+    );
+  }
+
+  document.getElementById('ecLogToggle').addEventListener('click', () => {
+    document.getElementById('ecLogCard').classList.toggle('open');
+  });
+
+  document.getElementById('ecLogSave').addEventListener('click', () => {
+    const date = document.getElementById('ecLogDate').value || dateKey(new Date());
+    const distance = parseFloat(document.getElementById('ecLogDistance').value);
+    if (isNaN(distance) || distance <= 0) return;
+    const durationVal = parseFloat(document.getElementById('ecLogDuration').value);
+    const sport = currentSport();
+
+    addLog({
+      id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+      date,
+      sport,
+      type: currentType(),
+      distance,
+      duration: isNaN(durationVal) ? null : durationVal,
+      pool: sport === 'swim' ? (parseFloat(document.getElementById('ecLogPool').value) || null) : null,
+      pace: sport === 'run' ? (document.getElementById('ecLogPace').value.trim() || null) : null,
+      hr: sport === 'run' ? (document.getElementById('ecLogHr').value.trim() || null) : null,
+      loggedAt: Date.now()
+    });
+
+    document.getElementById('ecLogDistance').value = '';
+    document.getElementById('ecLogDuration').value = '';
+    document.getElementById('ecLogPool').value = '';
+    document.getElementById('ecLogPace').value = '';
+    document.getElementById('ecLogHr').value = '';
+    render();
+  });
+
+  document.getElementById('ecLogDate').value = dateKey(new Date());
+
   render();
+
+  // initCloudSync is defined by sync.js, which loads with `defer` — its
+  // global isn't available yet while this inline script runs during the
+  // initial parse, so the call waits for DOMContentLoaded (fires after
+  // deferred scripts have run).
+  document.addEventListener('DOMContentLoaded', function () {
+    if (typeof initCloudSync !== 'function') return;
+    initCloudSync({
+      appKey: 'endurance',
+      syncedKeys: [LOGS_KEY],
+      onApplied: render
+    });
+  });
 })();
 </script>
 </body>
