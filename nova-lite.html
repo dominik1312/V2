@@ -122,6 +122,13 @@ body { font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; color: 
   const keyToggle = document.getElementById('keyToggle');
   keyToggle.addEventListener('click', () => keypanel.classList.toggle('open'));
 
+  // ---- date + read helpers (mirror the exact key formats the source
+  // pages use, so this briefing agrees with what those pages show) ----
+  function calDateKey(d){ d=d||new Date();
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function activeDateKey(){ const n=new Date(); if(n.getHours()<6) n.setDate(n.getDate()-1); return calDateKey(n); }
+  function lsGet(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } }
+
   function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
   function setOrb(s){ orb.className = 'orb' + (s ? ' ' + s : ''); }
 
@@ -138,15 +145,130 @@ body { font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; color: 
     keypanel.classList.remove('open'); // tuck it away so it's not on screen
   });
 
-  // ---- read whatever the dashboard stored (for context) ----
-  function dashboardData(){
+  // ---- component calculators — copy the Score page's exact logic so
+  // Nova's numbers agree with what the user sees there. Each is
+  // null-safe: missing/malformed data just yields null, never throws. ----
+
+  // Training: % of last 7 days with a workout marked done
+  function trainingPct(){
+    const done = lsGet('po_coach_workout_done') || {};
+    if (!done || !Object.keys(done).length) return null;
+    let c=0, base=new Date();
+    for(let i=0;i<7;i++){ const d=new Date(base); d.setDate(base.getDate()-i); if(done[calDateKey(d)]) c++; }
+    return Math.round(c/7*100);
+  }
+  // Supplements: % of today's stack taken (6 AM rollover)
+  function supplementsPct(){
+    const items = lsGet('stack:items') || [];
+    if (!Array.isArray(items) || !items.length) return null;
+    const taken = lsGet('stack:taken:'+activeDateKey()) || {};
+    const n = items.filter(i => i && taken[i.id]).length;
+    return Math.round(n/items.length*100);
+  }
+  // Sleep: last night's hours vs 8h target
+  function sleepInfo(){
+    const all = lsGet('po_sleep_v1') || {};
+    const e = all[calDateKey()];
+    if (!e || typeof e.hours!=='number') return { hours:null, pct:null };
+    return { hours:e.hours, pct: Math.round(Math.min(100,Math.max(0,e.hours/8*100))) };
+  }
+  // Water: today's logged units vs computed target (mirror topbar/score formula)
+  function waterPct(){
+    const s = lsGet('po_water_v1'); if(!s) return null;
+    const done = (s.logs||{})[calDateKey()] || 0;
+    const p = s.profile || { weightKg:75 };
+    const wKg = s.weightUnit==='lb' ? (p.weightKg||0)/2.20462 : (p.weightKg||0);
+    const base = wKg*35;
+    const exercise = (p.activityHrsPerWeek||0)/7*500;
+    const caffeine = Math.max(0,(s.caffeineMgPerDay||0)-200)*1.5;
+    const subs = (s.substances||[]).reduce((a,x)=>{ const dose=(x&&x.dose!=null?x.dose:(x&&x.defaultDose))||0; return a+Math.max(0,dose*((x&&x.mlPerUnit)||0)); },0);
+    let adj=0; if(p.sex==='m') adj+=200; if((p.age||0)>=50) adj+=100;
+    const totalMl = base+exercise+caffeine+subs+adj;
+    let unitVol = s.unit==='glass'?(s.glassMl||250):s.unit==='oz'?30:s.unit==='ml'?1:(s.bottleMl||500);
+    const target = Math.max(1, Math.ceil(totalMl/unitVol));
+    return Math.round(Math.min(100, done/target*100));
+  }
+  // Health score: weighted 40/30/20/10, renormalized over available parts
+  function healthScore(){
+    const parts = { training:trainingPct(), supplements:supplementsPct(), water:waterPct(), sleep:sleepInfo().pct };
+    const W = { training:40, supplements:30, water:20, sleep:10 };
+    let ws=0, ss=0;
+    Object.keys(W).forEach(k=>{ if(parts[k]!=null){ ws+=W[k]; ss+=W[k]*parts[k]; } });
+    return { score: ws>0 ? Math.round(ss/ws) : null, parts };
+  }
+  // Goals: today's completion (6 AM rollover, key 'goals:YYYY-MM-DD')
+  function goalsInfo(){
+    const g = lsGet('goals:'+activeDateKey()) || [];
+    if (!Array.isArray(g) || !g.length) return { done:0, total:0, pct:null };
+    const done = g.filter(x=>x&&x.done).length;
+    return { done, total:g.length, pct: Math.round(done/g.length*100) };
+  }
+  // Habits: today's completion (key 'habits:items' + 'habits:done:YYYY-MM-DD')
+  function habitsInfo(){
+    const items = lsGet('habits:items') || [];
+    if (!Array.isArray(items) || !items.length) return { done:0, total:0, pct:null };
+    const done = lsGet('habits:done:'+calDateKey()) || {};
+    const n = items.filter(h=>h&&done[h.id]).length;
+    return { done:n, total:items.length, pct: Math.round(n/items.length*100) };
+  }
+  // Weight: latest entry + 7-day delta from gym data (read-only)
+  function weightInfo(){
+    let arr = lsGet('po_coach_weights') || [];
+    if (!Array.isArray(arr) || !arr.length) return null;
+    arr = arr.filter(e=>e&&e.dateKey&&typeof e.weight==='number').sort((a,b)=>a.dateKey.localeCompare(b.dateKey));
+    if (!arr.length) return null;
+    const unit = (lsGet('po_coach_v1')||{}).units || 'kg';
+    const latest = arr[arr.length-1];
+    const cutoff = calDateKey(new Date(Date.now()-7*86400000));
+    const base = arr.find(e=>e.dateKey>=cutoff) || arr[0];
+    return { weight:latest.weight, unit, delta7d: +(latest.weight-base.weight).toFixed(1) };
+  }
+  // Finance: net worth + counts (amounts stored in CHF on the finance page)
+  function financeInfo(){
+    let nw=0; const cats=['bank','stocks','crypto','other'];
+    cats.forEach(c=>{ (lsGet('nw:'+c)||[]).forEach(it=>{ nw += Number(it.amount)||0; }); });
+    const subs = lsGet('subs') || [];
+    const orders = lsGet('incoming_orders') || [];
+    const wishlist = lsGet('wishlist') || [];
+    return { netWorthCHF: Math.round(nw), displayCurrency: lsGet('nw_currency')||'CHF',
+             subscriptionCount: subs.length, openOrderCount: orders.length, wishlistCount: wishlist.length };
+  }
+
+  // ---- trimmed raw fallback — everything in localStorage NOT already
+  // covered by a calculator above, so nothing is lost even though it
+  // isn't (yet) shaped into the structured briefing. ----
+  function rawFallback(){
+    const exact = new Set([KEY_LS, 'po_coach_workout_done','stack:items','po_sleep_v1','po_water_v1',
+      'habits:items','po_coach_weights','po_coach_v1','nw:bank','nw:stocks','nw:crypto','nw:other',
+      'subs','incoming_orders','wishlist','nw_currency']);
+    const prefixes = ['stack:taken:','goals:','habits:done:'];
     const out = {};
     for (let i = 0; i < localStorage.length; i++){
       const k = localStorage.key(i);
-      if (k === KEY_LS) continue; // never send the key as data
+      if (!k || exact.has(k) || prefixes.some(p => k.indexOf(p) === 0)) continue;
       try { out[k] = JSON.parse(localStorage.getItem(k)); } catch(e){ out[k] = localStorage.getItem(k); }
     }
     return out;
+  }
+
+  // ---- build the shaped briefing Nova actually reads ----
+  function buildBriefing(){
+    const hs = healthScore();
+    return {
+      date: calDateKey(),
+      healthScoreToday: hs.score,
+      components: {
+        training:    { weeklyPct: hs.parts.training },
+        supplements: { todayPct: hs.parts.supplements },
+        water:       { todayPct: hs.parts.water },
+        sleep:       { lastNightHours: sleepInfo().hours, pct: hs.parts.sleep }
+      },
+      goalsToday: goalsInfo(),
+      habitsToday: habitsInfo(),
+      bodyWeight: weightInfo(),
+      finance: financeInfo(),
+      raw: rawFallback()
+    };
   }
 
   // ---- render: bullets + **pills** ----
@@ -167,13 +289,21 @@ body { font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; color: 
   function scroll(){ window.scrollTo(0, document.body.scrollHeight); }
 
   const SYS =
-    "You are Nova, a personal mentor living inside the user's life-tracking dashboard. " +
-    "You can see their saved data (food, water, gym, finance, sleep, goals, etc.). " +
-    "Give honest, specific, encouraging guidance. " +
-    "Answer in short bullet points starting with '- ', few words each, plain language. " +
-    "Wrap key words and numbers in **double asterisks**. " +
-    "End with one '- Do today:' bullet giving the single action. " +
-    "Dashboard data as JSON:\n";
+    "You are Nova, a personal mentor inside the user's life-tracking dashboard. " +
+    "You can see a structured daily briefing of their health, habits, goals, body " +
+    "weight and finances. Give honest, specific, encouraging guidance grounded in " +
+    "their real numbers — quote the actual figures. If a value is null it means not " +
+    "logged today; gently note that instead of inventing data.\n\n" +
+    "Notes on the data: healthScoreToday is 0-100 (weighted training 40 / supplements " +
+    "30 / water 20 / sleep 10, renormalized over whatever was logged). Component pct " +
+    "values are 0-100. bodyWeight.delta7d is change over ~7 days in the user's unit. " +
+    "finance.netWorthCHF is in CHF. The 'raw' field is a catch-all of any other saved " +
+    "data not yet shaped above — treat it as secondary context, don't duplicate the " +
+    "structured numbers from it.\n\n" +
+    "Format: short bullets starting with '- ', few words each, plain language. Wrap key " +
+    "words and numbers in **double asterisks**. End with one '- Do today:' bullet giving " +
+    "the single highest-leverage action.\n\n" +
+    "Daily briefing (JSON):\n";
 
   let busy = false;
   async function ask(text){
@@ -195,7 +325,7 @@ body { font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; color: 
         body: JSON.stringify({
           model: 'claude-opus-4-8',
           max_tokens: 1024,
-          system: SYS + JSON.stringify(dashboardData()),
+          system: SYS + JSON.stringify(buildBriefing()),
           messages: [{ role: 'user', content: text }],
         }),
       });
