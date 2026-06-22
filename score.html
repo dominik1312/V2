@@ -129,6 +129,26 @@ body::after {
   .hs-ring { margin: 0 auto; }
 }
 
+/* ===== Sparkline card ===== */
+.hs-spark-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+.hs-spark-num {
+  font-family: var(--font-mono); font-size: 28px; font-weight: 700;
+  font-variant-numeric: tabular-nums; color: var(--text-primary);
+}
+.hs-spark-unit {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--text-tertiary); margin-left: 6px;
+}
+.hs-spark-delta {
+  font-family: var(--font-mono); font-size: 12px; font-variant-numeric: tabular-nums;
+  color: var(--text-tertiary);
+}
+.hs-spark-delta.up { color: var(--success); }
+.hs-spark-delta.down { color: var(--danger); }
+.hs-spark-svg { width: 100%; height: 90px; display: block; overflow: visible; }
+.hs-spark-empty { font-size: 11px; font-style: italic; color: var(--text-tertiary); text-align: center; padding: 8px 0; }
+.gm-card.has-data .hs-spark-empty { display: none; }
+
 /* ===== Sleep card ===== */
 .hs-sleep-label-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .hs-sleep-label { font-size: 14px; color: var(--text-primary); }
@@ -230,6 +250,24 @@ body::after {
   </div>
 
   <div class="section">
+    <div class="section-title">Last 30 days</div>
+    <div class="gm-card" id="hsSparkCard">
+      <div class="hs-spark-head">
+        <div>
+          <span class="hs-spark-num" id="hsSparkAvg">—</span>
+          <span class="hs-spark-unit">avg</span>
+        </div>
+        <span class="hs-spark-delta" id="hsSparkDelta"></span>
+      </div>
+      <svg class="hs-spark-svg" id="hsSparkSvg" viewBox="0 0 320 90"
+           preserveAspectRatio="none" aria-hidden="true"></svg>
+      <div class="hs-spark-empty" id="hsSparkEmpty">
+        Your score history builds as you use the dashboard — check back in a few days.
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
     <div class="section-title">Sleep</div>
     <div class="gm-card">
       <div class="hs-sleep-label-row">
@@ -290,6 +328,24 @@ body::after {
     const now = new Date();
     if (now.getHours() < 6) now.setDate(now.getDate() - 1);
     return calendarDateKey(now);
+  }
+
+  // ============================================================
+  // Score history — the seam the sparkline reads from. All reads/
+  // writes go through these two functions only, same pattern as the
+  // sleep store above. Shape: { "YYYY-MM-DD": number (0-100) }
+  // ============================================================
+  const SCORE_HISTORY_KEY = 'score:history';
+
+  function getScoreHistory() {
+    try { return JSON.parse(localStorage.getItem(SCORE_HISTORY_KEY)) || {}; }
+    catch (e) { return {}; }
+  }
+  function recordTodayScore(score) {
+    if (score == null) return;             // don't record a no-data day
+    const all = getScoreHistory();
+    all[calendarDateKey()] = score;        // overwrite today's entry on each render
+    localStorage.setItem(SCORE_HISTORY_KEY, JSON.stringify(all));
   }
 
   // ============================================================
@@ -465,7 +521,9 @@ body::after {
       else setRowPct(fillEl, pct);
     });
 
+    recordTodayScore(score);
     updateSleepCard(result.parts.sleep);
+    renderSparkline();
     firstRender = false;
   }
 
@@ -482,6 +540,64 @@ body::after {
     document.querySelectorAll('.hs-sleep-presets button').forEach(function (btn) {
       btn.classList.toggle('on', !isNaN(current) && parseFloat(btn.dataset.hours) === current);
     });
+  }
+
+  // 30-day history sparkline — reads score:history (written by
+  // recordTodayScore above), purely presentational, no scoring logic.
+  function renderSparkline() {
+    const history = getScoreHistory();
+    const days = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const key = calendarDateKey(d);
+      days.push({ dateKey: key, score: Object.prototype.hasOwnProperty.call(history, key) ? history[key] : null });
+    }
+    const scored = days.filter(function (d) { return d.score != null; });
+
+    const card = document.getElementById('hsSparkCard');
+    const svg = document.getElementById('hsSparkSvg');
+    const avgEl = document.getElementById('hsSparkAvg');
+    const deltaEl = document.getElementById('hsSparkDelta');
+
+    if (scored.length < 2) {
+      card.classList.remove('has-data');
+      svg.style.display = 'none';
+      svg.innerHTML = '';
+      avgEl.textContent = '—';
+      deltaEl.textContent = '';
+      deltaEl.classList.remove('up', 'down');
+      return;
+    }
+
+    card.classList.add('has-data');
+    svg.style.display = '';
+
+    const n = scored.length;
+    const x0 = 8, x1 = 312, y0 = 78, y1 = 12;
+    const points = scored.map(function (d, i) {
+      const x = x0 + (x1 - x0) * (i / (n - 1));
+      const pct = Math.min(100, Math.max(0, d.score));
+      const y = y0 - (y0 - y1) * (pct / 100);
+      return [x, y];
+    });
+
+    const latest = scored[scored.length - 1].score;
+    const color = scoreColor(latest);
+    const polyStr = points.map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' ');
+    const last = points[points.length - 1];
+
+    svg.innerHTML =
+      '<polyline points="' + polyStr + '" fill="none" style="stroke:' + color + '" stroke-width="2" vector-effect="non-scaling-stroke" />' +
+      '<circle cx="' + last[0].toFixed(1) + '" cy="' + last[1].toFixed(1) + '" r="3" style="fill:' + color + '" />';
+
+    avgEl.textContent = String(Math.round(scored.reduce(function (s, d) { return s + d.score; }, 0) / n));
+
+    const delta = latest - scored[0].score;
+    deltaEl.classList.remove('up', 'down');
+    if (delta > 0) { deltaEl.textContent = '▲ +' + delta; deltaEl.classList.add('up'); }
+    else if (delta < 0) { deltaEl.textContent = '▼ −' + Math.abs(delta); deltaEl.classList.add('down'); }
+    else { deltaEl.textContent = '· 0'; }
   }
 
   function loadSleepInput() {
