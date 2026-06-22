@@ -253,6 +253,14 @@ body.topbar-modal-open {
     <span class="bottombar-tab-icon">💊</span>
     <span>Health</span>
   </a>
+  <a href="habits.html" class="bottombar-tab" data-page="habits">
+    <span class="bottombar-tab-icon">✅</span>
+    <span>Habits</span>
+  </a>
+  <a href="schedule.html" class="bottombar-tab" data-page="schedule">
+    <span class="bottombar-tab-icon">🗓️</span>
+    <span>Schedule</span>
+  </a>
   <a href="gym.html" class="bottombar-tab" data-page="fitness">
     <span class="bottombar-tab-icon">💪</span>
     <span>Fitness</span>
@@ -283,6 +291,8 @@ body.topbar-modal-open {
   function currentPageKey() {
     const p = (window.location.pathname || '').toLowerCase();
     if (p.endsWith('health.html')) return 'health';
+    if (p.endsWith('habits.html')) return 'habits';
+    if (p.endsWith('schedule.html')) return 'schedule';
     if (p.endsWith('gym.html') || p.endsWith('endurance.html')) return 'fitness';
     return 'main'; // index.html, /, or anything else falls back to main
   }
