@@ -285,8 +285,14 @@ body.topbar-modal-open {
   function isEmbedded() {
     try { return window.self !== window.top; } catch (e) { return true; }
   }
+  // index.html is a clean full-screen tile grid — chrome only appears
+  // once you've navigated into an inner page.
+  function isIndexPage() {
+    const p = (window.location.pathname || '').toLowerCase();
+    return p.endsWith('/index.html') || p.endsWith('index.html') || p === '/' || p === '';
+  }
   function shouldShowChrome() {
-    return !isFinancePage() && !isEmbedded();
+    return !isFinancePage() && !isIndexPage() && !isEmbedded();
   }
   function currentPageKey() {
     const p = (window.location.pathname || '').toLowerCase();
