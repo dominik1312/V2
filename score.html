@@ -139,6 +139,10 @@ body::after {
   }
 }
 
+.grid .gm-card {
+  min-height: 140px;
+}
+
 /* ===== HERO ===== */
 .hero {
   padding: 32px;
@@ -195,7 +199,6 @@ body::after {
 .hs-ring-track { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 7; }
 .hs-ring-fill {
   fill: none; stroke-width: 7; stroke-linecap: round;
-  transform: rotate(-90deg); transform-origin: 60px 60px;
 }
 .hs-ring-overlay {
   position: absolute; inset: 0;
@@ -217,7 +220,6 @@ body::after {
   font-variant-numeric: tabular-nums;
   margin-top: 4px;
 }
-.hs-hero-date { display: none; }
 
 /* Component bars */
 .hs-rows {
@@ -427,7 +429,8 @@ body::after {
           </defs>
           <circle class="hs-ring-track" cx="60" cy="60" r="52"/>
           <circle class="hs-ring-fill"  cx="60" cy="60" r="52"
-                  id="hsRingFill" filter="url(#hsRingGlow)"/>
+                  id="hsRingFill" filter="url(#hsRingGlow)"
+                  transform="rotate(-90 60 60)"/>
         </svg>
         <div class="hs-ring-overlay">
           <span class="hs-hero-num" id="hsScore">—</span>
@@ -470,7 +473,7 @@ body::after {
         <input class="ci-slider" id="ciEnergySlider" type="range"
                min="1" max="5" step="1" value="3">
         <span class="ci-emoji">⚡</span>
-        <span class="ci-val" id="ciEnergyVal">—</span>
+        <span class="ci-val" id="ciEnergyVal">3</span>
       </div>
 
       <div class="ci-track-row" style="margin-top:12px">
@@ -478,7 +481,7 @@ body::after {
         <input class="ci-slider" id="ciMoodSlider" type="range"
                min="1" max="5" step="1" value="3">
         <span class="ci-emoji">😊</span>
-        <span class="ci-val" id="ciMoodVal">—</span>
+        <span class="ci-val" id="ciMoodVal">3</span>
       </div>
 
       <div class="ci-note-wrap" style="margin-top:14px">
@@ -1045,6 +1048,10 @@ body::after {
         s.style.setProperty('--ci-pct', '50%');
         s.style.setProperty('--ci-fill', 'rgba(255,255,255,0.18)');
       });
+      eVal.textContent = '3';
+      eVal.style.color = 'var(--text-tertiary)';
+      mVal.textContent = '3';
+      mVal.style.color = 'var(--text-tertiary)';
     }
   }
 
@@ -1084,7 +1091,7 @@ body::after {
     if (typeof initCloudSync !== 'function') return;
     initCloudSync({
       appKey: 'score',
-      syncedKeys: [SLEEP_KEY, CHECKIN_KEY],
+      syncedKeys: [SLEEP_KEY, CHECKIN_KEY, SCORE_HISTORY_KEY],
       onApplied: function () { loadSleepInput(); ciLoad(); render(); }
     });
   });
