@@ -13,6 +13,7 @@
 <script src="topbar.js" defer></script>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 :root {
   --text-primary: #FAFAFA;
   --text-secondary: #B8B6B0;
@@ -20,7 +21,12 @@
   --success: #6BE3A4;
   --warning: #F2C063;
   --danger:  #FF6B6B;
-  --font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --accent:  #E07658;
+  --hair: rgba(255,255,255,0.08);
+  --hair-strong: rgba(255,255,255,0.14);
+  --panel: rgba(255,255,255,0.035);
+  --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "Sora", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 * { box-sizing: border-box; }
@@ -34,95 +40,161 @@ html, body {
 }
 body {
   min-height: 100vh; position: relative; overflow-x: hidden;
-  padding: max(28px, env(safe-area-inset-top)) 20px 60px;
+  padding: max(36px, env(safe-area-inset-top)) 24px 80px;
 }
 body::before {
   content: ''; position: fixed; inset: 0;
   background:
-    radial-gradient(circle at 82% 14%, rgba(224,118,88,0.16), transparent 45%),
-    radial-gradient(circle at 18% 90%, rgba(180,180,200,0.06), transparent 50%);
-  filter: blur(40px); pointer-events: none; z-index: -2;
+    radial-gradient(circle at 82% 8%, rgba(224,118,88,0.18), transparent 42%),
+    radial-gradient(circle at 12% 92%, rgba(180,180,200,0.06), transparent 50%);
+  filter: blur(40px); pointer-events: none; z-index: -3;
   animation: drift 36s ease-in-out infinite alternate;
 }
+/* Faint geometric grid — borrowed from the design system's dark sections,
+   masked so it fades toward the edges. */
 body::after {
-  content: ''; position: fixed; inset: 0;
-  background-image: radial-gradient(rgba(255,255,255,0.014) 1px, transparent 1px);
-  background-size: 3px 3px; pointer-events: none; z-index: -1;
+  content: ''; position: fixed; inset: 0; z-index: -2; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: radial-gradient(circle at 50% 22%, #000 0%, transparent 72%);
+          mask-image: radial-gradient(circle at 50% 22%, #000 0%, transparent 72%);
 }
 @keyframes drift { 0%{transform:translate3d(0,0,0)} 100%{transform:translate3d(-22px,14px,0)} }
 
-.page { max-width: 1100px; margin: 0 auto; }
-.dash-title {
-  margin: 0 0 14px; font-size: 28px; font-weight: 700; letter-spacing: -0.025em;
-  background: linear-gradient(180deg, #FFFFFF 0%, #C7C4BC 120%);
+.page { max-width: 1140px; margin: 0 auto; }
+
+/* ===== Eyebrow (uppercase kicker) ===== */
+.eyebrow {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--text-tertiary);
+  display: inline-flex; align-items: center; gap: 9px;
+}
+.eyebrow::before {
+  content: ''; width: 16px; height: 2px; border-radius: 2px;
+  background: var(--accent);
+}
+.eyebrow .eyebrow-date { color: var(--text-secondary); }
+
+/* ===== Top bar / wordmark ===== */
+.topline {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; margin-bottom: 30px;
+}
+.brandmark {
+  display: inline-flex; align-items: center; gap: 11px; white-space: nowrap;
+  font-family: var(--font-display); font-weight: 800;
+  letter-spacing: -0.02em; font-size: 16px; color: var(--text-primary);
+}
+.brandmark .mono-chip {
+  width: 34px; height: 34px; border-radius: 9px;
+  display: grid; place-items: center;
+  background: rgba(224,118,88,0.14);
+  color: var(--accent); font-size: 15px; font-weight: 800;
+  border: 1px solid rgba(224,118,88,0.25);
+}
+.topline-meta {
+  font-family: var(--font-mono); font-size: 11.5px;
+  letter-spacing: 0.04em; color: var(--text-tertiary);
+}
+
+/* ===== Card shell ===== */
+.gm-card {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--hair);
+  border-radius: 20px;
+  padding: 24px;
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.45);
+  overflow: hidden;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.card-eyebrow {
+  font-size: 10.5px; font-weight: 600;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--text-tertiary);
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 18px;
+}
+.card-eyebrow::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, var(--hair), transparent);
+}
+
+/* ===== Responsive grid ===== */
+.grid {
+  display: grid; gap: 16px; grid-template-columns: 1fr;
+  margin-top: 16px;
+}
+@media (min-width: 760px) {
+  .grid { grid-template-columns: 1fr 1fr; gap: 18px; }
+  .gm-card:not(.hero):hover {
+    transform: translateY(-3px);
+    border-color: var(--hair-strong);
+    box-shadow: 0 26px 60px rgba(0,0,0,0.5);
+  }
+}
+
+/* ===== HERO ===== */
+.hero {
+  padding: 32px;
+  display: grid; gap: 28px;
+  grid-template-columns: 1fr;
+  background:
+    radial-gradient(120% 120% at 88% 0%, rgba(224,118,88,0.10), transparent 60%),
+    var(--panel);
+}
+.hero-top {
+  display: grid; gap: 28px; align-items: center;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 720px) {
+  .hero-top { grid-template-columns: 1fr auto; }
+}
+.hero-copy { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.hero-title {
+  margin: 0; font-family: var(--font-display);
+  font-weight: 800; line-height: 0.9;
+  letter-spacing: -0.04em;
+  font-size: clamp(48px, 9vw, 92px);
+  text-transform: none;
+}
+.hero-title .l1 {
+  display: block;
+  background: linear-gradient(180deg, #FFFFFF 0%, #B9B6AE 130%);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
 }
-@media (max-width: 480px) { .dash-title { font-size: 22px; } }
-
-.section { margin-top: 8px; }
-.section-title {
-  font-size: 10.5px; font-weight: 700;
-  letter-spacing: 0.18em; text-transform: uppercase;
-  color: var(--text-tertiary);
-  display: flex; align-items: center; gap: 12px;
-  margin-bottom: 12px;
+.hero-title .l2 {
+  display: block;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 2px rgba(224,118,88,0.85);
 }
-.section-title::before { content: ''; width: 18px; height: 1px; background: var(--text-tertiary); opacity: 0.6; }
-.section-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(255,255,255,0.08), transparent); }
-
-.gm-card {
-  position: relative;
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 14px;
-  backdrop-filter: blur(24px) saturate(1.2);
-  -webkit-backdrop-filter: blur(24px) saturate(1.2);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.45);
-  overflow: hidden;
+.hero-sub {
+  margin: 0; max-width: 30ch;
+  font-size: 15px; line-height: 1.6; color: var(--text-secondary);
 }
-/* ===== Hero card: ring (with score inside) centered, component rows below ===== */
-.hs-hero {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 6px;
-  margin-bottom: 24px;
-}
-.hs-hero-eyebrow {
-  font-size: 10.5px; font-weight: 700;
-  letter-spacing: 0.18em; text-transform: uppercase;
+.hero-status {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 12px;
   color: var(--text-tertiary);
 }
-.hs-hero-num {
-  font-family: var(--font-mono);
-  font-size: 40px; font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.03em; line-height: 1;
-  color: var(--text-primary);
-  transition: color 0.3s;
-}
-.hs-hero-denom {
-  font-family: var(--font-mono);
-  font-size: 12px; color: var(--text-tertiary);
-  font-variant-numeric: tabular-nums;
-  margin-top: 2px;
-}
-.hs-hero-date {
-  font-size: 12px; color: var(--text-tertiary);
-  margin-top: 4px;
+.hero-status .dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--text-tertiary); box-shadow: 0 0 0 0 rgba(0,0,0,0);
 }
 
-/* Ring — same SVG pattern as the Day Ring on main.html (track + glow-filtered
-   fill circle, stroke-dasharray/-dashoffset, rotated -90deg from 12 o'clock).
-   Score number now lives inside it via .hs-ring-overlay. */
-.hs-ring { position: relative; width: 140px; height: 140px; flex-shrink: 0; margin: 4px 0; }
+/* Ring */
+.hs-ring { position: relative; width: 200px; height: 200px; flex-shrink: 0; justify-self: center; }
 .hs-ring svg { width: 100%; height: 100%; display: block; }
-.hs-ring-track { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 8; }
+.hs-ring-track { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 7; }
 .hs-ring-fill {
-  fill: none; stroke-width: 8; stroke-linecap: round;
+  fill: none; stroke-width: 7; stroke-linecap: round;
   transform: rotate(-90deg); transform-origin: 60px 60px;
 }
 .hs-ring-overlay {
@@ -131,22 +203,43 @@ body::after {
   align-items: center; justify-content: center;
   pointer-events: none;
 }
+.hs-hero-num {
+  font-family: var(--font-mono);
+  font-size: 56px; font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em; line-height: 1;
+  color: var(--text-primary);
+  transition: color 0.3s;
+}
+.hs-hero-denom {
+  font-family: var(--font-mono);
+  font-size: 13px; color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+  margin-top: 4px;
+}
+.hs-hero-date { display: none; }
 
 /* Component bars */
-.hs-rows { display: flex; flex-direction: column; gap: 12px; }
-.hs-row { display: flex; align-items: center; gap: 10px; }
+.hs-rows {
+  display: grid; gap: 16px 28px;
+  grid-template-columns: 1fr;
+  padding-top: 26px;
+  border-top: 1px solid var(--hair);
+}
+@media (min-width: 560px) { .hs-rows { grid-template-columns: 1fr 1fr; } }
+.hs-row { display: flex; align-items: center; gap: 12px; }
 .hs-row-label {
-  width: 96px; flex-shrink: 0;
-  font-size: 13px; color: var(--text-secondary);
+  width: 92px; flex-shrink: 0;
+  font-size: 13px; font-weight: 500; color: var(--text-secondary);
   transition: color 0.2s;
 }
 .hs-row-track {
-  flex: 1; height: 3px; border-radius: 999px;
+  flex: 1; height: 4px; border-radius: 999px;
   background: rgba(255,255,255,0.06); overflow: hidden;
 }
-.hs-row-fill { display: block; height: 100%; border-radius: 999px; width: 0%; }
+.hs-row-fill { display: block; height: 100%; border-radius: 999px; width: 0%; transition: background 0.2s; }
 .hs-row-value {
-  width: 70px; flex-shrink: 0; text-align: right;
+  width: 64px; flex-shrink: 0; text-align: right;
   font-family: var(--font-mono); font-size: 12px;
   font-variant-numeric: tabular-nums; color: var(--text-secondary);
   transition: color 0.2s;
@@ -154,9 +247,12 @@ body::after {
 .hs-row-nodata .hs-row-label,
 .hs-row-nodata .hs-row-value { color: var(--text-tertiary); }
 
-@media (max-width: 480px) {
-  body { padding: max(20px, env(safe-area-inset-top)) 14px 50px; }
-  .gm-card { padding: 16px; }
+@media (max-width: 560px) {
+  body { padding: max(22px, env(safe-area-inset-top)) 16px 56px; }
+  .gm-card { padding: 18px; border-radius: 18px; }
+  .hero { padding: 22px; }
+  .hs-ring { width: 168px; height: 168px; }
+  .hs-hero-num { font-size: 48px; }
 }
 
 /* ===== Check-in card ===== */
@@ -305,65 +401,69 @@ body::after {
 <body>
 <div class="page">
 
-  <h1 class="dash-title">Health Score</h1>
-
-  <div class="section">
-    <div class="section-title">Today</div>
-    <div class="gm-card">
-
-      <div class="hs-hero">
-        <div class="hs-hero-eyebrow">Health Score</div>
-
-        <div class="hs-ring" id="hsRingWrap">
-          <svg viewBox="0 0 120 120">
-            <defs>
-              <filter id="hsRingGlow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="2.4" result="b"/>
-                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-              </filter>
-            </defs>
-            <circle class="hs-ring-track" cx="60" cy="60" r="52"/>
-            <circle class="hs-ring-fill"  cx="60" cy="60" r="52"
-                    id="hsRingFill" filter="url(#hsRingGlow)"/>
-          </svg>
-          <div class="hs-ring-overlay">
-            <span class="hs-hero-num" id="hsScore">—</span>
-            <span class="hs-hero-denom">/100</span>
-          </div>
-        </div>
-
-        <div class="hs-hero-date" id="hsHeroDate"></div>
-      </div><!-- /.hs-hero -->
-
-      <div class="hs-rows" id="hsRows">
-        <div class="hs-row" data-key="training">
-          <span class="hs-row-label">Training</span>
-          <div class="hs-row-track"><div class="hs-row-fill"></div></div>
-          <span class="hs-row-value">—</span>
-        </div>
-        <div class="hs-row" data-key="supplements">
-          <span class="hs-row-label">Supplements</span>
-          <div class="hs-row-track"><div class="hs-row-fill"></div></div>
-          <span class="hs-row-value">—</span>
-        </div>
-        <div class="hs-row" data-key="water">
-          <span class="hs-row-label">Water</span>
-          <div class="hs-row-track"><div class="hs-row-fill"></div></div>
-          <span class="hs-row-value">—</span>
-        </div>
-        <div class="hs-row" data-key="sleep">
-          <span class="hs-row-label">Sleep</span>
-          <div class="hs-row-track"><div class="hs-row-fill"></div></div>
-          <span class="hs-row-value">—</span>
-        </div>
-      </div>
-
-    </div>
+  <div class="topline">
+    <div class="brandmark"><span class="mono-chip">HS</span> Health Score</div>
+    <div class="topline-meta" id="hsHeroDate"></div>
   </div>
 
-  <div class="section">
-    <div class="section-title">How are you feeling?</div>
-    <div class="gm-card">
+  <header class="gm-card hero">
+    <div class="hero-top">
+      <div class="hero-copy">
+        <div class="eyebrow">Today's reading</div>
+        <h1 class="hero-title">
+          <span class="l1">Health</span>
+          <span class="l2">Score</span>
+        </h1>
+        <p class="hero-sub">One number from your training, supplements, water and sleep — tracked every day.</p>
+      </div>
+
+      <div class="hs-ring" id="hsRingWrap">
+        <svg viewBox="0 0 120 120">
+          <defs>
+            <filter id="hsRingGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="2.4" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <circle class="hs-ring-track" cx="60" cy="60" r="52"/>
+          <circle class="hs-ring-fill"  cx="60" cy="60" r="52"
+                  id="hsRingFill" filter="url(#hsRingGlow)"/>
+        </svg>
+        <div class="hs-ring-overlay">
+          <span class="hs-hero-num" id="hsScore">—</span>
+          <span class="hs-hero-denom">/100</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hs-rows" id="hsRows">
+      <div class="hs-row" data-key="training">
+        <span class="hs-row-label">Training</span>
+        <div class="hs-row-track"><div class="hs-row-fill"></div></div>
+        <span class="hs-row-value">—</span>
+      </div>
+      <div class="hs-row" data-key="supplements">
+        <span class="hs-row-label">Supplements</span>
+        <div class="hs-row-track"><div class="hs-row-fill"></div></div>
+        <span class="hs-row-value">—</span>
+      </div>
+      <div class="hs-row" data-key="water">
+        <span class="hs-row-label">Water</span>
+        <div class="hs-row-track"><div class="hs-row-fill"></div></div>
+        <span class="hs-row-value">—</span>
+      </div>
+      <div class="hs-row" data-key="sleep">
+        <span class="hs-row-label">Sleep</span>
+        <div class="hs-row-track"><div class="hs-row-fill"></div></div>
+        <span class="hs-row-value">—</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <section class="gm-card">
+      <div class="card-eyebrow">How are you feeling?</div>
 
       <div class="ci-track-row">
         <span class="ci-emoji">😴</span>
@@ -389,31 +489,10 @@ body::after {
       <div class="ci-footer">
         <span class="ci-logged" id="ciLogged"></span>
       </div>
+    </section>
 
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">Body weight</div>
-    <div class="gm-card hs-wt-card" id="hsWtCard">
-      <div class="hs-wt-head">
-        <div>
-          <span class="hs-wt-num" id="hsWtNum">—</span>
-          <span class="hs-wt-unit" id="hsWtUnit">kg</span>
-        </div>
-        <span class="hs-wt-delta" id="hsWtDelta"></span>
-      </div>
-      <svg class="hs-wt-svg" id="hsWtSvg" viewBox="0 0 320 70"
-           preserveAspectRatio="none" aria-hidden="true"></svg>
-      <div class="hs-wt-empty" id="hsWtEmpty">
-        Log your weight on the Fitness page — it'll show up here too.
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">Sleep</div>
-    <div class="gm-card">
+    <section class="gm-card">
+      <div class="card-eyebrow">Sleep</div>
       <div class="hs-sleep-label-row">
         <span class="hs-sleep-label">Hours slept last night</span>
         <span class="hs-sleep-band" id="hsSleepBand">—</span>
@@ -429,12 +508,26 @@ body::after {
         </div>
       </div>
       <div class="hs-sleep-hint">Manual now · Garmin sync planned</div>
-    </div>
-  </div>
+    </section>
 
-  <div class="section">
-    <div class="section-title">Score History</div>
-    <div class="gm-card" id="hsSparkCard">
+    <section class="gm-card hs-wt-card" id="hsWtCard">
+      <div class="card-eyebrow">Body weight</div>
+      <div class="hs-wt-head">
+        <div>
+          <span class="hs-wt-num" id="hsWtNum">—</span>
+          <span class="hs-wt-unit" id="hsWtUnit">kg</span>
+        </div>
+        <span class="hs-wt-delta" id="hsWtDelta"></span>
+      </div>
+      <svg class="hs-wt-svg" id="hsWtSvg" viewBox="0 0 320 70"
+           preserveAspectRatio="none" aria-hidden="true"></svg>
+      <div class="hs-wt-empty" id="hsWtEmpty">
+        Log your weight on the Fitness page — it'll show up here too.
+      </div>
+    </section>
+
+    <section class="gm-card" id="hsSparkCard">
+      <div class="card-eyebrow">Score history</div>
       <div class="hs-spark-head">
         <div>
           <span class="hs-spark-num" id="hsSparkAvg">—</span>
@@ -447,7 +540,8 @@ body::after {
       <div class="hs-spark-empty" id="hsSparkEmpty">
         Your score history builds as you use the dashboard — check back in a few days.
       </div>
-    </div>
+    </section>
+
   </div>
 
 </div><!-- /.page -->
