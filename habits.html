@@ -630,7 +630,7 @@ main {
         const isDone = !!done[h.id];
         const hs = calcHabitStreak(h.id);
         const streakHtml = hs > 0
-          ? `<span class="habit-streak ${hs >= 3 ? 'hot' : ''}">${hs >= 3 ? '🔥' : '📈'} ${hs}</span>`
+          ? `<span class="habit-streak ${hs >= 3 ? 'hot' : ''}">${hs >= 3 ? '🔥' : '🔗'} ${hs}</span>`
           : '';
         const delBtn = editMode
           ? `<button class="habit-del-btn" data-del="${escapeHtml(h.id)}" type="button">×</button>`
