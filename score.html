@@ -82,12 +82,43 @@ body::after {
   box-shadow: 0 12px 40px rgba(0,0,0,0.45);
   overflow: hidden;
 }
-/* ===== Today card: ring + component rows ===== */
-.hs-today-row { display: flex; align-items: center; gap: 26px; flex-wrap: wrap; }
+/* ===== Hero card: ring (with score inside) centered, component rows below ===== */
+.hs-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+.hs-hero-eyebrow {
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.hs-hero-num {
+  font-family: var(--font-mono);
+  font-size: 40px; font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em; line-height: 1;
+  color: var(--text-primary);
+  transition: color 0.3s;
+}
+.hs-hero-denom {
+  font-family: var(--font-mono);
+  font-size: 12px; color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+.hs-hero-date {
+  font-size: 12px; color: var(--text-tertiary);
+  margin-top: 4px;
+}
 
 /* Ring — same SVG pattern as the Day Ring on main.html (track + glow-filtered
-   fill circle, stroke-dasharray/-dashoffset, rotated -90deg from 12 o'clock). */
-.hs-ring { position: relative; width: 112px; height: 112px; flex-shrink: 0; }
+   fill circle, stroke-dasharray/-dashoffset, rotated -90deg from 12 o'clock).
+   Score number now lives inside it via .hs-ring-overlay. */
+.hs-ring { position: relative; width: 140px; height: 140px; flex-shrink: 0; margin: 4px 0; }
 .hs-ring svg { width: 100%; height: 100%; display: block; }
 .hs-ring-track { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 8; }
 .hs-ring-fill {
@@ -96,28 +127,27 @@ body::after {
 }
 .hs-ring-overlay {
   position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
   pointer-events: none;
 }
-.hs-ring-num {
-  font-family: var(--font-mono); font-size: 32px; font-weight: 700;
-  font-variant-numeric: tabular-nums; line-height: 1;
-}
 
-.hs-rows { flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 13px; }
+/* Component bars */
+.hs-rows { display: flex; flex-direction: column; gap: 12px; }
 .hs-row { display: flex; align-items: center; gap: 10px; }
 .hs-row-label {
-  width: 92px; flex-shrink: 0; font-size: 13px; color: var(--text-secondary);
+  width: 96px; flex-shrink: 0;
+  font-size: 13px; color: var(--text-secondary);
   transition: color 0.2s;
 }
 .hs-row-track {
-  flex: 1; height: 4px; border-radius: 999px;
+  flex: 1; height: 3px; border-radius: 999px;
   background: rgba(255,255,255,0.06); overflow: hidden;
 }
 .hs-row-fill { display: block; height: 100%; border-radius: 999px; width: 0%; }
 .hs-row-value {
-  width: 66px; flex-shrink: 0; text-align: right;
-  font-family: var(--font-mono); font-size: 12.5px;
+  width: 70px; flex-shrink: 0; text-align: right;
+  font-family: var(--font-mono); font-size: 12px;
   font-variant-numeric: tabular-nums; color: var(--text-secondary);
   transition: color 0.2s;
 }
@@ -125,9 +155,68 @@ body::after {
 .hs-row-nodata .hs-row-value { color: var(--text-tertiary); }
 
 @media (max-width: 480px) {
-  .hs-today-row { flex-direction: column; align-items: stretch; }
-  .hs-ring { margin: 0 auto; }
+  body { padding: max(20px, env(safe-area-inset-top)) 14px 50px; }
+  .gm-card { padding: 16px; }
 }
+
+/* ===== Check-in card ===== */
+.ci-track-row {
+  display: flex; align-items: center; gap: 10px;
+}
+.ci-emoji {
+  font-size: 16px; flex-shrink: 0; line-height: 1;
+  user-select: none;
+}
+.ci-slider {
+  flex: 1; -webkit-appearance: none; appearance: none;
+  height: 3px; border-radius: 999px;
+  background: rgba(255,255,255,0.10);
+  outline: none; cursor: pointer;
+}
+/* Thumb — same size on all browsers */
+.ci-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--text-primary);
+  border: 2px solid rgba(255,255,255,0.15);
+  box-shadow: 0 1px 6px rgba(0,0,0,0.5);
+  transition: transform 0.1s;
+}
+.ci-slider::-moz-range-thumb {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--text-primary);
+  border: 2px solid rgba(255,255,255,0.15);
+  box-shadow: 0 1px 6px rgba(0,0,0,0.5);
+}
+.ci-slider:active::-webkit-slider-thumb { transform: scale(1.2); }
+/* Track fill color driven by JS via --ci-fill custom property */
+.ci-slider { background: linear-gradient(
+  to right,
+  var(--ci-fill, rgba(255,255,255,0.35)) 0%,
+  var(--ci-fill, rgba(255,255,255,0.35)) var(--ci-pct, 50%),
+  rgba(255,255,255,0.08) var(--ci-pct, 50%),
+  rgba(255,255,255,0.08) 100%
+); }
+.ci-val {
+  width: 16px; flex-shrink: 0; text-align: right;
+  font-family: var(--font-mono); font-size: 13px; font-weight: 700;
+  color: var(--text-tertiary); font-variant-numeric: tabular-nums;
+}
+.ci-note-wrap { margin-top: 14px; }
+.ci-note {
+  width: 100%; padding: 10px 13px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px; background: rgba(0,0,0,0.28);
+  color: var(--text-primary); font-size: 13.5px; outline: none;
+  transition: border-color 0.2s;
+}
+.ci-note:focus { border-color: rgba(255,255,255,0.28); }
+.ci-note::placeholder { color: var(--text-tertiary); }
+.ci-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 12px; min-height: 18px;
+}
+.ci-logged { font-size: 11px; color: var(--text-tertiary); font-style: italic; }
 
 /* ===== Sparkline card ===== */
 .hs-spark-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
@@ -211,11 +300,6 @@ body::after {
 .hs-sleep-presets button.on { background: rgba(255,255,255,0.12); color: var(--text-primary); }
 
 .hs-sleep-hint { font-size: 11px; color: var(--text-tertiary); margin-top: 12px; }
-
-@media (max-width: 480px) {
-  body { padding: max(20px, env(safe-area-inset-top)) 14px 50px; }
-  .gm-card { padding: 16px; }
-}
 </style>
 </head>
 <body>
@@ -226,64 +310,86 @@ body::after {
   <div class="section">
     <div class="section-title">Today</div>
     <div class="gm-card">
-      <div class="hs-today-row">
-        <div class="hs-ring">
+
+      <div class="hs-hero">
+        <div class="hs-hero-eyebrow">Health Score</div>
+
+        <div class="hs-ring" id="hsRingWrap">
           <svg viewBox="0 0 120 120">
             <defs>
               <filter id="hsRingGlow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="2.4" result="b" />
+                <feGaussianBlur stdDeviation="2.4" result="b"/>
                 <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
               </filter>
             </defs>
-            <circle class="hs-ring-track" cx="60" cy="60" r="52" />
-            <circle class="hs-ring-fill" cx="60" cy="60" r="52" id="hsRingFill" filter="url(#hsRingGlow)" />
+            <circle class="hs-ring-track" cx="60" cy="60" r="52"/>
+            <circle class="hs-ring-fill"  cx="60" cy="60" r="52"
+                    id="hsRingFill" filter="url(#hsRingGlow)"/>
           </svg>
           <div class="hs-ring-overlay">
-            <span class="hs-ring-num" id="hsScore">—</span>
+            <span class="hs-hero-num" id="hsScore">—</span>
+            <span class="hs-hero-denom">/100</span>
           </div>
         </div>
 
-        <div class="hs-rows" id="hsRows">
-          <div class="hs-row" data-key="training">
-            <span class="hs-row-label">Training</span>
-            <div class="hs-row-track"><div class="hs-row-fill"></div></div>
-            <span class="hs-row-value">—</span>
-          </div>
-          <div class="hs-row" data-key="supplements">
-            <span class="hs-row-label">Supplements</span>
-            <div class="hs-row-track"><div class="hs-row-fill"></div></div>
-            <span class="hs-row-value">—</span>
-          </div>
-          <div class="hs-row" data-key="water">
-            <span class="hs-row-label">Water</span>
-            <div class="hs-row-track"><div class="hs-row-fill"></div></div>
-            <span class="hs-row-value">—</span>
-          </div>
-          <div class="hs-row" data-key="sleep">
-            <span class="hs-row-label">Sleep</span>
-            <div class="hs-row-track"><div class="hs-row-fill"></div></div>
-            <span class="hs-row-value">—</span>
-          </div>
+        <div class="hs-hero-date" id="hsHeroDate"></div>
+      </div><!-- /.hs-hero -->
+
+      <div class="hs-rows" id="hsRows">
+        <div class="hs-row" data-key="training">
+          <span class="hs-row-label">Training</span>
+          <div class="hs-row-track"><div class="hs-row-fill"></div></div>
+          <span class="hs-row-value">—</span>
+        </div>
+        <div class="hs-row" data-key="supplements">
+          <span class="hs-row-label">Supplements</span>
+          <div class="hs-row-track"><div class="hs-row-fill"></div></div>
+          <span class="hs-row-value">—</span>
+        </div>
+        <div class="hs-row" data-key="water">
+          <span class="hs-row-label">Water</span>
+          <div class="hs-row-track"><div class="hs-row-fill"></div></div>
+          <span class="hs-row-value">—</span>
+        </div>
+        <div class="hs-row" data-key="sleep">
+          <span class="hs-row-label">Sleep</span>
+          <div class="hs-row-track"><div class="hs-row-fill"></div></div>
+          <span class="hs-row-value">—</span>
         </div>
       </div>
+
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">Last 30 days</div>
-    <div class="gm-card" id="hsSparkCard">
-      <div class="hs-spark-head">
-        <div>
-          <span class="hs-spark-num" id="hsSparkAvg">—</span>
-          <span class="hs-spark-unit">avg</span>
-        </div>
-        <span class="hs-spark-delta" id="hsSparkDelta"></span>
+    <div class="section-title">How are you feeling?</div>
+    <div class="gm-card">
+
+      <div class="ci-track-row">
+        <span class="ci-emoji">😴</span>
+        <input class="ci-slider" id="ciEnergySlider" type="range"
+               min="1" max="5" step="1" value="3">
+        <span class="ci-emoji">⚡</span>
+        <span class="ci-val" id="ciEnergyVal">—</span>
       </div>
-      <svg class="hs-spark-svg" id="hsSparkSvg" viewBox="0 0 320 90"
-           preserveAspectRatio="none" aria-hidden="true"></svg>
-      <div class="hs-spark-empty" id="hsSparkEmpty">
-        Your score history builds as you use the dashboard — check back in a few days.
+
+      <div class="ci-track-row" style="margin-top:12px">
+        <span class="ci-emoji">😞</span>
+        <input class="ci-slider" id="ciMoodSlider" type="range"
+               min="1" max="5" step="1" value="3">
+        <span class="ci-emoji">😊</span>
+        <span class="ci-val" id="ciMoodVal">—</span>
       </div>
+
+      <div class="ci-note-wrap" style="margin-top:14px">
+        <input class="ci-note" id="ciNote" type="text"
+               placeholder="Add a note…" maxlength="200" autocomplete="off">
+      </div>
+
+      <div class="ci-footer">
+        <span class="ci-logged" id="ciLogged"></span>
+      </div>
+
     </div>
   </div>
 
@@ -326,6 +432,24 @@ body::after {
     </div>
   </div>
 
+  <div class="section">
+    <div class="section-title">Score History</div>
+    <div class="gm-card" id="hsSparkCard">
+      <div class="hs-spark-head">
+        <div>
+          <span class="hs-spark-num" id="hsSparkAvg">—</span>
+          <span class="hs-spark-unit">avg</span>
+        </div>
+        <span class="hs-spark-delta" id="hsSparkDelta"></span>
+      </div>
+      <svg class="hs-spark-svg" id="hsSparkSvg" viewBox="0 0 320 90"
+           preserveAspectRatio="none" aria-hidden="true"></svg>
+      <div class="hs-spark-empty" id="hsSparkEmpty">
+        Your score history builds as you use the dashboard — check back in a few days.
+      </div>
+    </div>
+  </div>
+
 </div><!-- /.page -->
 
 <script>
@@ -351,6 +475,28 @@ body::after {
     all[dateKey] = { hours: hours, source: source, loggedAt: Date.now() };
     localStorage.setItem(SLEEP_KEY, JSON.stringify(all));
     return all[dateKey];
+  }
+
+  // ============================================================
+  // Daily check-in store — same seam pattern as the sleep store above.
+  // Shape: { "YYYY-MM-DD": { energy, mood, note, loggedAt } }
+  // ============================================================
+  const CHECKIN_KEY = 'checkin:daily';
+
+  function getCheckin(dateKey) {
+    try { return (JSON.parse(localStorage.getItem(CHECKIN_KEY)) || {})[dateKey] || null; }
+    catch (e) { return null; }
+  }
+  function setCheckin(dateKey, energy, mood, note) {
+    let all = {};
+    try { all = JSON.parse(localStorage.getItem(CHECKIN_KEY)) || {}; } catch (e) {}
+    all[dateKey] = {
+      energy: energy,
+      mood: mood,
+      note: (note || '').trim().slice(0, 200),
+      loggedAt: Date.now()
+    };
+    localStorage.setItem(CHECKIN_KEY, JSON.stringify(all));
   }
 
   // ============================================================
@@ -550,6 +696,9 @@ body::after {
     const ringTargetPct = score == null ? 0 : score;
     const ringColor = score == null ? 'var(--text-tertiary)' : scoreColor(score);
 
+    document.getElementById('hsHeroDate').textContent =
+      new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+
     const scoreEl = document.getElementById('hsScore');
     scoreEl.textContent = score == null ? '—' : String(score);
     scoreEl.style.color = ringColor;
@@ -582,6 +731,7 @@ body::after {
     updateSleepCard(result.parts.sleep);
     renderSparkline();
     renderWeight();
+    ciLoad();
     firstRender = false;
   }
 
@@ -753,6 +903,75 @@ body::after {
     });
   });
 
+  // --- Check-in — always interactive, no locked state ---
+  const CI_DATE = calendarDateKey();
+
+  function ciColor(val) {
+    if (val <= 2) return 'var(--danger)';
+    if (val === 3) return 'var(--warning)';
+    return 'var(--success)';
+  }
+
+  function ciUpdateSlider(sliderEl, valEl, val) {
+    const pct = ((val - 1) / 4 * 100).toFixed(1) + '%';
+    sliderEl.style.setProperty('--ci-pct', pct);
+    sliderEl.style.setProperty('--ci-fill', ciColor(val));
+    sliderEl.value = String(val);
+    valEl.textContent = String(val);
+    valEl.style.color = ciColor(val);
+  }
+
+  function ciSave() {
+    const energy = parseInt(document.getElementById('ciEnergySlider').value, 10);
+    const mood   = parseInt(document.getElementById('ciMoodSlider').value,   10);
+    const note   = document.getElementById('ciNote').value || '';
+    const existing = getCheckin(CI_DATE);
+    setCheckin(CI_DATE, energy, mood, note);
+    const label = existing ? 'Updated' : 'Logged';
+    document.getElementById('ciLogged').textContent =
+      label + ' at ' + new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+  }
+
+  function ciLoad() {
+    const entry = getCheckin(CI_DATE);
+    const eSlider = document.getElementById('ciEnergySlider');
+    const mSlider = document.getElementById('ciMoodSlider');
+    const eVal    = document.getElementById('ciEnergyVal');
+    const mVal    = document.getElementById('ciMoodVal');
+    if (entry) {
+      ciUpdateSlider(eSlider, eVal, entry.energy);
+      ciUpdateSlider(mSlider, mVal, entry.mood);
+      if (entry.note) document.getElementById('ciNote').value = entry.note;
+      document.getElementById('ciLogged').textContent =
+        'Logged at ' + new Date(entry.loggedAt)
+          .toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+    } else {
+      // No entry yet — neutral uncolored state
+      [eSlider, mSlider].forEach(function(s) {
+        s.style.setProperty('--ci-pct', '50%');
+        s.style.setProperty('--ci-fill', 'rgba(255,255,255,0.18)');
+      });
+    }
+  }
+
+  // Wire sliders — live visual update + immediate save
+  function ciWireSlider(sliderId, valId) {
+    const slider = document.getElementById(sliderId);
+    const valEl  = document.getElementById(valId);
+    slider.addEventListener('input', function() {
+      ciUpdateSlider(slider, valEl, parseInt(slider.value, 10));
+      ciSave();
+    });
+  }
+  ciWireSlider('ciEnergySlider', 'ciEnergyVal');
+  ciWireSlider('ciMoodSlider',   'ciMoodVal');
+
+  // Note saves on blur
+  document.getElementById('ciNote').addEventListener('blur', function() {
+    const entry = getCheckin(CI_DATE);
+    if (entry) ciSave();
+  });
+
   loadSleepInput();
   render();
 
@@ -771,8 +990,8 @@ body::after {
     if (typeof initCloudSync !== 'function') return;
     initCloudSync({
       appKey: 'score',
-      syncedKeys: [SLEEP_KEY],
-      onApplied: function () { loadSleepInput(); render(); }
+      syncedKeys: [SLEEP_KEY, CHECKIN_KEY],
+      onApplied: function () { loadSleepInput(); ciLoad(); render(); }
     });
   });
 })();
