@@ -7,14 +7,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#050506">
 <meta name="color-scheme" content="dark">
-<title>Daily Stack — Customizable Template</title>
+<title>Health</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="sync.js" defer></script>
 <script src="topbar.js" defer></script>
 <style>
 :root {
   --bg: #050506;
-  --bg-card: rgba(255, 255, 255, 0.04);
+  --bg-card: rgba(255, 255, 255, 0.055);
   --bg-secondary: rgba(255, 255, 255, 0.035);
   --bg-input: rgba(0, 0, 0, 0.28);
   --bg-input-focus: rgba(0, 0, 0, 0.36);
@@ -36,8 +39,23 @@
   --tag-stack: #D8AB30;
   --tag-stack-bg: rgba(216, 171, 48, 0.15);
 
+  /* Ported score/water states — namespaced so they never touch the stack's
+     existing --accent/--warning tokens above. */
+  --score-success: #6BE3A4;
+  --score-warning: #F2C063;
+  --score-danger:  #FF6B6B;
+  --water-good: #6ee7b7;
+  --water-warn: #fbbf24;
+  --water-bad:  #ff8a8a;
+  --water-info: #7DD3FC;
+
   --font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --font-display: 'Sora', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --color-primary: #2563eb;
+  --color-accent: #10b981;
 }
 
 * { box-sizing: border-box; }
@@ -71,174 +89,384 @@ body::after {
 
 main {
   position: relative; z-index: 2;
-  max-width: 720px; margin: 0 auto;
-  padding: 56px 20px 80px;
-  padding-top: max(56px, env(safe-area-inset-top, 56px));
+  max-width: 960px; margin: 0 auto;
+  padding: 22px 18px 72px;
+  padding-top: max(56px, env(safe-area-inset-top));
 }
 
-.section-title {
-  font-family: var(--font-mono);
-  font-size: 11px; font-weight: 600;
-  letter-spacing: 0.18em; text-transform: uppercase;
-  color: var(--text-tertiary);
-  margin: 0 4px 14px;
-  display: flex; align-items: center; gap: 12px;
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.75rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.14em;
+  color: var(--color-accent);
 }
-.section-title::before { content: '≡'; font-size: 14px; opacity: 0.5; }
+.section-eyebrow { margin: 28px 0 12px; }
+.section-eyebrow:first-child { margin-top: 0; }
 
-.sleep-open-btn {
-  display: flex; align-items: center; gap: 14px;
-  margin: 0 0 24px;
-  padding: 16px 18px;
-  background: linear-gradient(135deg, rgba(125, 211, 252, 0.10), rgba(168, 162, 255, 0.08));
-  border: 1px solid rgba(168, 162, 255, 0.18);
-  border-radius: 16px;
-  text-decoration: none; color: var(--text-primary);
-  -webkit-tap-highlight-color: transparent;
-  transition: background 0.15s, transform 0.10s;
+.hp-pagehead {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 18px;
 }
-.sleep-open-btn:hover {
-  background: linear-gradient(135deg, rgba(125, 211, 252, 0.16), rgba(168, 162, 255, 0.14));
-}
-.sleep-open-btn:active { transform: scale(0.985); }
-.sleep-open-icon {
-  font-size: 22px; line-height: 1;
-  filter: grayscale(20%);
-}
-.sleep-open-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-.sleep-open-title {
-  font-size: 14px; font-weight: 700; letter-spacing: 0.02em;
-}
-.sleep-open-sub {
-  font-size: 11px; font-weight: 500;
-  color: var(--text-tertiary);
-  font-family: var(--font-mono);
-  letter-spacing: 0.08em; text-transform: uppercase;
-}
-.sleep-open-chevron {
-  font-size: 22px; line-height: 1;
-  color: var(--text-tertiary);
-  font-weight: 300;
-}
-
-.water-embed { margin-top: 56px; }
-.water-iframe {
-  display: block;
-  width: 100%;
-  height: 880px;
-  border: 0;
-  background: transparent;
-  border-radius: 16px;
-  overflow: hidden;
-  color-scheme: dark;
-}
-@media (max-width: 480px) {
-  .water-embed { margin-top: 40px; }
-  .water-iframe { height: 780px; }
-}
-
-.stack-card {
-  background: var(--bg-card);
-  border-radius: 16px;
-  padding: 22px 22px 18px;
-  backdrop-filter: blur(24px) saturate(1.2);
-  -webkit-backdrop-filter: blur(24px) saturate(1.2);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.45);
-}
-
-.stack-head { margin-bottom: 12px; }
-.sf-eyebrow {
-  font-family: var(--font-mono);
-  font-size: 11px; font-weight: 600;
-  letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--text-tertiary);
-  margin-bottom: 6px;
-}
-.sf-title {
-  font-size: 24px; font-weight: 700;
-  letter-spacing: -0.022em;
-  color: var(--text-primary);
-  line-height: 1.15; margin-bottom: 2px;
-}
-.stack-progress-text {
+.hp-date {
   font-family: var(--font-mono);
   font-size: 12px; color: var(--text-tertiary);
+}
+
+/* ===== Generic card shell ===== */
+.card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 14px;
+}
+.hub-card-head, .card-head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 12px;
+}
+.card-icon { flex-shrink: 0; }
+.card-label {
+  font-family: var(--font-body);
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: #94a3b8;
+}
+.hub-icon-btn {
+  width: 30px; height: 30px; flex-shrink: 0; margin-left: auto;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 9px; color: var(--text-secondary); cursor: pointer;
+  font-size: 14px;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.18s, color 0.18s;
+}
+.hub-icon-btn:hover { background: rgba(255,255,255,0.10); color: var(--text-primary); }
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap;
+}
+
+/* ===== Section 1 — Score hero ===== */
+@keyframes hpPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.45; transform: scale(0.82); }
+}
+.hero-card {
+  border: 1px solid rgba(37,99,235,0.2);
+  border-radius: 20px;
+  padding: 26px 24px;
+  margin-bottom: 26px;
+  background:
+    radial-gradient(120% 90% at 78% 18%, rgba(37,99,235,0.22), transparent 62%),
+    linear-gradient(rgba(37,99,235,0.045) 1px, transparent 1px) 0 0 / 100% 58px,
+    linear-gradient(90deg, rgba(37,99,235,0.045) 1px, transparent 1px) 0 0 / 58px 100%,
+    #0a0c12;
+}
+.hero-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.hero-left { flex: 1; min-width: 0; }
+.hero-label {
+  font-family: var(--font-mono);
+  font-size: 11px; color: #94a3b8;
+  text-transform: uppercase; letter-spacing: 0.14em;
+  margin-bottom: 10px;
+}
+.hero-score-line { display: flex; align-items: baseline; gap: 2px; }
+.hero-score-num {
+  font-family: var(--font-display);
+  font-size: 64px; font-weight: 800;
+  color: #fff; letter-spacing: -0.04em; line-height: 1;
   font-variant-numeric: tabular-nums;
-  margin-top: 6px;
+  transition: color 0.3s;
+}
+.hero-score-suffix {
+  font-family: var(--font-display);
+  font-size: 38px; font-weight: 800;
+  color: transparent; -webkit-text-stroke: 2px #2563eb;
+}
+.hub-status { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: #cbd5e1; margin-top: 12px; }
+.hub-status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-tertiary); animation: hpPulse 2s ease-in-out infinite; transition: background 0.3s; }
+
+.ring-wrap { position: relative; width: 134px; height: 134px; flex-shrink: 0; }
+.ring-wrap svg { width: 100%; height: 100%; display: block; }
+.ring-track { fill: none; stroke: rgba(255,255,255,0.07); }
+.ring-fill { fill: none; stroke: #2563eb; stroke-linecap: round; }
+.ring-overlay {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.ring-num {
+  font-family: var(--font-display);
+  font-size: 34px; font-weight: 700; color: #fff;
+  font-variant-numeric: tabular-nums; line-height: 1;
+}
+.ring-caption { font-size: 12px; color: #64748b; margin-top: 2px; }
+
+.hub-rows {
+  width: 100%;
+  display: grid; gap: 10px;
+  grid-template-columns: 1fr;
+  margin-top: 22px; padding-top: 18px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.hub-row { display: flex; align-items: center; gap: 12px; }
+.hub-row-label {
+  width: 78px; flex-shrink: 0; text-align: left;
+  font-family: var(--font-body);
+  font-size: 11px; font-weight: 500; color: #94a3b8;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  transition: color 0.2s;
+}
+.hub-row-track {
+  flex: 1; height: 4px; border-radius: 999px;
+  background: rgba(255,255,255,0.08); overflow: hidden;
+}
+.hub-row-fill { display: block; height: 100%; border-radius: 999px; width: 0%; transition: width 0.5s ease, background 0.2s; }
+.hub-row-value {
+  width: 34px; flex-shrink: 0; text-align: right;
+  font-size: 11px; font-weight: 600; color: #cbd5e1;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.2s;
+}
+.hub-row-nodata .hub-row-label,
+.hub-row-nodata .hub-row-value { color: var(--text-tertiary); }
+
+/* ===== Score sparkline card ===== */
+.spark-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.spark-label {
+  font-family: var(--font-body);
+  font-size: 11px; font-weight: 600; color: #94a3b8;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.spark-caption { font-size: 11px; color: #64748b; margin-left: 8px; }
+.spark-stats { display: flex; align-items: baseline; gap: 8px; }
+.hub-spark-num {
+  font-family: var(--font-display); font-size: 20px; font-weight: 700;
+  font-variant-numeric: tabular-nums; color: #fff;
+}
+.hub-spark-unit {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.hub-spark-delta {
+  font-family: var(--font-mono); font-size: 12px; font-variant-numeric: tabular-nums;
+  color: var(--text-tertiary);
+}
+.hub-spark-delta.up { color: var(--color-accent); }
+.hub-spark-delta.down { color: #ef4444; }
+.spark-wrap { height: 56px; margin-top: 4px; }
+.hub-spark-svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.hub-spark-empty { font-size: 11px; font-style: italic; color: var(--text-tertiary); text-align: center; padding: 8px 0; }
+.card.has-data .hub-spark-empty { display: none; }
+
+/* ===== Section 2 — Daily inputs grid ===== */
+.grid-cards {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(248px, 1fr)); gap: 12px;
+  margin-bottom: 14px;
+}
+.grid-cards .card { margin-bottom: 0; }
+
+/* ----- hp-range (energy / mood / sleep sliders) ----- */
+.hp-range {
+  -webkit-appearance: none; appearance: none;
+  height: 4px; border-radius: 999px; width: 100%;
+  background: linear-gradient(
+    to right,
+    var(--ci-fill, var(--color-primary)) 0%,
+    var(--ci-fill, var(--color-primary)) var(--ci-pct, 50%),
+    rgba(255,255,255,0.12) var(--ci-pct, 50%),
+    rgba(255,255,255,0.12) 100%
+  );
+  outline: none; cursor: pointer;
+}
+.hp-range::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+  background: #2563eb; border: 2px solid #050506;
+  box-shadow: 0 0 0 1px rgba(37,99,235,0.5);
+}
+.hp-range::-moz-range-thumb {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #2563eb; border: 2px solid #050506;
+  box-shadow: 0 0 0 1px rgba(37,99,235,0.5);
+}
+.hp-range--emerald::-webkit-slider-thumb { background: #10b981; box-shadow: 0 0 0 1px rgba(16,185,129,0.5); }
+.hp-range--emerald::-moz-range-thumb { background: #10b981; box-shadow: 0 0 0 1px rgba(16,185,129,0.5); }
+
+/* ----- Water card ----- */
+.hub-water-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 14px; }
+.hub-water-num {
+  font-family: var(--font-display);
+  font-size: 32px; font-weight: 700;
+  line-height: 1; font-variant-numeric: tabular-nums; color: #fff;
+}
+.hub-water-target { font-size: 14px; color: #64748b; font-weight: 500; }
+.water-unit-word { font-size: 14px; color: #64748b; font-weight: 500; text-transform: lowercase; }
+.hub-water-bar-wrap { position: relative; margin: 0 0 8px; }
+.hub-water-bar-track {
+  position: relative; height: 6px; border-radius: 999px;
+  background: rgba(255,255,255,0.08); overflow: hidden;
+}
+.hub-water-bar-fill {
+  position: absolute; top: 0; bottom: 0; left: 0;
+  border-radius: 999px;
+  background: #2563eb;
+  transition: width 0.4s ease;
+}
+.hub-water-bar-fill.over { background: var(--color-accent); }
+.hub-water-bar-zone { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,0.18); }
+.hub-water-bar-labels {
+  display: flex; justify-content: space-between; margin-top: 6px;
+  font-size: 10px; color: var(--text-tertiary); font-family: var(--font-mono);
+}
+.hub-water-zone-name { color: var(--color-accent); font-weight: 700; letter-spacing: 0.08em; text-transform: lowercase; }
+.hub-water-actions { display: grid; grid-template-columns: 38px 1fr 38px; gap: 8px; align-items: center; margin-top: 12px; }
+.hub-water-minus-btn {
+  width: 38px; height: 38px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px;
+  color: #f1f5f9; font-size: 18px; font-weight: 700; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.hub-water-minus-btn:hover { background: rgba(255,255,255,0.10); }
+.hub-water-minus-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.hub-water-plus-btn {
+  width: 38px; height: 38px;
+  background: rgba(37,99,235,0.16); border: 1px solid rgba(37,99,235,0.4); border-radius: 10px;
+  color: #60a5fa; font-size: 18px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.hub-water-plus-btn:active { transform: scale(0.96); }
+.hub-water-helper { font-size: 11px; color: #64748b; margin-top: 10px; }
+.hub-water-helper.good { color: var(--color-accent); }
+.hub-water-spark-svg { width: 100%; height: 36px; display: block; margin-top: 12px; }
+.hub-spark-bar { fill: var(--color-accent); }
+.hub-spark-bar.miss { fill: rgba(239,68,68,0.35); }
+.hub-spark-target { stroke: rgba(255,255,255,0.20); stroke-width: 1; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
+
+/* ----- Sleep card ----- */
+.hub-sleep-badge {
+  font-size: 10px; font-weight: 600;
+  padding: 4px 9px; border-radius: 999px;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  background: rgba(255,255,255,0.06); color: var(--text-tertiary);
+}
+.hub-sleep-value-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 10px; }
+.hp-sleep-num {
+  font-family: var(--font-display); font-size: 32px; font-weight: 700; color: #fff;
+  font-variant-numeric: tabular-nums; line-height: 1;
+}
+.hub-sleep-unit { font-size: 14px; color: #64748b; }
+.hub-sleep-input { width: 100%; margin: 10px 0 8px; }
+.hub-sleep-hint, .hp-scale-labels {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: #64748b; font-family: var(--font-mono);
+}
+
+/* ===== Section 3 — Check-in ===== */
+.mood-card { margin-bottom: 26px; }
+.mood-title {
+  font-family: var(--font-body);
+  font-size: 11px; font-weight: 600; color: #94a3b8;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  margin-bottom: 16px;
+}
+.mood-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px 26px;
+}
+.hub-ci-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+.hub-ci-label { font-size: 12px; color: #cbd5e1; }
+.hub-ci-val {
+  font-family: var(--font-display); font-size: 15px; font-weight: 700;
+  color: #2563eb;
+}
+.hub-ci-val.emerald { color: #10b981; }
+.hub-ci-footer { margin-top: 10px; min-height: 16px; }
+.hub-ci-logged { font-size: 11px; color: var(--text-tertiary); font-style: italic; }
+
+/* ===== History grid (score sparkline + body weight) ===== */
+.history-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(248px, 1fr)); gap: 12px;
+}
+.history-grid .card { margin-bottom: 0; }
+.hp-wt-num-row { display: flex; align-items: baseline; gap: 6px; margin-top: 12px; }
+.hp-wt-num {
+  font-family: var(--font-display); font-size: 28px; font-weight: 700; color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+.hub-wt-unit { font-size: 12px; color: #64748b; }
+.hub-wt-delta { font-size: 12px; color: #cbd5e1; font-variant-numeric: tabular-nums; margin-top: 6px; }
+.hub-wt-svg { width: 100%; height: 56px; display: block; overflow: visible; color: #2563eb; margin-top: 10px; }
+.hub-wt-empty { font-size: 11px; font-style: italic; color: var(--text-tertiary); text-align: center; padding: 6px 0; }
+.card.has-data .hub-wt-empty { display: none; }
+
+/* ===== Daily Stack ===== */
+.stack-card { margin-bottom: 26px; }
+
+.stack-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.stack-head-text { font-size: 12px; color: #94a3b8; }
+.stack-head-pct {
+  font-family: var(--font-display); font-size: 13px; font-weight: 700; color: #cbd5e1;
 }
 .stack-progress-track {
-  height: 5px;
-  background: rgba(255, 255, 255, 0.05);
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 999px; overflow: hidden;
-  margin: 14px 0 18px;
+  margin: 0 0 18px;
 }
 .stack-progress-fill {
   height: 100%; width: 0%;
-  background: #FFFFFF; border-radius: 999px;
-  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  background: #2563eb; border-radius: 999px;
+  transition: width 0.5s ease;
 }
 
 .stack-window { margin-bottom: 14px; }
 .stack-window-header {
   display: flex; align-items: center; gap: 8px;
-  margin-bottom: 8px; padding-bottom: 6px;
-  border-bottom: 1px solid var(--border-soft);
+  margin-bottom: 4px;
 }
 .stack-window-icon { font-size: 16px; }
-.stack-window-title { font-size: 13px; font-weight: 700; color: var(--text-primary); }
-.stack-window-time { font-size: 11px; color: var(--text-tertiary); font-weight: 500; }
+.stack-window-title { font-size: 11px; font-weight: 600; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.06em; }
+.stack-window-time { font-size: 11px; color: #64748b; margin-left: auto; }
 
 .stack-item {
-  display: grid;
-  grid-template-columns: 32px 1fr auto auto;
-  gap: 10px;
+  display: flex;
   align-items: center;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: var(--bg-secondary);
-  margin-bottom: 6px;
-  border: 1px solid transparent;
-  transition: background 0.2s, border-color 0.2s;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  cursor: pointer;
 }
-.stack-item:hover { background: rgba(255,255,255,0.05); }
-.stack-item.taken { background: rgba(29,158,117,0.08); }
-.stack-item.taken .stack-item-name { text-decoration: line-through; color: var(--text-tertiary); }
+.stack-item.taken .stack-item-name-text { text-decoration: line-through; color: #64748b; }
+.stack-item:not(.taken) .stack-item-name-text { color: #f1f5f9; }
 
 @keyframes pulse-red {
   0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
   50%      { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
 }
-.stack-item.missed {
-  border: 1px solid rgba(239, 68, 68, 0.45);
-  animation: pulse-red 1.5s ease-in-out infinite;
-}
-.stack-item.missed .stack-check { border-color: rgba(239, 68, 68, 0.55); }
-.stack-item.taken.missed { animation: none; border-color: transparent; }
-.stack-item.taken.missed .stack-check { border-color: var(--accent); }
+.stack-item.missed .stack-check { border-color: rgba(239, 68, 68, 0.55); animation: pulse-red 1.5s ease-in-out infinite; }
+.stack-item.taken.missed .stack-check { animation: none; border-color: var(--color-accent); }
 
 .stack-check {
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  border: 2px solid var(--border-strong);
-  background: var(--bg-card);
+  width: 20px; height: 20px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: transparent;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  font-size: 14px; color: transparent;
+  font-size: 13px; font-weight: 700; line-height: 1; color: transparent;
   transition: all 0.2s;
   flex-shrink: 0; font-family: inherit; padding: 0;
 }
-.stack-check:hover { border-color: var(--accent); }
 .stack-check.checked {
-  background: var(--accent); border-color: var(--accent);
-  color: white;
-  box-shadow: 0 0 12px var(--accent-glow);
+  border-color: #10b981; background: rgba(16,185,129,0.15);
+  color: #10b981;
 }
 
-.stack-item-body { min-width: 0; }
+.stack-item-body { min-width: 0; flex: 1; }
 .stack-item-name {
-  font-size: 14px; font-weight: 600;
-  color: var(--text-primary);
+  font-size: 14px; font-weight: 500;
   line-height: 1.2;
   display: inline-flex; align-items: center;
   gap: 8px; flex-wrap: wrap;
@@ -249,8 +477,8 @@ main {
   outline-offset: 4px; border-radius: 4px;
 }
 .stack-item-meta {
-  font-size: 11px; color: var(--text-tertiary);
-  margin-top: 2px; outline: none; cursor: text;
+  font-size: 12px; color: #64748b;
+  margin-left: auto; outline: none; cursor: text; text-align: right;
 }
 .stack-item-meta[contenteditable="true"] {
   outline: 1px solid rgba(255,255,255,0.2);
@@ -275,7 +503,7 @@ main {
 
 .stack-low-btn {
   background: transparent;
-  border: 1px solid var(--border-strong);
+  border: 1px solid rgba(255,255,255,0.12);
   color: var(--text-tertiary);
   font-size: 10px;
   padding: 5px 9px; border-radius: 6px;
@@ -283,7 +511,7 @@ main {
   font-family: var(--font-mono);
   font-weight: 600; letter-spacing: 0.04em;
   white-space: nowrap;
-  display: inline-flex; align-items: center; gap: 4px;
+  flex-shrink: 0;
   transition: all 0.15s;
 }
 .stack-low-btn:hover { border-color: rgba(163,45,45,0.4); color: var(--warning); }
@@ -295,21 +523,22 @@ main {
 
 .stack-item-del {
   background: transparent;
-  border: 1px solid var(--border-strong);
+  border: 1px solid rgba(255,255,255,0.12);
   color: var(--text-tertiary);
   cursor: pointer;
-  font-size: 16px;
-  padding: 4px 10px; border-radius: 6px;
-  opacity: 0.7;
+  font-size: 15px;
+  padding: 3px 9px; border-radius: 6px;
+  opacity: 0.6;
+  flex-shrink: 0;
   transition: opacity 0.15s, color 0.15s, border-color 0.15s, background 0.15s;
   font-family: inherit;
   line-height: 1;
-  min-width: 28px; min-height: 28px;
+  min-width: 26px; min-height: 26px;
   display: inline-flex; align-items: center; justify-content: center;
 }
 .stack-item:hover .stack-item-del { opacity: 1; }
 .stack-item-del:hover, .stack-item-del:active {
-  color: #FF6B6B;
+  color: #ef4444;
   border-color: rgba(239, 68, 68, 0.45);
   background: rgba(239, 68, 68, 0.08);
   opacity: 1;
@@ -319,7 +548,7 @@ main {
   font-size: 12px;
   color: var(--text-quaternary);
   font-style: italic;
-  padding: 8px 12px;
+  padding: 8px 0;
 }
 
 /* ====== TICKER — cycles missed + running low every 5s ====== */
@@ -330,7 +559,7 @@ main {
   padding: 10px 14px;
   margin-bottom: 14px;
   background: rgba(0, 0, 0, 0.28);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 10px;
   font-size: 12px;
   min-height: 36px;
@@ -338,13 +567,13 @@ main {
 .stack-ticker-dot {
   width: 8px; height: 8px;
   border-radius: 50%;
-  background: #6BE3A4;
+  background: #10b981;
   flex-shrink: 0;
   transition: background 0.3s;
 }
-.stack-ticker.status-low .stack-ticker-dot { background: #FF8A4D; }
+.stack-ticker.status-low .stack-ticker-dot { background: #f59e0b; }
 .stack-ticker.status-missed .stack-ticker-dot {
-  background: #FF6B6B;
+  background: #ef4444;
   animation: ticker-pulse 1.5s ease-in-out infinite;
 }
 @keyframes ticker-pulse {
@@ -365,7 +594,7 @@ main {
   flex: 1;
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #f1f5f9;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -383,7 +612,7 @@ main {
 .stack-add-wrap {
   margin-top: 16px;
   padding-top: 14px;
-  border-top: 1px solid var(--border-soft);
+  border-top: 1px solid rgba(255,255,255,0.06);
 }
 .stack-add-label { margin-bottom: 10px; }
 .stack-add-row {
@@ -396,17 +625,17 @@ main {
   font-size: 13px;
   padding: 9px 11px;
   border-radius: 10px;
-  border: 1px solid var(--border-strong);
-  background: var(--bg-input);
-  color: var(--text-primary);
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.28);
+  color: #f1f5f9;
   font-family: inherit;
   transition: border-color 0.18s, background 0.18s;
 }
 .stack-input::placeholder { color: var(--text-tertiary); }
 .stack-input:focus {
   outline: none;
-  border-color: rgba(255, 255, 255, 0.40);
-  background: var(--bg-input-focus);
+  border-color: rgba(37,99,235,0.5);
+  background: rgba(0,0,0,0.36);
 }
 .stack-select { cursor: pointer; }
 .stack-add-btn {
@@ -487,11 +716,159 @@ main {
   color: var(--text-quaternary);
 }
 
+/* ===== Water settings modal (ported from po-water.html) ===== */
+.modal-bg {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65); backdrop-filter: blur(6px);
+  z-index: 100; align-items: center; justify-content: center; padding: 20px;
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
+  padding-top: max(20px, env(safe-area-inset-top));
+}
+.modal-bg.show { display: flex; }
+.modal {
+  width: 100%; max-width: 480px;
+  background: var(--bg-dropdown);
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  padding: 22px; max-height: calc(88vh - env(safe-area-inset-bottom)); overflow-y: auto;
+}
+.modal h3 { margin: 0 0 14px; font-size: 17px; font-weight: 700; color: var(--text-primary); }
+.set-section { margin-bottom: 22px; }
+.set-section h4 {
+  margin: 0 0 8px; font-size: 11px; font-weight: 800; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--text-tertiary);
+}
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.field label {
+  font-size: 11px; color: var(--text-tertiary); font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+.field input[type="number"], .field input[type="text"], .field select {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-family: inherit; font-size: 14px;
+  padding: 10px 12px; border-radius: 10px; outline: none;
+  -moz-appearance: textfield;
+}
+.field input[type="number"]::-webkit-outer-spin-button,
+.field input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.field input:focus, .field select:focus {
+  border-color: rgba(110,231,183,0.40);
+  box-shadow: 0 0 0 2px rgba(110,231,183,0.10);
+}
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.seg {
+  display: flex; gap: 4px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px; padding: 3px;
+}
+.seg button {
+  flex: 1; padding: 9px; border: none; background: transparent;
+  color: var(--text-tertiary); border-radius: 7px;
+  font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.seg button.active {
+  background: linear-gradient(180deg, #ffffff 0%, #e8e5dd 100%);
+  color: #0a0a0b;
+}
+.search-wrap { position: relative; }
+.search-input {
+  width: 100%; background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-primary); font-family: inherit; font-size: 14px;
+  padding: 11px 14px; border-radius: 10px; outline: none;
+}
+.search-input:focus { border-color: rgba(110,231,183,0.40); }
+.search-results {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: var(--bg-dropdown);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px; padding: 4px;
+  max-height: 240px; overflow-y: auto;
+  z-index: 5;
+  display: none;
+}
+.search-results.show { display: block; }
+.search-result {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 9px 12px; border-radius: 7px;
+  cursor: pointer; font-size: 13px;
+  -webkit-tap-highlight-color: transparent;
+}
+.search-result:hover { background: rgba(255, 255, 255, 0.05); }
+.search-result-name { color: var(--text-primary); font-weight: 600; }
+.search-result-meta { font-size: 10.5px; color: var(--text-tertiary); font-family: var(--font-mono); }
+.search-result-add { color: var(--water-good); }
+.subs-list { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.sub-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  flex-wrap: wrap;
+}
+.sub-row-info { flex: 1; min-width: 140px; }
+.sub-row-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.sub-row-meta {
+  font-size: 11px; color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums; font-family: var(--font-mono);
+  margin-top: 2px;
+}
+.sub-row-dose {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(0,0,0,0.30);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 8px;
+}
+.sub-row-dose .sub-dose-input {
+  width: 56px; background: transparent; border: none; outline: none;
+  color: var(--text-primary); font-family: inherit; font-size: 13px;
+  font-weight: 600; text-align: center;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+}
+.sub-row-dose .sub-dose-input::-webkit-outer-spin-button,
+.sub-row-dose .sub-dose-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.sub-row-dose .sub-dose-unit { font-size: 11px; color: var(--text-tertiary); font-family: var(--font-mono); white-space: nowrap; }
+.sub-row-del {
+  background: transparent; border: none; color: var(--text-quaternary);
+  font-size: 16px; cursor: pointer; padding: 4px 8px;
+  -webkit-tap-highlight-color: transparent;
+}
+.sub-row-del:hover { color: var(--water-bad); }
+.btn-primary {
+  width: 100%; padding: 13px;
+  border: none;
+  background: linear-gradient(180deg, #ffffff 0%, #e8e5dd 100%);
+  color: #0a0a0b; border-radius: 12px;
+  font-family: inherit; font-size: 14px; font-weight: 700;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 4px 14px rgba(0,0,0,0.40);
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-secondary {
+  padding: 11px 16px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
+  color: var(--text-primary); border-radius: 10px;
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-secondary:hover { background: rgba(255,255,255,0.10); }
+.modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+.modal-actions .btn-primary { flex: 1; }
+
 @media (max-width: 600px) {
-  main { padding: 40px 16px 60px; }
-  .stack-card { padding: 18px 16px 14px; }
-  .stack-item { grid-template-columns: 28px 1fr auto; gap: 8px; }
-  .stack-item .stack-low-btn { grid-column: 2 / 4; margin-top: 4px; justify-self: start; }
+  main { padding: 18px 14px 60px; padding-top: max(56px, env(safe-area-inset-top)); }
+  .card, .hero-card { padding: 16px; }
+  .hero-row { flex-wrap: wrap; }
+  .stack-item-meta { display: none; }
   .stack-add-row { grid-template-columns: 1fr 1fr; }
   .stack-add-row .stack-add-btn { grid-column: 1 / -1; }
   .stack-add-row .stack-select { grid-column: 1 / -1; }
@@ -509,388 +886,170 @@ main {
 
 <main>
 
-  <!-- ===== WHOOP card (full) ===== -->
-  <style>
-    .whoop-section { margin-bottom: 32px; }
-    .whoop-card {
-      padding: 22px 22px 18px;
-      background: rgba(255,255,255,0.025);
-      border-radius: 22px;
-      box-shadow: 0 1px 0 0 rgba(255,255,255,0.06) inset, 0 12px 40px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.25);
-    }
-    /* Disconnected */
-    .wh-brand { display:inline-flex; align-items:center; gap:8px; }
-    .wh-brand-mark { width:22px; height:22px; border-radius:50%; background:#FFF; color:#0A0A0B; font-weight:900; font-size:12px; display:inline-flex; align-items:center; justify-content:center; letter-spacing:-0.04em; box-shadow:0 0 12px rgba(255,255,255,0.20); }
-    .wh-brand-text { font-weight:800; font-size:13px; letter-spacing:0.18em; color:var(--text-primary); }
-    .wh-disc { display:flex; flex-direction:column; align-items:center; text-align:center; padding:18px 8px 8px; gap:6px; }
-    .wh-disc .wh-brand { margin-bottom:14px; }
-    .wh-disc-title { font-size:22px; font-weight:700; color:var(--text-primary); letter-spacing:-0.02em; margin-top:2px; }
-    .wh-disc-sub { font-size:13px; color:var(--text-tertiary); max-width:280px; line-height:1.5; margin-bottom:18px; }
-    .wh-connect { display:inline-flex; align-items:center; gap:8px; padding:12px 22px; border-radius:999px; border:1px solid rgba(255,255,255,0.85); background:linear-gradient(180deg, #FFF, #E8E5DD); color:#0A0A0B; font-family:inherit; font-size:13.5px; font-weight:700; cursor:pointer; box-shadow:inset 0 1px 0 rgba(255,255,255,0.55), 0 6px 20px rgba(0,0,0,0.45); transition:transform 0.12s; }
-    .wh-connect:hover { transform:translateY(-1px); }
-    /* Header */
-    .wh-head { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:18px; flex-wrap:wrap; }
-    .wh-live { display:inline-flex; align-items:center; gap:5px; font-size:9.5px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:#6BE3A4; margin-left:4px; padding:3px 8px; border-radius:999px; background:rgba(107,227,164,0.10); border:1px solid rgba(107,227,164,0.30); }
-    .wh-live-dot { width:6px; height:6px; border-radius:50%; background:#6BE3A4; box-shadow:0 0 8px rgba(107,227,164,0.65); animation:wh-pulse 1.6s ease-in-out infinite; }
-    @keyframes wh-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.85)} }
-    .wh-head-right { display:flex; align-items:center; gap:10px; }
-    .wh-updated { font-size:11px; color:var(--text-tertiary); font-family:var(--font-mono); }
-    .wh-refresh { width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); color:var(--text-secondary); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform 0.4s, background 0.18s, color 0.18s; }
-    .wh-refresh:hover { background:rgba(255,255,255,0.10); color:var(--text-primary); }
-    .wh-refresh.spin { transform:rotate(360deg); }
-    /* Ring */
-    .wh-ring-wrap { position:relative; width:240px; max-width:78%; margin:0 auto 24px; aspect-ratio:1; }
-    .wh-ring { width:100%; height:100%; transform:rotate(-90deg); filter:drop-shadow(0 0 24px rgba(255,255,255,0.05)); }
-    .wh-ring-track { fill:none; stroke:rgba(255,255,255,0.06); stroke-width:12; }
-    .wh-ring-fill { fill:none; stroke:#FFF; stroke-width:12; stroke-linecap:round; stroke-dasharray:603.19; stroke-dashoffset:603.19; transition:stroke-dashoffset 0.8s cubic-bezier(0.22,1,0.36,1), stroke 0.4s; }
-    .wh-ring-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; }
-    .wh-ring-num { font-size:60px; font-weight:700; letter-spacing:-0.04em; color:var(--text-primary); line-height:1; font-variant-numeric:tabular-nums; }
-    .wh-ring-unit { font-size:10px; font-weight:700; letter-spacing:0.22em; text-transform:uppercase; color:var(--text-tertiary); margin-top:10px; }
-    .wh-ring-label { font-size:12.5px; font-weight:600; margin-top:6px; letter-spacing:-0.005em; }
-    /* Stages */
-    .wh-stages { margin-bottom:22px; padding-top:22px; border-top:1px solid rgba(255,255,255,0.05); }
-    .wh-stages-head { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; }
-    .wh-stages-eye { font-size:10px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-tertiary); }
-    .wh-stages-meta { font-size:11px; color:var(--text-tertiary); font-family:var(--font-mono); }
-    .wh-stages-bar { display:flex; height:10px; background:rgba(255,255,255,0.04); border-radius:999px; overflow:hidden; margin-bottom:12px; border:1px solid rgba(255,255,255,0.04); }
-    .wh-stage { height:100%; transition:width 0.7s cubic-bezier(0.22,1,0.36,1); }
-    .wh-stage-rem   { background:#FFF; }
-    .wh-stage-deep  { background:#B8B6B0; }
-    .wh-stage-light { background:#76746E; }
-    .wh-stage-awake { background:#38362F; }
-    .wh-stages-legend { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
-    .wh-leg { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text-secondary); font-weight:500; }
-    .wh-leg-dot { width:8px; height:8px; border-radius:2px; flex-shrink:0; }
-    .wh-leg-dot.d-rem{background:#FFF} .wh-leg-dot.d-deep{background:#B8B6B0} .wh-leg-dot.d-light{background:#76746E} .wh-leg-dot.d-awake{background:#38362F; border:1px solid rgba(255,255,255,0.10);}
-    .wh-leg-num { margin-left:auto; color:var(--text-primary); font-weight:700; font-family:var(--font-mono); font-size:11px; }
-    @media (max-width:480px) { .wh-stages-legend { grid-template-columns:repeat(2,1fr); } }
-    /* Stats */
-    .wh-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding-top:22px; border-top:1px solid rgba(255,255,255,0.05); }
-    .wh-stat { position:relative; background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.04); border-radius:12px; padding:12px 10px; text-align:center; }
-    .wh-stat-label { font-size:10px; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.14em; font-weight:700; margin-bottom:8px; }
-    .wh-stat-val { font-size:22px; font-weight:700; color:var(--text-primary); line-height:1; font-variant-numeric:tabular-nums; letter-spacing:-0.03em; }
-    .wh-stat-sub { font-size:10px; color:var(--text-tertiary); margin-top:5px; font-family:var(--font-mono); }
-    @media (max-width:480px) { .wh-stats { grid-template-columns:repeat(2,1fr); } .wh-stat-val { font-size:20px; } }
-    /* Biomarkers */
-    .wh-bio { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px; }
-    .wh-bio-item { position:relative; background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.04); border-radius:12px; padding:11px 12px; text-align:center; }
-    .wh-bio-label { display:block; font-size:9.5px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:4px; }
-    .wh-bio-val { display:block; font-size:14px; font-weight:700; color:var(--text-primary); font-variant-numeric:tabular-nums; }
-    @media (max-width:380px) { .wh-bio { grid-template-columns:1fr; } }
-    /* Zone dot */
-    .wh-zone { position:absolute; top:9px; right:9px; width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,0.12); }
-    .wh-zone.z-good { background:#6BE3A4; box-shadow:0 0 7px rgba(107,227,164,0.55); }
-    .wh-zone.z-norm { background:rgba(255,255,255,0.30); }
-    .wh-zone.z-warn { background:#F2C063; box-shadow:0 0 7px rgba(242,192,99,0.55); }
-    .wh-zone.z-bad  { background:#FF8A8A; box-shadow:0 0 7px rgba(255,138,138,0.55); }
-    /* Legend */
-    .wh-legend { display:flex; justify-content:center; flex-wrap:wrap; gap:14px; margin-top:14px; padding:10px 12px; background:rgba(255,255,255,0.02); border-radius:999px; border:1px solid rgba(255,255,255,0.04); }
-    .wh-leg-item { display:inline-flex; align-items:center; gap:6px; font-size:10.5px; font-weight:600; color:var(--text-tertiary); }
-    .wh-leg-item .wh-zone { position:static; display:inline-block; }
-    /* Today's Call */
-    .wh-verdict { margin-top:18px; padding:16px 18px; background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.04); border-left:2px solid rgba(255,255,255,0.40); border-radius:0 12px 12px 0; }
-    .wh-verdict-head { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-    .wh-verdict-eye { font-size:10px; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:0.18em; font-weight:700; }
-    .wh-verdict-badge { font-size:9.5px; font-weight:800; padding:3px 9px; border-radius:999px; letter-spacing:0.14em; text-transform:uppercase; border:1px solid; }
-    .wh-verdict-badge.green  { color:#6BE3A4; border-color:rgba(107,227,164,0.50); background:rgba(107,227,164,0.10); }
-    .wh-verdict-badge.yellow { color:#F2C063; border-color:rgba(242,192,99,0.50); background:rgba(242,192,99,0.10); }
-    .wh-verdict-badge.red    { color:#FF8A8A; border-color:rgba(255,138,138,0.50); background:rgba(255,138,138,0.10); }
-    .wh-verdict-headline { font-size:15px; font-weight:600; color:var(--text-primary); line-height:1.4; margin-bottom:12px; }
-    .wh-verdict-reasons { font-size:12.5px; color:var(--text-secondary); line-height:1.65; }
-    /* Disconnect */
-    .wh-disconnect-link { display:block; margin:16px auto 0; padding:6px 14px; background:transparent; border:none; color:var(--text-tertiary); font-family:inherit; font-size:11px; text-align:center; cursor:pointer; letter-spacing:0.04em; }
-    .wh-disconnect-link:hover { color:var(--text-secondary); text-decoration:underline; }
-    .wh-err { background:rgba(255,107,107,0.08); border:1px solid rgba(255,107,107,0.28); color:#FF8A8A; padding:10px 12px; border-radius:10px; font-size:11.5px; font-family:var(--font-mono); margin-bottom:14px; }
-  </style>
-  <div class="whoop-section">
-    <div class="section-title">Whoop</div>
-    <div class="whoop-card">
-      <div id="whDisc" class="wh-disc">
-        <div class="wh-brand"><span class="wh-brand-mark">W</span><span class="wh-brand-text">WHOOP</span></div>
-        <div class="wh-disc-title">Not connected</div>
-        <div class="wh-disc-sub">Link your account to see live recovery, sleep, and strain.</div>
-        <button id="whConnectBtn" class="wh-connect" type="button">Connect WHOOP</button>
+  <div class="hp-pagehead">
+    <span class="eyebrow">Health</span>
+    <span class="hp-date" id="hpDateText"></span>
+  </div>
+
+  <!-- ===== Section 1: Score hero ===== -->
+  <div class="card hero-card">
+    <div class="hero-row">
+      <div class="hero-left">
+        <div class="hero-label">Daily score</div>
+        <div class="hero-score-line">
+          <span class="hero-score-num" id="hsScore">—</span><span class="hero-score-suffix">/100</span>
+        </div>
+        <div class="hub-status" id="hsStatus">
+          <span class="hub-status-dot" id="hsStatusDot"></span>
+          <span id="hsStatusText">Not enough data yet</span>
+        </div>
       </div>
-      <div id="whConn" style="display:none">
-        <div class="wh-head">
-          <div class="wh-brand"><span class="wh-brand-mark">W</span><span class="wh-brand-text">WHOOP</span><span class="wh-live"><span class="wh-live-dot"></span>live</span></div>
-          <div class="wh-head-right">
-            <span id="whUpdated" class="wh-updated">—</span>
-            <button id="whRefresh" class="wh-refresh" type="button" aria-label="Refresh"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M20.49 15A9 9 0 1 1 5.64 5.64L23 10"/></svg></button>
-          </div>
+      <div class="ring-wrap" id="hsRingWrap">
+        <svg viewBox="0 0 120 120">
+          <defs>
+            <filter id="hsRingGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="2.4" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <circle class="ring-track" cx="60" cy="60" r="52" stroke-width="7"/>
+          <circle class="ring-fill" cx="60" cy="60" r="52" stroke-width="7"
+                  id="hsRingFill" filter="url(#hsRingGlow)"
+                  transform="rotate(-90 60 60)"/>
+        </svg>
+        <div class="ring-overlay">
+          <span class="ring-num" id="hsRingNum">—</span>
+          <span class="ring-caption">out of 100</span>
         </div>
-        <div id="whErr" class="wh-err" style="display:none"></div>
-        <div class="wh-ring-wrap">
-          <svg class="wh-ring" viewBox="0 0 220 220" aria-hidden="true">
-            <circle class="wh-ring-track" cx="110" cy="110" r="96"/>
-            <circle class="wh-ring-fill" cx="110" cy="110" r="96" id="whRingFill"/>
-          </svg>
-          <div class="wh-ring-center">
-            <div id="whRecNum" class="wh-ring-num">—</div>
-            <div class="wh-ring-unit">recovery</div>
-            <div id="whRecLabel" class="wh-ring-label">—</div>
-          </div>
-        </div>
-        <div id="whStages" class="wh-stages" style="display:none">
-          <div class="wh-stages-head"><span class="wh-stages-eye">Sleep stages</span><span class="wh-stages-meta" id="whStagesMeta">—</span></div>
-          <div class="wh-stages-bar">
-            <div class="wh-stage wh-stage-rem"   id="whBarRem"   style="width:0%"></div>
-            <div class="wh-stage wh-stage-deep"  id="whBarDeep"  style="width:0%"></div>
-            <div class="wh-stage wh-stage-light" id="whBarLight" style="width:0%"></div>
-            <div class="wh-stage wh-stage-awake" id="whBarAwake" style="width:0%"></div>
-          </div>
-          <div class="wh-stages-legend">
-            <div class="wh-leg"><span class="wh-leg-dot d-rem"></span>REM<span class="wh-leg-num" id="whRem">—</span></div>
-            <div class="wh-leg"><span class="wh-leg-dot d-deep"></span>Deep<span class="wh-leg-num" id="whDeep">—</span></div>
-            <div class="wh-leg"><span class="wh-leg-dot d-light"></span>Light<span class="wh-leg-num" id="whLight">—</span></div>
-            <div class="wh-leg"><span class="wh-leg-dot d-awake"></span>Awake<span class="wh-leg-num" id="whAwake">—</span></div>
-          </div>
-        </div>
-        <div class="wh-stats">
-          <div class="wh-stat"><span class="wh-zone" id="whZoneSleep"></span><div class="wh-stat-label">Sleep</div><div class="wh-stat-val" id="whSleep">—</div><div class="wh-stat-sub" id="whSleepSub">—</div></div>
-          <div class="wh-stat"><span class="wh-zone" id="whZoneStrain"></span><div class="wh-stat-label">Strain</div><div class="wh-stat-val" id="whStrain">—</div><div class="wh-stat-sub" id="whStrainSub">today</div></div>
-          <div class="wh-stat"><span class="wh-zone" id="whZoneHrv"></span><div class="wh-stat-label">HRV</div><div class="wh-stat-val" id="whHrv">—</div><div class="wh-stat-sub">ms</div></div>
-          <div class="wh-stat"><span class="wh-zone" id="whZoneRhr"></span><div class="wh-stat-label">RHR</div><div class="wh-stat-val" id="whRhr">—</div><div class="wh-stat-sub">bpm</div></div>
-        </div>
-        <div id="whBio" class="wh-bio" style="display:none">
-          <div class="wh-bio-item"><span class="wh-zone" id="whZoneSkin"></span><span class="wh-bio-label">Skin temp</span><span class="wh-bio-val" id="whSkin">—</span></div>
-          <div class="wh-bio-item"><span class="wh-zone" id="whZoneSpo2"></span><span class="wh-bio-label">Blood O₂</span><span class="wh-bio-val" id="whSpo2">—</span></div>
-          <div class="wh-bio-item"><span class="wh-zone" id="whZoneResp"></span><span class="wh-bio-label">Resp rate</span><span class="wh-bio-val" id="whResp">—</span></div>
-        </div>
-        <div class="wh-legend">
-          <span class="wh-leg-item"><span class="wh-zone z-good"></span>Good</span>
-          <span class="wh-leg-item"><span class="wh-zone z-norm"></span>Normal</span>
-          <span class="wh-leg-item"><span class="wh-zone z-warn"></span>Watch</span>
-          <span class="wh-leg-item"><span class="wh-zone z-bad"></span>High / Low</span>
-        </div>
-        <div id="whVerdict" class="wh-verdict" style="display:none">
-          <div class="wh-verdict-head"><span class="wh-verdict-eye">Today's call</span><span id="whVerdictBadge" class="wh-verdict-badge"></span></div>
-          <div id="whVerdictHead" class="wh-verdict-headline"></div>
-          <div id="whVerdictReasons" class="wh-verdict-reasons"></div>
-        </div>
-        <button id="whDisconnectBtn" class="wh-disconnect-link" type="button">Disconnect</button>
+      </div>
+    </div>
+
+    <div class="hub-rows" id="hsRows">
+      <div class="hub-row" data-key="training">
+        <span class="hub-row-label">Training</span>
+        <div class="hub-row-track"><div class="hub-row-fill"></div></div>
+        <span class="hub-row-value">—</span>
+      </div>
+      <div class="hub-row" data-key="supplements">
+        <span class="hub-row-label">Supplements</span>
+        <div class="hub-row-track"><div class="hub-row-fill"></div></div>
+        <span class="hub-row-value">—</span>
+      </div>
+      <div class="hub-row" data-key="water">
+        <span class="hub-row-label">Water</span>
+        <div class="hub-row-track"><div class="hub-row-fill"></div></div>
+        <span class="hub-row-value">—</span>
+      </div>
+      <div class="hub-row" data-key="sleep">
+        <span class="hub-row-label">Sleep</span>
+        <div class="hub-row-track"><div class="hub-row-fill"></div></div>
+        <span class="hub-row-value">—</span>
       </div>
     </div>
   </div>
-  <script>
-  (function () {
-    const KEY = 'whoop_tokens_v1';
-    const CLIENT_ID = '3b9d1b01-31fb-4bd8-b18c-c7fa27deed2f';
-    const REDIRECT  = window.location.origin + '/api/whoop-callback';
-    const SCOPES    = 'read:recovery read:sleep read:workout read:cycles read:profile read:body_measurement offline';
 
-    function load() { try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; } }
-    function save(t) { try { localStorage.setItem(KEY, JSON.stringify(t)); } catch {} }
-    function wipe() { try { localStorage.removeItem(KEY); } catch {} }
+  <div class="card" id="hsSparkCard">
+    <div class="spark-head">
+      <div>
+        <span class="spark-label">Score</span>
+        <span class="spark-caption">last 30 days</span>
+      </div>
+      <div class="spark-stats">
+        <span class="hub-spark-num" id="hsSparkAvg">—</span><span class="hub-spark-unit">avg</span>
+        <span class="hub-spark-delta" id="hsSparkDelta"></span>
+      </div>
+    </div>
+    <div class="spark-wrap">
+      <svg class="hub-spark-svg" id="hsSparkSvg" viewBox="0 0 320 80" preserveAspectRatio="none" aria-hidden="true"></svg>
+    </div>
+    <div class="hub-spark-empty" id="hsSparkEmpty">
+      Your score history builds as you use the dashboard — check back in a few days.
+    </div>
+  </div>
 
-    if (location.hash && location.hash.indexOf('whoop_access') !== -1) {
-      const h = new URLSearchParams(location.hash.slice(1));
-      const access = h.get('whoop_access'), refresh = h.get('whoop_refresh');
-      const expires = Number(h.get('whoop_expires')) || Date.now() + 3500e3;
-      if (access) { save({ access, refresh, expires }); history.replaceState(null, '', location.pathname + location.search); }
-    }
+  <!-- ===== Section 2: Daily inputs ===== -->
+  <div class="section-eyebrow"><span class="eyebrow">Daily Inputs</span></div>
+  <div class="grid-cards">
 
-    const $ = (id) => document.getElementById(id);
-    const errEl = $('whErr');
-    function showErr(m) { errEl.textContent = m || ''; errEl.style.display = m ? 'block' : 'none'; }
+    <div class="card water-card">
+      <div class="card-head">
+        <svg class="card-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5s6 7 6 11a6 6 0 1 1-12 0c0-4 6-11 6-11Z"/></svg>
+        <span class="card-label">Water</span>
+        <button class="hub-icon-btn" id="waterSettingsBtn" type="button" aria-label="Water settings">⚙</button>
+      </div>
+      <div class="hub-water-row">
+        <span class="hub-water-num" id="waterNum">0</span>
+        <span class="hub-water-target" id="waterTarget">/ 9</span> <span class="water-unit-word" id="waterUnitLabel">bottles</span>
+      </div>
+      <div class="hub-water-actions">
+        <button class="hub-water-minus-btn" id="waterMinusBtn" type="button" aria-label="Undo last">−</button>
+        <div class="water-bar-col">
+          <div class="hub-water-bar-wrap">
+            <div class="hub-water-bar-track">
+              <div class="hub-water-bar-fill" id="waterBarFill" style="width:0%"></div>
+              <div class="hub-water-bar-zone" id="waterBarZoneStart" style="left:55%"></div>
+              <div class="hub-water-bar-zone" id="waterBarZoneEnd" style="left:80%"></div>
+            </div>
+            <div class="hub-water-bar-labels">
+              <span id="waterBarMin">0</span>
+              <span class="hub-water-zone-name">healthy zone</span>
+              <span id="waterBarMax">12+</span>
+            </div>
+          </div>
+        </div>
+        <button class="hub-water-plus-btn" id="waterPlusBtn" type="button" aria-label="Log a drink">
+          <span class="sr-only" id="waterPlusLabel">Drank a bottle</span><span aria-hidden="true">+</span>
+        </button>
+      </div>
+      <div class="hub-water-helper" id="waterHelper">Start the day — first one in.</div>
+      <svg class="hub-water-spark-svg" id="waterSparkSvg" viewBox="0 0 280 40" preserveAspectRatio="none" aria-hidden="true"></svg>
+    </div>
 
-    $('whConnectBtn').addEventListener('click', () => {
-      const url = 'https://api.prod.whoop.com/oauth/oauth2/auth'
-        + '?client_id='     + encodeURIComponent(CLIENT_ID)
-        + '&redirect_uri='  + encodeURIComponent(REDIRECT)
-        + '&response_type=code'
-        + '&scope='         + encodeURIComponent(SCOPES)
-        + '&state='         + Math.random().toString(36).slice(2);
-      location.href = url;
-    });
-    $('whDisconnectBtn').addEventListener('click', () => { wipe(); render(); });
-    $('whRefresh').addEventListener('click', async (e) => {
-      const btn = e.currentTarget; btn.classList.add('spin');
-      try { await loadData(); } finally { setTimeout(() => btn.classList.remove('spin'), 600); }
-    });
+    <div class="card sleep-card">
+      <div class="card-head">
+        <svg class="card-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"/></svg>
+        <span class="card-label">Sleep</span>
+        <span class="hub-sleep-badge" id="hsSleepBadge" style="margin-left:auto">—</span>
+      </div>
+      <div class="hub-sleep-value-row">
+        <span class="hp-sleep-num" id="hsSleepNum">—</span><span class="hub-sleep-unit">hrs</span>
+      </div>
+      <input class="hub-sleep-input hp-range" id="hsSleepInput" type="range" min="0" max="10" step="0.1" value="">
+      <div class="hp-scale-labels">
+        <span>0h</span><span id="hsSleepTargetLabel">target 8h</span><span>10h</span>
+      </div>
+    </div>
 
-    async function refreshTok(t) {
-      if (!t.refresh) return null;
-      try {
-        const r = await fetch('/api/whoop-refresh', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ refresh_token: t.refresh }) });
-        const j = await r.json();
-        if (j.access_token) {
-          const next = { access: j.access_token, refresh: j.refresh_token || t.refresh, expires: Date.now() + (j.expires_in||3500)*1000 };
-          save(next); return next;
-        }
-      } catch {}
-      return null;
-    }
-    async function whFetch(path, t) {
-      const [p, qs] = path.split('?');
-      const params = new URLSearchParams(qs || ''); params.set('path', p);
-      const r = await fetch('/api/whoop-data?' + params.toString(), { headers: { 'Authorization': 'Bearer ' + t.access, 'Accept':'application/json' } });
-      if (r.status === 401) { const n = await refreshTok(t); if (n) return whFetch(path, n); throw new Error('unauthorized — reconnect'); }
-      if (!r.ok) throw new Error('WHOOP ' + r.status + ': ' + (await r.text()));
-      return await r.json();
-    }
+  </div>
 
-    function fmtMins(ms) { const m = Math.round(ms/60000); const h = Math.floor(m/60); return h + 'h ' + String(m%60).padStart(2,'0') + 'm'; }
-    function fmtMinsShort(ms) { const m = Math.round(ms/60000); const h = Math.floor(m/60); return (h>0?h+'h ':'') + (m%60)+'m'; }
-    function zone(el, c) { el.className = 'wh-zone'; if (c) el.classList.add('z-' + c); }
-    function recoveryZone(v) { if (v == null) return null; if (v >= 67) return 'good'; if (v >= 34) return 'warn'; return 'bad'; }
-    function sleepZone(p) { if (p == null) return null; if (p >= 85) return 'good'; if (p >= 70) return 'norm'; return 'warn'; }
-    function strainZone(s) { if (s == null) return null; if (s < 6) return 'norm'; if (s < 14) return 'good'; if (s < 18) return 'warn'; return 'bad'; }
-    function hrvZone(h) { if (h == null) return null; if (h >= 60) return 'good'; if (h >= 40) return 'norm'; return 'warn'; }
-    function rhrZone(r) { if (r == null) return null; if (r <= 55) return 'good'; if (r <= 70) return 'norm'; return 'warn'; }
-    function tempZone(t) { if (t == null) return null; if (t >= 32.5 && t <= 34) return 'good'; if (t >= 31 && t <= 35) return 'norm'; return 'warn'; }
-    function spo2Zone(s) { if (s == null) return null; if (s >= 95) return 'good'; if (s >= 92) return 'norm'; if (s >= 88) return 'warn'; return 'bad'; }
-    function respZone(r) { if (r == null) return null; if (r >= 12 && r <= 18) return 'good'; if (r >= 10 && r <= 22) return 'norm'; return 'warn'; }
+  <!-- ===== Section 3: Mood & Energy check-in ===== -->
+  <div class="card mood-card">
+    <div class="mood-title">How are you feeling?</div>
+    <div class="mood-grid">
+      <div>
+        <div class="hub-ci-head">
+          <span class="hub-ci-label">Energy</span>
+          <span class="hub-ci-val" id="ciEnergyValWrap"><span id="ciEnergyVal">3</span>/10</span>
+        </div>
+        <input class="hub-ci-slider hp-range" id="ciEnergySlider" type="range" min="1" max="10" step="1" value="3">
+      </div>
+      <div>
+        <div class="hub-ci-head">
+          <span class="hub-ci-label">Mood</span>
+          <span class="hub-ci-val emerald" id="ciMoodValWrap"><span id="ciMoodVal">3</span>/10</span>
+        </div>
+        <input class="hub-ci-slider hp-range hp-range--emerald" id="ciMoodSlider" type="range" min="1" max="10" step="1" value="3">
+      </div>
+    </div>
+    <div class="hub-ci-footer">
+      <span class="hub-ci-logged" id="ciLogged"></span>
+    </div>
+  </div>
 
-    function ringStroke(score) {
-      // green > yellow > red
-      if (score >= 67) return '#6BE3A4';
-      if (score >= 34) return '#F2C063';
-      return '#FF8A8A';
-    }
-    function recoveryLabel(score) {
-      if (score >= 67) return 'Go hard today';
-      if (score >= 34) return 'Moderate — listen to body';
-      return 'Recover today';
-    }
+  <!-- ===== Section 4: Daily Stack ===== -->
+  <div class="section-eyebrow"><span class="eyebrow">Daily Stack</span></div>
 
-    function verdict(rec, strain, sleepPerf) {
-      if (rec == null) return null;
-      let cls = 'green', badge = 'GREEN', headline = 'Push hard today. Body\'s primed — go for the PR, do the harder workout, take on the heavy task.';
-      if (rec < 67 && rec >= 34) { cls = 'yellow'; badge = 'YELLOW'; headline = 'Moderate day. Train, but don\'t max out. Stick to planned volume, skip the max effort sets.'; }
-      else if (rec < 34) { cls = 'red'; badge = 'RED'; headline = 'Recover. Body is asking for rest — light movement, walk, mobility, sleep early.'; }
-      return { cls, badge, headline };
-    }
-
-    async function loadData() {
-      let t = load(); if (!t) return;
-      if (t.expires && Date.now() > t.expires - 60000) { const n = await refreshTok(t); if (n) t = n; }
-      showErr('');
-      try {
-        const [rec, sleep, cycle] = await Promise.all([
-          whFetch('/recovery?limit=1', t).catch((e)=>{console.error('[whoop] recovery', e.message); return null;}),
-          whFetch('/activity/sleep?limit=1', t).catch((e)=>{console.error('[whoop] sleep', e.message); return null;}),
-          whFetch('/cycle?limit=1', t).catch((e)=>{console.error('[whoop] cycle', e.message); return null;}),
-        ]);
-
-        let recScore = null, hrv = null, rhr = null, skin = null, spo2 = null;
-        const r0 = rec && rec.records && rec.records[0];
-        if (r0 && r0.score) {
-          recScore = Math.round(r0.score.recovery_score || 0);
-          hrv = r0.score.hrv_rmssd_milli != null ? Math.round(r0.score.hrv_rmssd_milli) : null;
-          rhr = r0.score.resting_heart_rate != null ? Math.round(r0.score.resting_heart_rate) : null;
-          skin = r0.score.skin_temp_celsius != null ? r0.score.skin_temp_celsius : null;
-          spo2 = r0.score.spo2_percentage != null ? r0.score.spo2_percentage : null;
-        }
-
-        // Ring
-        const fill = $('whRingFill');
-        const C = 603.19;
-        if (recScore != null) {
-          fill.style.strokeDashoffset = String(C * (1 - recScore/100));
-          fill.style.stroke = ringStroke(recScore);
-          $('whRecNum').textContent = String(recScore);
-          const labelEl = $('whRecLabel');
-          labelEl.textContent = recoveryLabel(recScore);
-          labelEl.style.color = ringStroke(recScore);
-        }
-
-        // Sleep
-        let sleepPerf = null, sleepDuration = null, resp = null;
-        const s0 = sleep && sleep.records && sleep.records[0];
-        if (s0 && s0.score) {
-          sleepPerf = Math.round(s0.score.sleep_performance_percentage || 0);
-          resp = s0.score.respiratory_rate != null ? Number(s0.score.respiratory_rate).toFixed(1) : null;
-          if (s0.score.stage_summary) {
-            const ss = s0.score.stage_summary;
-            const inBed = ss.total_in_bed_time_milli || 0;
-            const awake = ss.total_awake_time_milli || 0;
-            sleepDuration = inBed - awake;
-            const rem = ss.total_rem_sleep_time_milli || 0;
-            const deep = ss.total_slow_wave_sleep_time_milli || 0;
-            const light = ss.total_light_sleep_time_milli || 0;
-            const total = rem + deep + light + awake;
-            if (total > 0) {
-              $('whStages').style.display = '';
-              $('whBarRem').style.width   = (100*rem/total)   + '%';
-              $('whBarDeep').style.width  = (100*deep/total)  + '%';
-              $('whBarLight').style.width = (100*light/total) + '%';
-              $('whBarAwake').style.width = (100*awake/total) + '%';
-              $('whStagesMeta').textContent = fmtMins(total) + ' total';
-              $('whRem').textContent   = fmtMinsShort(rem);
-              $('whDeep').textContent  = fmtMinsShort(deep);
-              $('whLight').textContent = fmtMinsShort(light);
-              $('whAwake').textContent = fmtMinsShort(awake);
-            }
-          }
-        }
-        if (sleepPerf != null) {
-          $('whSleep').textContent = sleepPerf + '%';
-          const hrs = sleepDuration ? (sleepDuration/3.6e6).toFixed(1) + 'h' : '—';
-          $('whSleepSub').textContent = hrs;
-          zone($('whZoneSleep'), sleepZone(sleepPerf));
-        }
-
-        // Strain
-        let strain = null, kcal = null;
-        const c0 = cycle && cycle.records && cycle.records[0];
-        if (c0 && c0.score && c0.score.strain != null) {
-          strain = Number(c0.score.strain);
-          $('whStrain').textContent = strain.toFixed(1);
-          if (c0.score.kilojoule != null) {
-            kcal = Math.round(c0.score.kilojoule / 4.184);
-            $('whStrainSub').textContent = kcal + ' kcal';
-          }
-          zone($('whZoneStrain'), strainZone(strain));
-        }
-
-        if (hrv != null) { $('whHrv').textContent = String(hrv); zone($('whZoneHrv'), hrvZone(hrv)); }
-        if (rhr != null) { $('whRhr').textContent = String(rhr); zone($('whZoneRhr'), rhrZone(rhr)); }
-
-        // Biomarkers
-        const anyBio = (skin != null) || (spo2 != null) || (resp != null);
-        if (anyBio) {
-          $('whBio').style.display = '';
-          if (skin != null) { $('whSkin').textContent = Number(skin).toFixed(1) + '°C'; zone($('whZoneSkin'), tempZone(skin)); }
-          if (spo2 != null) { $('whSpo2').textContent = Number(spo2).toFixed(1) + '%'; zone($('whZoneSpo2'), spo2Zone(spo2)); }
-          if (resp != null) { $('whResp').textContent = resp + ' br/min'; zone($('whZoneResp'), respZone(Number(resp))); }
-        }
-
-        // Verdict
-        const v = verdict(recScore, strain, sleepPerf);
-        if (v) {
-          $('whVerdict').style.display = '';
-          const badge = $('whVerdictBadge');
-          badge.textContent = v.badge;
-          badge.className = 'wh-verdict-badge ' + v.cls;
-          $('whVerdictHead').textContent = v.headline;
-          const reasons = [];
-          if (sleepPerf != null) reasons.push((sleepPerf >= 80 ? '✓' : '·') + ' Sleep score ' + sleepPerf + '% — ' + (sleepPerf >= 80 ? 'you slept well.' : 'sub-par sleep.'));
-          if (strain != null)   reasons.push((strain < 14 ? '·' : '✓') + ' Strain ' + strain.toFixed(1) + ' yesterday — ' + (strain < 14 ? 'room to push today if recovery allows.' : 'high load logged.'));
-          if (hrv != null)      reasons.push((hrv >= 50 ? '✓' : '·') + ' HRV ' + hrv + 'ms — ' + (hrv >= 50 ? 'strong autonomic state.' : 'autonomic stress.'));
-          if (rhr != null)      reasons.push((rhr <= 60 ? '✓' : '·') + ' RHR ' + rhr + 'bpm — ' + (rhr <= 60 ? 'well-conditioned.' : 'elevated.'));
-          $('whVerdictReasons').innerHTML = reasons.join('<br>');
-        }
-
-        const now = new Date();
-        $('whUpdated').textContent = 'Updated ' + now.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
-      } catch (e) {
-        showErr(e.message || String(e));
-      }
-    }
-
-    function render() {
-      const t = load();
-      if (t && t.access) { $('whDisc').style.display = 'none'; $('whConn').style.display = ''; loadData(); }
-      else { $('whDisc').style.display = ''; $('whConn').style.display = 'none'; }
-    }
-    render();
-  })();
-  </script>
-
-  <div class="section-title">Daily Stack</div>
-
-  <div class="stack-card">
+  <div class="card stack-card">
     <div class="stack-ticker" id="stackTicker">
       <span class="stack-ticker-dot"></span>
       <span class="stack-ticker-label">STACK</span>
@@ -900,9 +1059,8 @@ main {
     </div>
 
     <div class="stack-head">
-      <div class="sf-eyebrow">Daily stack</div>
-      <div class="sf-title">Tap each as you take it</div>
-      <div class="stack-progress-text" id="stackProgressText">— / — taken today · resets at 6 AM</div>
+      <span class="stack-head-text" id="stackProgressText">— / — taken today · resets at 6 AM</span>
+      <span class="stack-head-pct" id="stackProgressPct"></span>
     </div>
 
     <div class="stack-progress-track">
@@ -930,14 +1088,1006 @@ main {
     </div>
   </div>
 
-  <section id="water" class="water-embed">
-    <div class="section-title">Water Tracker</div>
-    <iframe src="po-water.html" class="water-iframe" loading="lazy" title="Water Tracker"></iframe>
-  </section>
+  <!-- ===== Section 5: History ===== -->
+  <div class="section-eyebrow"><span class="eyebrow">History</span></div>
+  <div class="history-grid">
+
+    <div class="card hub-wt-card" id="hsWtCard">
+      <div class="card-head">
+        <span class="card-label">Body weight</span>
+      </div>
+      <div class="hp-wt-num-row">
+        <span class="hp-wt-num" id="hsWtNum">—</span><span class="hub-wt-unit" id="hsWtUnit">kg</span>
+      </div>
+      <div class="hub-wt-delta" id="hsWtDelta"></div>
+      <svg class="hub-wt-svg" id="hsWtSvg" viewBox="0 0 320 60" preserveAspectRatio="none" aria-hidden="true"></svg>
+      <div class="hub-wt-empty" id="hsWtEmpty">
+        Log your weight on the Fitness page — it'll show up here too.
+      </div>
+    </div>
+
+  </div>
 
   <div class="attribution">// editable template · all data stays in your browser</div>
 </main>
 
+<!-- Water settings modal -->
+<div class="modal-bg" id="setModalBg">
+  <div class="modal">
+    <h3>Water settings</h3>
+
+    <div class="set-section">
+      <h4>Profile</h4>
+      <div class="field-row">
+        <div class="field">
+          <label>Weight</label>
+          <input type="number" id="setWeight" step="0.5" min="20" max="300">
+        </div>
+        <div class="field">
+          <label>Weight unit</label>
+          <div class="seg" id="setWeightUnit">
+            <button data-u="kg">kg</button>
+            <button data-u="lb">lb</button>
+          </div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Age</label>
+          <input type="number" id="setAge" min="13" max="100">
+        </div>
+        <div class="field">
+          <label>Sex</label>
+          <div class="seg" id="setSex">
+            <button data-s="m">Male</button>
+            <button data-s="f">Female</button>
+            <button data-s="o">Other</button>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Activity (training hours per week)</label>
+        <input type="number" id="setActivity" min="0" max="40" step="0.5">
+      </div>
+    </div>
+
+    <div class="set-section">
+      <h4>Display</h4>
+      <div class="field">
+        <label>Show water as</label>
+        <div class="seg" id="setUnit">
+          <button data-u="bottle">Bottles</button>
+          <button data-u="glass">Glasses</button>
+          <button data-u="oz">oz</button>
+          <button data-u="ml">ml</button>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Bottle size (ml)</label>
+          <input type="number" id="setBottleMl" min="100" max="2000" step="50">
+        </div>
+        <div class="field">
+          <label>Glass size (ml)</label>
+          <input type="number" id="setGlassMl" min="100" max="500" step="10">
+        </div>
+      </div>
+    </div>
+
+    <div class="set-section">
+      <h4>Caffeine</h4>
+      <div class="field">
+        <label>Average caffeine per day (mg)</label>
+        <input type="number" id="setCaffeine" min="0" max="1000" step="10">
+        <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px;line-height:1.4">
+          ~1 cup of coffee = 95mg · espresso shot = 75mg · energy drink = 160mg.
+          Above 200mg/day starts to add a small water requirement.
+        </div>
+      </div>
+    </div>
+
+    <div class="set-section">
+      <h4>Stimulants &amp; meds</h4>
+      <div class="field">
+        <label>Search to add</label>
+        <div class="search-wrap">
+          <input type="text" class="search-input" id="subSearch" placeholder="Type a name (Adderall, Concerta, Lithium…)" autocomplete="off">
+          <div class="search-results" id="subResults"></div>
+        </div>
+        <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px;line-height:1.4">
+          Each substance bumps your daily water target. Includes ADHD stims,
+          diuretics, decongestants, nicotine, alcohol, and a few others.
+        </div>
+      </div>
+      <div class="subs-list" id="subsList"></div>
+    </div>
+
+    <div class="set-section">
+      <h4>Data</h4>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn-secondary" id="setExport">Export JSON</button>
+        <button class="btn-secondary" id="setImport">Import JSON</button>
+        <button class="btn-secondary" id="setReset" style="color:var(--water-bad);border-color:rgba(255,138,138,0.3)">Reset all</button>
+      </div>
+      <input type="file" id="setImportFile" accept=".json" style="display:none">
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-primary" id="setClose">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     Score + Water + Sleep + Check-in + Weight — ported from
+     score.html and po-water.html, merged into one module.
+     ============================================================ -->
+<script>
+(function () {
+  'use strict';
+
+  // ============================================================
+  // Sleep store — the seam a future Garmin sync plugs into.
+  // ============================================================
+  const SLEEP_KEY = 'po_sleep_v1';
+  function getSleepEntry(dateKey) {
+    let all = {};
+    try { all = JSON.parse(localStorage.getItem(SLEEP_KEY)) || {}; } catch (e) {}
+    return all[dateKey] || null;
+  }
+  function setSleepEntry(dateKey, hours, source) {
+    let all = {};
+    try { all = JSON.parse(localStorage.getItem(SLEEP_KEY)) || {}; } catch (e) {}
+    all[dateKey] = { hours: hours, source: source, loggedAt: Date.now() };
+    localStorage.setItem(SLEEP_KEY, JSON.stringify(all));
+    return all[dateKey];
+  }
+
+  // ============================================================
+  // Daily check-in store
+  // ============================================================
+  const CHECKIN_KEY = 'checkin:daily';
+  function getCheckin(dateKey) {
+    try { return (JSON.parse(localStorage.getItem(CHECKIN_KEY)) || {})[dateKey] || null; }
+    catch (e) { return null; }
+  }
+  function setCheckin(dateKey, energy, mood, note) {
+    let all = {};
+    try { all = JSON.parse(localStorage.getItem(CHECKIN_KEY)) || {}; } catch (e) {}
+    all[dateKey] = {
+      energy: energy,
+      mood: mood,
+      note: (note || '').trim().slice(0, 200),
+      loggedAt: Date.now()
+    };
+    localStorage.setItem(CHECKIN_KEY, JSON.stringify(all));
+  }
+
+  // ============================================================
+  // Date helpers — local-time formatter, identical across every page.
+  // ============================================================
+  function calendarDateKey(d) {
+    d = d || new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  // stack:taken:* keys roll over at 6 AM, not midnight.
+  function activeDateKey() {
+    const now = new Date();
+    if (now.getHours() < 6) now.setDate(now.getDate() - 1);
+    return calendarDateKey(now);
+  }
+
+  // ============================================================
+  // Weight — READ-ONLY consumer of the gym page's data. Never writes
+  // po_coach_weights or po_coach_v1.
+  // ============================================================
+  function getWeightEntries() {
+    try {
+      const arr = JSON.parse(localStorage.getItem('po_coach_weights')) || [];
+      return Array.isArray(arr)
+        ? arr.filter(function (e) { return e && e.dateKey && typeof e.weight === 'number'; })
+             .sort(function (a, b) { return a.dateKey.localeCompare(b.dateKey); })
+        : [];
+    } catch (e) { return []; }
+  }
+  function getWeightUnit() {
+    try { return (JSON.parse(localStorage.getItem('po_coach_v1')) || {}).units || 'kg'; }
+    catch (e) { return 'kg'; }
+  }
+
+  // ============================================================
+  // Score history
+  // ============================================================
+  const SCORE_HISTORY_KEY = 'score:history';
+  function getScoreHistory() {
+    try { return JSON.parse(localStorage.getItem(SCORE_HISTORY_KEY)) || {}; }
+    catch (e) { return {}; }
+  }
+  function recordTodayScore(score) {
+    if (score == null) return;
+    const all = getScoreHistory();
+    all[calendarDateKey()] = score;
+    localStorage.setItem(SCORE_HISTORY_KEY, JSON.stringify(all));
+  }
+
+  // ============================================================
+  // Component scores — each returns a 0-100 % or null ("no data").
+  // ============================================================
+  function getSupplementsPct() {
+    let items = [];
+    try { items = JSON.parse(localStorage.getItem('stack:items')) || []; } catch (e) {}
+    if (!Array.isArray(items) || items.length === 0) return null;
+    let taken = {};
+    try { taken = JSON.parse(localStorage.getItem('stack:taken:' + activeDateKey())) || {}; } catch (e) {}
+    const done = items.filter(function (i) { return i && taken[i.id]; }).length;
+    return Math.min(100, (done / items.length) * 100);
+  }
+
+  function defaultWaterState() {
+    return {
+      unit: 'bottle', bottleMl: 500, glassMl: 250, weightUnit: 'kg',
+      profile: { weightKg: 75, age: 25, sex: 'm', activityHrsPerWeek: 5 },
+      caffeineMgPerDay: 200, substances: [], logs: {}
+    };
+  }
+  function getWaterPct() {
+    let state = null;
+    try { state = JSON.parse(localStorage.getItem('po_water_v1')); } catch (e) {}
+    if (!state || typeof state !== 'object') state = defaultWaterState();
+    const todayKey = calendarDateKey();
+    const done = (state.logs || {})[todayKey] || 0;
+    const p = state.profile || { weightKg: 75 };
+    const wKg = state.weightUnit === 'lb' ? (p.weightKg || 0) / 2.20462 : (p.weightKg || 0);
+    const base = wKg * 35;
+    const exercise = (p.activityHrsPerWeek || 0) / 7 * 500;
+    const caffeine = Math.max(0, (state.caffeineMgPerDay || 0) - 200) * 1.5;
+    const subs = (state.substances || []).reduce(function (s, x) {
+      const dose = (x && x.dose != null ? x.dose : (x && x.defaultDose)) || 0;
+      return s + Math.max(0, dose * ((x && x.mlPerUnit) || 0));
+    }, 0);
+    let adjust = 0;
+    if (p.sex === 'm') adjust += 200;
+    if ((p.age || 0) >= 50) adjust += 100;
+    const totalMl = base + exercise + caffeine + subs + adjust;
+    let unitVol;
+    if (state.unit === 'glass') unitVol = state.glassMl || 250;
+    else if (state.unit === 'oz') unitVol = 30;
+    else if (state.unit === 'ml') unitVol = 1;
+    else unitVol = state.bottleMl || 500;
+    const target = Math.max(1, Math.ceil(totalMl / unitVol));
+    return Math.min(100, (done / target) * 100);
+  }
+
+  function getTrainingPct() {
+    let doneDays = {};
+    try { doneDays = JSON.parse(localStorage.getItem('po_coach_workout_done')) || {}; } catch (e) {}
+    if (!doneDays || Object.keys(doneDays).length === 0) return null;
+    let count = 0;
+    const base = new Date();
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(base);
+      d.setDate(base.getDate() - i);
+      if (doneDays[calendarDateKey(d)]) count++;
+    }
+    return (count / 7) * 100;
+  }
+
+  function getSleepPct() {
+    const entry = getSleepEntry(calendarDateKey());
+    if (!entry || typeof entry.hours !== 'number' || isNaN(entry.hours)) return null;
+    return Math.min(100, Math.max(0, (entry.hours / 8) * 100));
+  }
+
+  // ============================================================
+  // computeHealthScore — base weights 40/30/20/10, renormalized
+  // proportionally across whichever components have data today.
+  // ============================================================
+  const WEIGHTS = { training: 40, supplements: 30, water: 20, sleep: 10 };
+  const LABELS  = { training: 'Training', supplements: 'Supplements', water: 'Water', sleep: 'Sleep' };
+  const NO_DATA = { training: 'no data', supplements: 'no data', water: 'no data', sleep: 'not logged' };
+
+  function computeHealthScore() {
+    const parts = {
+      training:    getTrainingPct(),
+      supplements: getSupplementsPct(),
+      water:       getWaterPct(),
+      sleep:       getSleepPct()
+    };
+    let weightSum = 0, scoreSum = 0;
+    Object.keys(WEIGHTS).forEach(function (k) {
+      if (parts[k] != null) { weightSum += WEIGHTS[k]; scoreSum += WEIGHTS[k] * parts[k]; }
+    });
+    const score = weightSum > 0 ? Math.round(scoreSum / weightSum) : null;
+    return { score: score, parts: parts };
+  }
+
+  function scoreColor(score) {
+    if (score >= 75) return 'var(--score-success)';
+    if (score >= 50) return 'var(--score-warning)';
+    return 'var(--score-danger)';
+  }
+  function statusInfo(score) {
+    if (score == null) return { color: 'var(--text-tertiary)', text: 'Not enough data yet' };
+    if (score >= 75) return { color: 'var(--score-success)', text: 'Strong day' };
+    if (score >= 50) return { color: 'var(--score-warning)', text: 'On track' };
+    return { color: 'var(--score-danger)', text: 'Needs attention' };
+  }
+
+  // ============================================================
+  // Ring + bars presentation
+  // ============================================================
+  const RING_R = 52;
+  const RING_C = 2 * Math.PI * RING_R;
+  const ringFillEl = document.getElementById('hsRingFill');
+  ringFillEl.setAttribute('stroke-dasharray', RING_C);
+  ringFillEl.setAttribute('stroke-dashoffset', RING_C);
+
+  let firstRender = true;
+
+  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+  function animate(durationMs, onFrame) {
+    const start = performance.now();
+    function step(now) {
+      const t = Math.min(1, (now - start) / durationMs);
+      onFrame(easeOutCubic(t));
+      if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  function setRingPct(pct) {
+    ringFillEl.setAttribute('stroke-dashoffset', RING_C * (1 - pct / 100));
+  }
+  function setRowPct(fillEl, pct) {
+    fillEl.style.width = pct + '%';
+  }
+
+  function render() {
+    const result = computeHealthScore();
+    const score = result.score;
+    const ringTargetPct = score == null ? 0 : score;
+    const ringColor = score == null ? 'var(--text-tertiary)' : scoreColor(score);
+
+    const scoreEl = document.getElementById('hsScore');
+    scoreEl.textContent = score == null ? '—' : String(score);
+    scoreEl.style.color = ringColor;
+    ringFillEl.style.stroke = ringColor;
+
+    const info = statusInfo(score);
+    document.getElementById('hsStatusDot').style.background = info.color;
+    document.getElementById('hsStatusText').textContent = info.text;
+    document.getElementById('hsStatusText').style.color = info.color;
+
+    if (firstRender) animate(500, function (t) { setRingPct(ringTargetPct * t); });
+    else setRingPct(ringTargetPct);
+
+    Object.keys(LABELS).forEach(function (k) {
+      const rowEl = document.querySelector('.hub-row[data-key="' + k + '"]');
+      const fillEl = rowEl.querySelector('.hub-row-fill');
+      const valueEl = rowEl.querySelector('.hub-row-value');
+      const v = result.parts[k];
+
+      if (v == null) {
+        rowEl.classList.add('hub-row-nodata');
+        fillEl.style.width = '0%';
+        valueEl.textContent = NO_DATA[k];
+        return;
+      }
+      rowEl.classList.remove('hub-row-nodata');
+      const pct = Math.round(v);
+      valueEl.textContent = pct + '%';
+      fillEl.style.background = scoreColor(v);
+      if (firstRender) animate(500, function (t) { setRowPct(fillEl, pct * t); });
+      else setRowPct(fillEl, pct);
+    });
+
+    recordTodayScore(score);
+    updateSleepBadge();
+    renderSparkline();
+    renderWeight();
+    ciLoad();
+    firstRender = false;
+  }
+
+  // Sleep quality badge — direct hour thresholds (distinct from getSleepPct's
+  // normalized % used only for the ring/bars above).
+  function sleepQualityInfo(hours) {
+    if (hours == null || isNaN(hours)) return { label: '—', color: 'var(--text-tertiary)' };
+    if (hours >= 7) return { label: 'Good', color: 'var(--score-success)' };
+    if (hours >= 6) return { label: 'Fair', color: 'var(--score-warning)' };
+    return { label: 'Low', color: 'var(--score-danger)' };
+  }
+  function updateSleepBadge() {
+    const entry = getSleepEntry(calendarDateKey());
+    const hours = (entry && typeof entry.hours === 'number') ? entry.hours : null;
+    const info = sleepQualityInfo(hours);
+    const badgeEl = document.getElementById('hsSleepBadge');
+    badgeEl.textContent = info.label;
+    badgeEl.style.color = info.color;
+  }
+
+  // 30-day history sparkline — reads score:history, purely presentational.
+  function renderSparkline() {
+    const history = getScoreHistory();
+    const days = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const key = calendarDateKey(d);
+      days.push({ dateKey: key, score: Object.prototype.hasOwnProperty.call(history, key) ? history[key] : null });
+    }
+    const scored = days.filter(function (d) { return d.score != null; });
+
+    const card = document.getElementById('hsSparkCard');
+    const svg = document.getElementById('hsSparkSvg');
+    const avgEl = document.getElementById('hsSparkAvg');
+    const deltaEl = document.getElementById('hsSparkDelta');
+
+    if (scored.length < 2) {
+      card.classList.remove('has-data');
+      svg.style.display = 'none';
+      svg.innerHTML = '';
+      avgEl.textContent = '—';
+      deltaEl.textContent = '';
+      deltaEl.classList.remove('up', 'down');
+      return;
+    }
+
+    card.classList.add('has-data');
+    svg.style.display = '';
+
+    const n = scored.length;
+    const x0 = 8, x1 = 312, y0 = 68, y1 = 10;
+    const points = scored.map(function (d, i) {
+      const x = x0 + (x1 - x0) * (i / (n - 1));
+      const pct = Math.min(100, Math.max(0, d.score));
+      const y = y0 - (y0 - y1) * (pct / 100);
+      return [x, y];
+    });
+
+    const latest = scored[scored.length - 1].score;
+    const color = scoreColor(latest);
+    const polyStr = points.map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' ');
+    const last = points[points.length - 1];
+
+    svg.innerHTML =
+      '<polyline points="' + polyStr + '" fill="none" style="stroke:' + color + '" stroke-width="2" vector-effect="non-scaling-stroke" />' +
+      '<circle cx="' + last[0].toFixed(1) + '" cy="' + last[1].toFixed(1) + '" r="3" style="fill:' + color + '" />';
+
+    avgEl.textContent = String(Math.round(scored.reduce(function (s, d) { return s + d.score; }, 0) / n));
+
+    const delta = latest - scored[0].score;
+    deltaEl.classList.remove('up', 'down');
+    if (delta > 0) { deltaEl.textContent = '▲ +' + delta; deltaEl.classList.add('up'); }
+    else if (delta < 0) { deltaEl.textContent = '▼ −' + Math.abs(delta); deltaEl.classList.add('down'); }
+    else { deltaEl.textContent = '· 0'; }
+  }
+
+  // Body weight card — READ-ONLY, never writes po_coach_weights/po_coach_v1.
+  // Delta is shown against ~30 days ago, per this page's spec.
+  function renderWeight() {
+    const entries = getWeightEntries();
+    const unit = getWeightUnit();
+    const card = document.getElementById('hsWtCard');
+    const svg = document.getElementById('hsWtSvg');
+    const numEl = document.getElementById('hsWtNum');
+    const unitEl = document.getElementById('hsWtUnit');
+    const deltaEl = document.getElementById('hsWtDelta');
+
+    unitEl.textContent = unit;
+
+    if (entries.length === 0) {
+      card.classList.remove('has-data');
+      svg.innerHTML = '';
+      numEl.textContent = '—';
+      deltaEl.textContent = '';
+      return;
+    }
+
+    card.classList.add('has-data');
+    const latest = entries[entries.length - 1];
+    numEl.textContent = latest.weight.toFixed(1);
+
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const thirtyDaysAgoKey = calendarDateKey(thirtyDaysAgo);
+    const baseline = entries.find(function (e) { return e.dateKey >= thirtyDaysAgoKey; }) || entries[0];
+    const diff = latest.weight - baseline.weight;
+    if (Math.abs(diff) < 0.05) {
+      deltaEl.textContent = '';
+    } else {
+      deltaEl.textContent = (diff > 0 ? '↑ +' : '↓ −') + Math.abs(diff).toFixed(1) + ' ' + unit + ' · 30d';
+    }
+
+    const recent = entries.slice(-30);
+    const x0 = 8, x1 = 312, yTop = 10, yBottom = 50;
+
+    if (recent.length === 1) {
+      svg.innerHTML = '<circle cx="' + x1.toFixed(1) + '" cy="' + ((yTop + yBottom) / 2).toFixed(1) + '" r="3" style="fill:currentColor" />';
+      return;
+    }
+
+    const weights = recent.map(function (e) { return e.weight; });
+    let min = Math.min.apply(null, weights);
+    let max = Math.max.apply(null, weights);
+    if (max - min < 0.01) { min -= 0.5; max += 0.5; }
+
+    const n = recent.length;
+    const points = recent.map(function (e, i) {
+      const x = x0 + (x1 - x0) * (i / (n - 1));
+      const y = yBottom - (yBottom - yTop) * ((e.weight - min) / (max - min));
+      return [x, y];
+    });
+    const polyStr = points.map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' ');
+    const last = points[points.length - 1];
+
+    svg.innerHTML =
+      '<polyline points="' + polyStr + '" fill="none" style="stroke:currentColor" stroke-width="2" vector-effect="non-scaling-stroke" />' +
+      '<circle cx="' + last[0].toFixed(1) + '" cy="' + last[1].toFixed(1) + '" r="3" style="fill:currentColor" />';
+  }
+
+  // ============================================================
+  // Sleep input — auto-saves on blur/Enter via setSleepEntry.
+  // ============================================================
+  function loadSleepInput() {
+    const entry = getSleepEntry(calendarDateKey());
+    const input = document.getElementById('hsSleepInput');
+    input.value = (entry && typeof entry.hours === 'number') ? entry.hours : '';
+    updateSleepBadge();
+  }
+  function saveSleepInput() {
+    const input = document.getElementById('hsSleepInput');
+    const v = parseFloat(input.value);
+    if (isNaN(v) || v < 0 || v > 24) return;
+    setSleepEntry(calendarDateKey(), v, 'manual');
+    render();
+  }
+  const sleepInput = document.getElementById('hsSleepInput');
+  sleepInput.addEventListener('blur', saveSleepInput);
+  sleepInput.addEventListener('change', saveSleepInput);
+  sleepInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); sleepInput.blur(); }
+  });
+
+  // ============================================================
+  // Check-in — always interactive, auto-saves on input. No note field
+  // on this page, so setCheckin always passes '' for note.
+  // ============================================================
+  const CI_DATE = calendarDateKey();
+
+  function ciColor(val) {
+    if (val <= 4) return 'var(--score-danger)';
+    if (val <= 6) return 'var(--score-warning)';
+    return 'var(--score-success)';
+  }
+  function ciUpdateSlider(sliderEl, valEl, val) {
+    const pct = ((val - 1) / 9 * 100).toFixed(1) + '%';
+    sliderEl.style.setProperty('--ci-pct', pct);
+    sliderEl.style.setProperty('--ci-fill', ciColor(val));
+    sliderEl.value = String(val);
+    valEl.textContent = String(val);
+    valEl.style.color = ciColor(val);
+  }
+  function ciSave() {
+    const energy = parseInt(document.getElementById('ciEnergySlider').value, 10);
+    const mood   = parseInt(document.getElementById('ciMoodSlider').value,   10);
+    const existing = getCheckin(CI_DATE);
+    setCheckin(CI_DATE, energy, mood, '');
+    const label = existing ? 'Updated' : 'Logged';
+    document.getElementById('ciLogged').textContent =
+      label + ' at ' + new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+  }
+  function ciLoad() {
+    const entry = getCheckin(CI_DATE);
+    const eSlider = document.getElementById('ciEnergySlider');
+    const mSlider = document.getElementById('ciMoodSlider');
+    const eVal    = document.getElementById('ciEnergyVal');
+    const mVal    = document.getElementById('ciMoodVal');
+    if (entry) {
+      ciUpdateSlider(eSlider, eVal, entry.energy);
+      ciUpdateSlider(mSlider, mVal, entry.mood);
+      document.getElementById('ciLogged').textContent =
+        'Logged at ' + new Date(entry.loggedAt)
+          .toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+    } else {
+      [eSlider, mSlider].forEach(function (s) {
+        s.style.setProperty('--ci-pct', '50%');
+        s.style.setProperty('--ci-fill', 'rgba(255,255,255,0.18)');
+      });
+      eVal.textContent = '3';
+      eVal.style.color = 'var(--text-tertiary)';
+      mVal.textContent = '3';
+      mVal.style.color = 'var(--text-tertiary)';
+    }
+  }
+  function ciWireSlider(sliderId, valId) {
+    const slider = document.getElementById(sliderId);
+    const valEl  = document.getElementById(valId);
+    slider.addEventListener('input', function () {
+      ciUpdateSlider(slider, valEl, parseInt(slider.value, 10));
+      ciSave();
+    });
+  }
+  ciWireSlider('ciEnergySlider', 'ciEnergyVal');
+  ciWireSlider('ciMoodSlider',   'ciMoodVal');
+
+  // ============================================================
+  // WATER — ported from po-water.html. "Why this target?" and the
+  // 14-day history list are dropped per this page's spec; only the
+  // hero counter, bar, +/- actions, helper text and a 7-day
+  // sparkline remain.
+  // ============================================================
+  const WATER_KEY = 'po_water_v1';
+
+  const SUBSTANCE_DB = [
+    { id: 'adderall',    name: 'Adderall (mixed amphetamine salts)', cat: 'ADHD stim',    unit: 'mg',           defaultDose: 20,   mlPerUnit: 25,    note: 'Stim · reduces thirst signal · dries you out' },
+    { id: 'concerta',    name: 'Concerta (methylphenidate ER)',      cat: 'ADHD stim',    unit: 'mg',           defaultDose: 36,   mlPerUnit: 13.9,  note: 'Stim · reduces thirst signal' },
+    { id: 'vyvanse',     name: 'Vyvanse (lisdexamfetamine)',         cat: 'ADHD stim',    unit: 'mg',           defaultDose: 50,   mlPerUnit: 10,    note: 'Stim prodrug · long acting' },
+    { id: 'ritalin',     name: 'Ritalin IR (methylphenidate)',       cat: 'ADHD stim',    unit: 'mg',           defaultDose: 20,   mlPerUnit: 20,    note: 'Short-acting stim' },
+    { id: 'focalin',     name: 'Focalin / Focalin XR',               cat: 'ADHD stim',    unit: 'mg',           defaultDose: 20,   mlPerUnit: 20,    note: 'Methylphenidate isomer' },
+    { id: 'modafinil',   name: 'Modafinil',                          cat: 'Wakefulness',  unit: 'mg',           defaultDose: 200,  mlPerUnit: 1.75,  note: 'Mild dehydrating effect' },
+    { id: 'lithium',     name: 'Lithium',                            cat: 'Mood',         unit: 'mg',           defaultDose: 600,  mlPerUnit: 1.67,  note: 'Critical — narrow therapeutic window, dehydration → toxicity' },
+    { id: 'hctz',        name: 'Hydrochlorothiazide (HCTZ)',         cat: 'Diuretic',     unit: 'mg',           defaultDose: 25,   mlPerUnit: 40,    note: 'Direct diuretic — drink to compensate' },
+    { id: 'lasix',       name: 'Furosemide (Lasix)',                 cat: 'Diuretic',     unit: 'mg',           defaultDose: 40,   mlPerUnit: 30,    note: 'Loop diuretic · talk to your doctor about target' },
+    { id: 'spironol',    name: 'Spironolactone',                     cat: 'Diuretic',     unit: 'mg',           defaultDose: 50,   mlPerUnit: 12,    note: 'K-sparing diuretic' },
+    { id: 'sudafed',     name: 'Pseudoephedrine (Sudafed)',          cat: 'Decongestant', unit: 'mg',           defaultDose: 60,   mlPerUnit: 4.17,  note: 'Sympathomimetic · dries mucous membranes' },
+    { id: 'phenyl',      name: 'Phenylephrine',                      cat: 'Decongestant', unit: 'mg',           defaultDose: 10,   mlPerUnit: 20,    note: 'Vasoconstrictor — mild' },
+    { id: 'nicotine',    name: 'Nicotine pouch (Velo / Zyn)',        cat: 'Stim',         unit: 'pouches/day',  defaultDose: 4,    mlPerUnit: 62.5,  note: 'Vasoconstriction + dry mouth' },
+    { id: 'nicpatch',    name: 'Nicotine patch',                     cat: 'Stim',         unit: 'mg',           defaultDose: 14,   mlPerUnit: 18,    note: '24-h transdermal · sustained release' },
+    { id: 'alcohol',     name: 'Alcohol',                            cat: 'Depressant',   unit: 'drinks/day',   defaultDose: 1,    mlPerUnit: 400,   note: '~10ml urine per gram ethanol — adds up fast' },
+    { id: 'cannabis',    name: 'Cannabis / THC',                     cat: 'Other',        unit: 'sessions/day', defaultDose: 1,    mlPerUnit: 250,   note: 'Cottonmouth — saliva gland inhibition' },
+    { id: 'creatine',    name: 'Creatine monohydrate',               cat: 'Supplement',   unit: 'g/day',        defaultDose: 5,    mlPerUnit: 80,    note: 'Pulls water into muscle cells — drink more' },
+    { id: 'preworkout',  name: 'Pre-workout (caffeine + others)',    cat: 'Stim',         unit: 'servings/day', defaultDose: 1,    mlPerUnit: 300,   note: 'High-stim formula on top of caffeine' },
+    { id: 'metformin',   name: 'Metformin',                          cat: 'Glucose',      unit: 'mg',           defaultDose: 1000, mlPerUnit: 0.3,   note: 'Mild GI fluid loss' },
+    { id: 'sertraline',  name: 'SSRI (sertraline / escitalopram / fluoxetine)', cat: 'SSRI', unit: 'mg',         defaultDose: 50,   mlPerUnit: 4,     note: 'Mild dry mouth in some users' },
+    { id: 'wellbutrin',  name: 'Bupropion (Wellbutrin)',             cat: 'NDRI',         unit: 'mg',           defaultDose: 300,  mlPerUnit: 1.17,  note: 'Stim-like profile' }
+  ];
+
+  function subExtraMl(s) {
+    const dose = (s.dose != null ? s.dose : s.defaultDose) || 0;
+    return Math.max(0, dose * (s.mlPerUnit || 0));
+  }
+  function subDoseLabel(s) {
+    const dose = (s.dose != null ? s.dose : s.defaultDose);
+    return dose + ' ' + (s.unit || '');
+  }
+
+  function waterLoadState() {
+    try {
+      const raw = localStorage.getItem(WATER_KEY);
+      if (raw) return waterNormalize(JSON.parse(raw));
+    } catch (e) {}
+    return waterNormalize({});
+  }
+  function waterNormalize(s) {
+    s = s || {};
+    s.unit = s.unit || 'bottle';
+    s.bottleMl = s.bottleMl || 500;
+    s.glassMl  = s.glassMl  || 250;
+    s.weightUnit = s.weightUnit || 'kg';
+    s.profile = Object.assign({ weightKg: 75, age: 25, sex: 'm', activityHrsPerWeek: 5 }, s.profile || {});
+    s.caffeineMgPerDay = (s.caffeineMgPerDay != null) ? s.caffeineMgPerDay : 200;
+    s.substances = Array.isArray(s.substances) ? s.substances : [];
+    s.logs = (s.logs && typeof s.logs === 'object') ? s.logs : {};
+    return s;
+  }
+  function waterSaveState() {
+    try { localStorage.setItem(WATER_KEY, JSON.stringify(waterState)); } catch (e) {}
+  }
+  let waterState = waterLoadState();
+
+  function waterTodayCount() { return waterState.logs[calendarDateKey()] || 0; }
+  function setWaterTodayCount(n) {
+    const k = calendarDateKey();
+    if (n <= 0) delete waterState.logs[k];
+    else waterState.logs[k] = n;
+    waterSaveState();
+  }
+
+  function computeWaterTargetMl() {
+    const p = waterState.profile;
+    const wKg = waterState.weightUnit === 'lb' ? p.weightKg / 2.20462 : p.weightKg;
+    const base = wKg * 35;
+    const exercise = (p.activityHrsPerWeek || 0) / 7 * 500;
+    const caffeine = Math.max(0, (waterState.caffeineMgPerDay || 0) - 200) * 1.5;
+    const subs = (waterState.substances || []).reduce(function (s, x) { return s + subExtraMl(x); }, 0);
+    let adjust = 0;
+    if (p.sex === 'm') adjust += 200;
+    if ((p.age || 0) >= 50) adjust += 100;
+    return base + exercise + caffeine + subs + adjust;
+  }
+  function waterUnitVolMl() {
+    if (waterState.unit === 'bottle') return waterState.bottleMl || 500;
+    if (waterState.unit === 'glass')  return waterState.glassMl  || 250;
+    if (waterState.unit === 'oz')     return 30;
+    return 1;
+  }
+  function waterUnitLabelPlural() {
+    if (waterState.unit === 'bottle') return 'bottles';
+    if (waterState.unit === 'glass')  return 'glasses';
+    if (waterState.unit === 'oz')     return 'oz';
+    return 'ml';
+  }
+  function waterUnitLabelSingular() {
+    if (waterState.unit === 'bottle') return 'bottle';
+    if (waterState.unit === 'glass')  return 'glass';
+    if (waterState.unit === 'oz')     return 'oz';
+    return 'ml';
+  }
+  function fmtMl(ml) {
+    if (ml >= 1000) return (ml / 1000).toFixed(1) + ' L';
+    return Math.round(ml) + ' ml';
+  }
+
+  function renderWater() {
+    const totalMl = computeWaterTargetMl();
+    const targetUnits = Math.max(1, Math.ceil(totalMl / waterUnitVolMl()));
+    const count = waterTodayCount();
+    const unitName = waterUnitLabelPlural();
+
+    document.getElementById('waterUnitLabel').textContent = unitName.charAt(0).toUpperCase() + unitName.slice(1);
+    document.getElementById('waterNum').textContent = count;
+    document.getElementById('waterTarget').textContent = '/ ' + targetUnits;
+    document.getElementById('waterPlusLabel').textContent = 'Drank a ' + waterUnitLabelSingular();
+
+    const pctRaw = (count / targetUnits) * 100;
+    const fillPct = Math.min(150, pctRaw) / 1.5;
+    const fill = document.getElementById('waterBarFill');
+    fill.style.width = fillPct + '%';
+    fill.classList.toggle('over', pctRaw > 100);
+    document.getElementById('waterBarMin').textContent = '0';
+    document.getElementById('waterBarMax').textContent = (Math.ceil(targetUnits * 1.5)) + '+';
+    document.getElementById('waterBarZoneStart').style.left = (65 / 1.5) + '%';
+    document.getElementById('waterBarZoneEnd').style.left   = (100 / 1.5) + '%';
+
+    const helper = document.getElementById('waterHelper');
+    if (count === 0) { helper.textContent = 'Start the day — first one in.'; helper.classList.remove('good'); }
+    else if (pctRaw < 50) { helper.textContent = 'Behind pace — drink one in the next hour.'; helper.classList.remove('good'); }
+    else if (pctRaw < 100) { helper.textContent = (targetUnits - count) + ' to go. Pacing well.'; helper.classList.remove('good'); }
+    else if (pctRaw < 130) { helper.textContent = '✓ Target hit — top up if you train this evening.'; helper.classList.add('good'); }
+    else { helper.textContent = 'Strong — way past target.'; helper.classList.add('good'); }
+
+    document.getElementById('waterMinusBtn').disabled = count <= 0;
+
+    renderWaterSparkline(targetUnits);
+  }
+
+  // 7-day sparkline (po-water.html used 14; this page's spec calls for 7).
+  function renderWaterSparkline(target) {
+    const svg = document.getElementById('waterSparkSvg');
+    const W = 280, H = 40, pad = 4;
+    const days = 7;
+    const data = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      data.push(waterState.logs[calendarDateKey(d)] || 0);
+    }
+    const maxVal = Math.max(target, Math.max.apply(null, data)) || 1;
+    const colW = (W - pad * 2) / data.length;
+    const barW = colW * 0.6;
+    let html = '';
+    const targetY = H - pad - (target / maxVal) * (H - pad * 2);
+    html += '<line class="hub-spark-target" x1="0" x2="' + W + '" y1="' + targetY.toFixed(1) + '" y2="' + targetY.toFixed(1) + '"/>';
+    data.forEach(function (v, i) {
+      const x = pad + i * colW + (colW - barW) / 2;
+      const h = (v / maxVal) * (H - pad * 2);
+      const y = H - pad - h;
+      const cls = (v >= target) ? 'hub-spark-bar' : 'hub-spark-bar miss';
+      html += '<rect class="' + cls + '" x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + barW.toFixed(1) + '" height="' + Math.max(0, h).toFixed(1) + '" rx="2"/>';
+    });
+    svg.innerHTML = html;
+  }
+
+  document.getElementById('waterPlusBtn').addEventListener('click', function () {
+    setWaterTodayCount(waterTodayCount() + 1);
+    renderWater();
+    render();
+    const btn = document.getElementById('waterPlusBtn');
+    btn.style.transform = 'scale(0.97)';
+    setTimeout(function () { btn.style.transform = ''; }, 120);
+  });
+  document.getElementById('waterMinusBtn').addEventListener('click', function () {
+    setWaterTodayCount(Math.max(0, waterTodayCount() - 1));
+    renderWater();
+    render();
+  });
+
+  // ===== Water settings modal =====
+  function waterRenderSettings() {
+    document.getElementById('setWeight').value = waterState.profile.weightKg;
+    document.getElementById('setAge').value = waterState.profile.age;
+    document.getElementById('setActivity').value = waterState.profile.activityHrsPerWeek;
+    document.getElementById('setCaffeine').value = waterState.caffeineMgPerDay;
+    document.getElementById('setBottleMl').value = waterState.bottleMl;
+    document.getElementById('setGlassMl').value = waterState.glassMl;
+
+    waterSetSegActive('setUnit', waterState.unit);
+    waterSetSegActive('setWeightUnit', waterState.weightUnit);
+    waterSetSegActive('setSex', waterState.profile.sex);
+
+    waterRenderSubsList();
+  }
+  function waterSetSegActive(segId, value) {
+    document.getElementById(segId).querySelectorAll('button').forEach(function (b) {
+      const v = b.dataset.u || b.dataset.s;
+      b.classList.toggle('active', v === value);
+    });
+  }
+  function waterBindSeg(segId, attr, onPick) {
+    document.getElementById(segId).querySelectorAll('button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        const v = b.dataset[attr];
+        document.getElementById(segId).querySelectorAll('button').forEach(function (x) { x.classList.remove('active'); });
+        b.classList.add('active');
+        onPick(v);
+      });
+    });
+  }
+  waterBindSeg('setUnit', 'u', function (v) { waterState.unit = v; waterSaveState(); renderWater(); });
+  waterBindSeg('setWeightUnit', 'u', function (v) { waterState.weightUnit = v; waterSaveState(); renderWater(); });
+  waterBindSeg('setSex', 's', function (v) { waterState.profile.sex = v; waterSaveState(); renderWater(); });
+
+  ['setWeight', 'setAge', 'setActivity', 'setCaffeine', 'setBottleMl', 'setGlassMl'].forEach(function (id) {
+    document.getElementById(id).addEventListener('input', function () {
+      const v = parseFloat(document.getElementById(id).value);
+      if (id === 'setWeight') waterState.profile.weightKg = v || 0;
+      else if (id === 'setAge') waterState.profile.age = v || 0;
+      else if (id === 'setActivity') waterState.profile.activityHrsPerWeek = v || 0;
+      else if (id === 'setCaffeine') waterState.caffeineMgPerDay = v || 0;
+      else if (id === 'setBottleMl') waterState.bottleMl = v || 500;
+      else if (id === 'setGlassMl') waterState.glassMl = v || 250;
+      waterSaveState(); renderWater(); render();
+    });
+  });
+
+  function waterEscapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function waterRenderSubsList() {
+    const list = document.getElementById('subsList');
+    if (!waterState.substances || !waterState.substances.length) {
+      list.innerHTML = '<div style="font-size:12px;color:var(--text-tertiary);text-align:center;padding:14px 0;font-style:italic;">No substances added.</div>';
+      return;
+    }
+    list.innerHTML = waterState.substances.map(function (s, i) {
+      return '<div class="sub-row" data-i="' + i + '">'
+        + '<div class="sub-row-info">'
+        +   '<div class="sub-row-name">' + waterEscapeHtml(s.name) + '</div>'
+        +   '<div class="sub-row-meta">+ ' + fmtMl(subExtraMl(s)) + ' / day · ' + waterEscapeHtml(s.cat || '') + '</div>'
+        + '</div>'
+        + '<div class="sub-row-dose">'
+        +   '<input type="number" class="sub-dose-input" data-i="' + i + '" min="0" step="0.5" value="' + (s.dose != null ? s.dose : s.defaultDose) + '">'
+        +   '<span class="sub-dose-unit">' + waterEscapeHtml(s.unit || '') + '</span>'
+        + '</div>'
+        + '<button class="sub-row-del" data-i="' + i + '" aria-label="Remove">×</button>'
+        + '</div>';
+    }).join('');
+    list.querySelectorAll('.sub-dose-input').forEach(function (inp) {
+      inp.addEventListener('input', function () {
+        const i = parseInt(inp.dataset.i, 10);
+        waterState.substances[i].dose = parseFloat(inp.value) || 0;
+        waterSaveState();
+        const row = inp.closest('.sub-row');
+        const meta = row.querySelector('.sub-row-meta');
+        meta.textContent = '+ ' + fmtMl(subExtraMl(waterState.substances[i])) + ' / day · ' + (waterState.substances[i].cat || '');
+        renderWater(); render();
+      });
+    });
+    list.querySelectorAll('.sub-row-del').forEach(function (b) {
+      b.addEventListener('click', function () {
+        waterState.substances.splice(parseInt(b.dataset.i, 10), 1);
+        waterSaveState(); waterRenderSubsList(); renderWater(); render();
+      });
+    });
+  }
+
+  document.getElementById('subSearch').addEventListener('input', function (e) {
+    const q = e.target.value.trim().toLowerCase();
+    const results = document.getElementById('subResults');
+    if (!q) { results.classList.remove('show'); results.innerHTML = ''; return; }
+    const matches = SUBSTANCE_DB.filter(function (s) {
+      return s.name.toLowerCase().includes(q) || s.cat.toLowerCase().includes(q);
+    }).slice(0, 8);
+    if (!matches.length) {
+      results.innerHTML = '<div class="search-result"><span class="search-result-name">No matches</span><span class="search-result-meta">Try a different name or category</span></div>';
+      results.classList.add('show');
+      return;
+    }
+    results.innerHTML = matches.map(function (s) {
+      const defaultExtra = (s.defaultDose || 0) * (s.mlPerUnit || 0);
+      return '<div class="search-result" data-id="' + s.id + '">'
+        + '<span class="search-result-name">' + waterEscapeHtml(s.name) + ' <span class="search-result-add">+</span></span>'
+        + '<span class="search-result-meta">' + waterEscapeHtml(s.cat) + ' · ' + s.defaultDose + ' ' + waterEscapeHtml(s.unit) + ' default → adds ~' + fmtMl(defaultExtra) + '/day · ' + waterEscapeHtml(s.note) + '</span>'
+        + '</div>';
+    }).join('');
+    results.classList.add('show');
+    results.querySelectorAll('.search-result').forEach(function (el) {
+      el.addEventListener('click', function () {
+        const id = el.dataset.id;
+        const sub = SUBSTANCE_DB.find(function (x) { return x.id === id; });
+        if (!sub) return;
+        if ((waterState.substances || []).find(function (x) { return x.id === id; })) { alert('Already added — edit the dose below.'); return; }
+        waterState.substances.push({
+          id: sub.id, name: sub.name, cat: sub.cat,
+          unit: sub.unit, mlPerUnit: sub.mlPerUnit,
+          defaultDose: sub.defaultDose, dose: sub.defaultDose
+        });
+        waterSaveState();
+        document.getElementById('subSearch').value = '';
+        results.classList.remove('show');
+        waterRenderSubsList(); renderWater(); render();
+      });
+    });
+  });
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.search-wrap')) document.getElementById('subResults').classList.remove('show');
+  });
+
+  document.getElementById('waterSettingsBtn').addEventListener('click', function () {
+    waterRenderSettings();
+    document.getElementById('setModalBg').classList.add('show');
+  });
+  document.getElementById('setClose').addEventListener('click', function () {
+    document.getElementById('setModalBg').classList.remove('show');
+  });
+
+  document.getElementById('setExport').addEventListener('click', function () {
+    const blob = new Blob([JSON.stringify(waterState, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'water-coach-data-' + new Date().toISOString().slice(0, 10) + '.json';
+    a.click(); URL.revokeObjectURL(url);
+  });
+  document.getElementById('setImport').addEventListener('click', function () {
+    document.getElementById('setImportFile').click();
+  });
+  document.getElementById('setImportFile').addEventListener('change', function (e) {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = function () {
+      try {
+        const parsed = JSON.parse(r.result);
+        if (!confirm('Replace ALL current water data with the imported file?')) return;
+        waterState = waterNormalize(parsed);
+        waterSaveState(); waterRenderSettings(); renderWater(); render();
+      } catch (err) { alert('Import failed: ' + err.message); }
+    };
+    r.readAsText(f);
+  });
+  document.getElementById('setReset').addEventListener('click', function () {
+    if (!confirm('Wipe ALL water logs and settings? This cannot be undone.')) return;
+    localStorage.removeItem(WATER_KEY);
+    waterState = waterLoadState();
+    document.getElementById('setModalBg').classList.remove('show');
+    renderWater(); render();
+  });
+
+  // ============================================================
+  // INIT
+  // ============================================================
+  loadSleepInput();
+  render();
+  renderWater();
+
+  // The gym page writes po_coach_weights/po_coach_v1 from other tabs or
+  // devices; cloud sync applying any of this page's keys also dispatches
+  // a generic 'storage' event (see the cloud-sync block below) — re-render
+  // everything so the page reflects synced changes without a reload.
+  window.addEventListener('storage', function () {
+    loadSleepInput();
+    ciLoad();
+    renderWater();
+    render();
+  });
+})();
+</script>
+
+<!-- ============================================================
+     Daily Stack — ported unchanged from health.html.
+     ============================================================ -->
 <script>
 (() => {
   'use strict';
@@ -1178,7 +2328,6 @@ main {
       groupsEl.innerHTML = `<div class="stack-window-empty">No items yet — add one below to start your stack.</div>`;
     }
 
-    // Sync ticker after every render
     renderTicker();
   }
 
@@ -1359,7 +2508,7 @@ main {
   const addBtn = document.getElementById('stackAddBtn');
   const resultsEl = document.getElementById('stackSearchResults');
 
-  let pendingNote = ''; // hidden note auto-filled when a DB result is selected
+  let pendingNote = '';
 
   function searchSupplements(q) {
     const query = q.toLowerCase().trim();
@@ -1399,7 +2548,7 @@ main {
 
   nameInput.addEventListener('input', () => {
     renderSearchResults(nameInput.value);
-    pendingNote = ''; // reset note if user is typing manually
+    pendingNote = '';
   });
   nameInput.addEventListener('focus', () => {
     if (nameInput.value.trim()) renderSearchResults(nameInput.value);
@@ -1432,7 +2581,6 @@ main {
   [nameInput, doseInput].forEach(i => {
     i.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
-        // If search dropdown is open with matches, pick the first one
         if (!resultsEl.hidden && i === nameInput) {
           const firstResult = resultsEl.querySelector('.stack-result');
           if (firstResult) { e.preventDefault(); firstResult.click(); return; }
@@ -1459,12 +2607,65 @@ document.addEventListener('DOMContentLoaded', function () {
   if (typeof initCloudSync !== 'function') return;
   initCloudSync({
     appKey: 'health',
-    syncedKeys: ['stack:items', 'stack:version', 'stack:low', 'po_water_v1'],
+    syncedKeys: ['stack:items', 'stack:version', 'stack:low', 'po_water_v1', 'checkin:daily', 'po_sleep_v1', 'score:history'],
     syncedPrefixes: ['stack:taken:'],
     onApplied: function () {
       window.dispatchEvent(new Event('storage'));
     }
   });
+});
+</script>
+
+<!-- ============================================================
+     Purely presentational glue for the redesign — does not read or
+     write any localStorage key, and does not modify any function in
+     the three script blocks above. Just mirrors already-rendered
+     values into the new layout's extra display elements.
+     ============================================================ -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Page-head date.
+  var dateEl = document.getElementById('hpDateText');
+  if (dateEl) {
+    dateEl.textContent = new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+  }
+
+  // Mirror the score hero's #hsScore (text + color) into the small
+  // ring-overlay number, so the same score reads in both places.
+  var heroScoreEl = document.getElementById('hsScore');
+  var ringNumEl = document.getElementById('hsRingNum');
+  if (heroScoreEl && ringNumEl) {
+    var syncRingNum = function () {
+      ringNumEl.textContent = heroScoreEl.textContent;
+      ringNumEl.style.color = heroScoreEl.style.color;
+    };
+    syncRingNum();
+    new MutationObserver(syncRingNum).observe(heroScoreEl, { characterData: true, childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
+  }
+
+  // Live numeric readout for the sleep range slider (the slider itself
+  // has no visible number).
+  var sleepRange = document.getElementById('hsSleepInput');
+  var sleepNumEl = document.getElementById('hsSleepNum');
+  if (sleepRange && sleepNumEl) {
+    var syncSleepNum = function () {
+      sleepNumEl.textContent = sleepRange.value === '' ? '—' : sleepRange.value;
+    };
+    syncSleepNum();
+    sleepRange.addEventListener('input', syncSleepNum);
+    new MutationObserver(syncSleepNum).observe(sleepRange, { attributes: true, attributeFilter: ['value'] });
+  }
+
+  // Mirror the stack progress bar's width into a "N%" label.
+  var stackBar = document.getElementById('stackProgressBar');
+  var stackPctEl = document.getElementById('stackProgressPct');
+  if (stackBar && stackPctEl) {
+    var syncStackPct = function () {
+      stackPctEl.textContent = (stackBar.style.width || '0%').trim();
+    };
+    syncStackPct();
+    new MutationObserver(syncStackPct).observe(stackBar, { attributes: true, attributeFilter: ['style'] });
+  }
 });
 </script>
 
