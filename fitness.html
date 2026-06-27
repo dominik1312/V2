@@ -1338,165 +1338,266 @@ img, video, canvas, svg { max-width: 100%; }
 
 .hidden { display: none !important; }
 
-/* ===== Endurance — ported verbatim from endurance.html, scoped under
-   #enduranceSection. All selectors below are ec- prefixed and do not
-   collide with any gym .po-*/.card/.pill/.active rule above. ===== */
-#enduranceSection .ec-shell {
-  min-height: 100vh;
-  padding: 34px 24px calc(48px + env(safe-area-inset-bottom));
-  display: flex; justify-content: center;
+/* ===== Endurance — new session-first design, ported from endurance.html
+   and scoped under #enduranceSection. .card is shared with the gym
+   section above (identical rule there); img/video/canvas/svg sizing is
+   also already global. Everything else below is en- prefixed and does
+   not collide with any gym .po-*/.wt-*/.fit-* rule. ===== */
+#enduranceSection .en-shell {
+  width: 100%; max-width: min(720px, 100vw);
+  margin: 0 auto;
+  padding: 24px 16px calc(40px + env(safe-area-inset-bottom));
+  padding-top: max(24px, env(safe-area-inset-top));
+  padding-right: max(16px, env(safe-area-inset-right));
+  padding-left: max(16px, env(safe-area-inset-left));
+  box-sizing: border-box;
 }
-#enduranceSection .ec-inner { width: 100%; max-width: 880px; }
-#enduranceSection { --ec-card-1: #161616; --ec-card-2: #111111; --ec-card-2b: #101010; --ec-card-3a: #141414; --ec-card-3b: #0f0f0f; --ec-border: rgba(255,255,255,0.06); --ec-border-soft: rgba(255,255,255,0.05); --ec-text-1: #f5f3ee; --ec-text-2: #ededed; --ec-text-3: #9a9a9a; --ec-text-4: #8a8a8a; --ec-text-5: #7c7c7c; --ec-text-6: #6b6b6b; --ec-gold: #caa75f; --ec-gold-pill-bg: #f1ece0; --ec-gold-pill-text: #191919; --ec-good: #62c193; --ec-good-bg: rgba(98,193,147,0.12); --ec-neutral-bg: rgba(255,255,255,0.05); }
-#enduranceSection { color: var(--ec-text-1); font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+#enduranceSection .en-shell *, #enduranceSection .en-shell *::before, #enduranceSection .en-shell *::after { min-width: 0; }
 
-/* Header */
-#enduranceSection .ec-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
-#enduranceSection .ec-title { margin: 0; font-size: 27px; font-weight: 800; letter-spacing: -0.02em; color: var(--ec-text-1); }
-#enduranceSection .ec-subtitle { margin-top: 6px; font-size: 13px; color: var(--ec-text-5); }
-#enduranceSection .ec-settings-btn {
-  flex: none; width: 40px; height: 40px; border-radius: 11px;
-  background: #1a1a1a; border: 1px solid var(--ec-border);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; color: var(--ec-text-3);
+#enduranceSection .en-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 18px;
 }
+#enduranceSection .en-title { margin: 0; font-size: 27px; font-weight: 800; letter-spacing: -0.02em; }
+#enduranceSection .en-subtitle { margin-top: 6px; font-size: 13px; color: var(--text-3); }
 
-/* Week progress */
-#enduranceSection .ec-progress-row { display: flex; align-items: center; gap: 14px; margin-top: 16px; }
-#enduranceSection .ec-week-chip { flex: none; font-size: 11px; font-weight: 700; letter-spacing: .14em; color: var(--ec-gold); white-space: nowrap; }
-#enduranceSection .ec-progress-track { flex: 1; height: 4px; background: rgba(255,255,255,0.07); border-radius: 999px; overflow: hidden; }
-#enduranceSection .ec-progress-fill { height: 100%; background: var(--ec-gold); border-radius: 999px; transition: width .25s ease; }
-
-/* Selector card */
-#enduranceSection .ec-selector-card {
-  margin-top: 18px;
-  background: linear-gradient(180deg, var(--ec-card-1), var(--ec-card-2));
-  border: 1px solid var(--ec-border); border-radius: 22px;
-  padding: 22px 24px; display: flex; flex-direction: column; gap: 16px;
+/* ----- Sport toggle ----- */
+#enduranceSection .en-sport-toggle {
+  display: flex; gap: 4px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 14px; padding: 5px;
+  margin-bottom: 16px;
 }
-#enduranceSection .ec-selector-row { display: grid; grid-template-columns: 62px 1fr; align-items: center; gap: 16px; }
-#enduranceSection .ec-selector-label { font-size: 12px; font-weight: 700; letter-spacing: .14em; color: var(--ec-gold); }
-#enduranceSection .ec-pill-group {
-  display: flex; gap: 6px; flex-wrap: wrap;
-  background: rgba(255,255,255,0.03); border: 1px solid var(--ec-border-soft);
-  border-radius: 14px; padding: 6px;
+#enduranceSection .en-sport-pill {
+  flex: 1; padding: 11px; border: none; background: transparent;
+  color: var(--text-2); border-radius: 10px;
+  font-family: inherit; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: background 0.15s, color 0.15s;
+  -webkit-tap-highlight-color: transparent;
 }
-#enduranceSection .ec-pill {
-  flex: 1; min-width: max-content; text-align: center;
-  padding: 11px 12px; border-radius: 10px; font-size: 14px; line-height: 1;
-  cursor: pointer; border: none; font-family: inherit; font-weight: 600;
-  background: transparent; color: var(--ec-gold);
-  transition: all .18s ease; white-space: nowrap;
-}
-#enduranceSection .ec-pill.active {
-  background: var(--ec-gold-pill-bg); color: var(--ec-gold-pill-text);
-  font-weight: 700; box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+#enduranceSection .en-sport-pill:hover { color: var(--text-1); }
+#enduranceSection .en-sport-pill.active {
+  background: linear-gradient(180deg, #ffffff 0%, #e8e5dd 100%);
+  color: #0a0a0b; font-weight: 800;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 4px 12px rgba(0,0,0,0.35);
 }
 
-/* Week heading */
-#enduranceSection .ec-week-head { margin-top: 20px; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-#enduranceSection .ec-week-title { margin: 0; font-size: 17px; font-weight: 700; color: var(--ec-text-2); letter-spacing: -0.01em; }
-#enduranceSection .ec-week-note { font-size: 12px; color: var(--ec-text-4); }
+/* ----- Hero stats ----- */
+#enduranceSection .en-stats-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  margin-bottom: 14px;
+}
+#enduranceSection .en-stat-box {
+  padding: 14px 10px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--border);
+  border-radius: 12px; text-align: center;
+}
+#enduranceSection .en-stat-val {
+  font-size: 28px; font-weight: 800; letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+#enduranceSection .en-stat-val.muted { color: var(--text-3); }
+#enduranceSection .en-stat-unit { font-size: 13px; font-weight: 600; color: var(--text-3); margin-left: 3px; }
+#enduranceSection .en-stat-label {
+  margin-top: 4px;
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.10em;
+  text-transform: uppercase; color: var(--text-3);
+}
 
-/* Metric cards */
-#enduranceSection .ec-metrics-grid {
-  margin-top: 14px; display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px;
+/* ----- Card title ----- */
+#enduranceSection .en-card-title {
+  display: flex; align-items: center; gap: 8px;
+  margin: 0 0 14px; font-size: 14px; font-weight: 700;
 }
-#enduranceSection .ec-metric-card {
-  background: linear-gradient(180deg, var(--ec-card-1), var(--ec-card-2b));
-  border: 1px solid var(--ec-border); border-radius: 16px; padding: 16px 18px;
+#enduranceSection .en-help-icon {
+  width: 17px; height: 17px; border-radius: 50%;
+  background: rgba(255,255,255,0.06); color: var(--text-3);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; cursor: default;
 }
-#enduranceSection .ec-metric-label {
-  font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ec-gold);
-}
-#enduranceSection .ec-metric-value-row { margin-top: 10px; display: flex; align-items: baseline; gap: 6px; }
-#enduranceSection .ec-metric-value { font-size: 30px; font-weight: 800; color: var(--ec-text-1); letter-spacing: -0.02em; }
-#enduranceSection .ec-metric-unit { font-size: 14px; font-weight: 500; color: var(--ec-text-5); }
-#enduranceSection .ec-metric-card-empty .ec-metric-value { color: var(--ec-text-4); }
-#enduranceSection .ec-tag {
-  display: inline-block; margin-top: 12px; padding: 4px 10px; border-radius: 999px;
-  font-size: 11px; font-weight: 600; letter-spacing: .02em;
-}
-#enduranceSection .ec-tag.neutral { color: var(--ec-text-3); background: var(--ec-neutral-bg); }
+#enduranceSection .en-chart-sublabel { font-size: 12px; font-weight: 500; color: var(--text-3); }
 
-/* Weekly bar chart */
-#enduranceSection .ec-chart-card {
-  margin-top: 16px;
-  background: linear-gradient(180deg, var(--ec-card-3a), var(--ec-card-3b));
-  border: 1px solid var(--ec-border); border-radius: 18px; padding: 20px 24px 18px;
+/* ----- Quick log card ----- */
+#enduranceSection .en-log-distance-row {
+  display: flex; align-items: baseline; gap: 8px;
+  margin-bottom: 16px; padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
 }
-#enduranceSection .ec-chart-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-#enduranceSection .ec-chart-label {
-  font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ec-text-3);
+#enduranceSection .en-log-distance-row input[type="number"] {
+  flex: 1; min-width: 0;
+  font-size: 40px; font-weight: 700; letter-spacing: -0.02em;
+  background: transparent; border: none; outline: none;
+  color: var(--text-1); font-family: inherit;
+  -moz-appearance: textfield; padding: 0;
 }
-#enduranceSection .ec-chart-badges { display: flex; align-items: center; gap: 12px; }
-#enduranceSection .ec-chart-badge { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; color: var(--ec-gold); }
-#enduranceSection .ec-chart-badge .dot { width: 8px; height: 8px; border-radius: 2px; background: var(--ec-gold); display: inline-block; }
-#enduranceSection .ec-chart-badge.actual { color: var(--ec-good); }
-#enduranceSection .ec-chart-badge.actual .dot { background: var(--ec-good); border-radius: 50%; }
-#enduranceSection .ec-bars-row { margin-top: 18px; display: flex; align-items: flex-end; gap: 10px; }
-#enduranceSection .ec-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-#enduranceSection .ec-bar-val { font-size: 12px; font-weight: 500; color: var(--ec-text-6); }
-#enduranceSection .ec-bar-val.current { font-weight: 700; color: var(--ec-gold); }
-#enduranceSection .ec-bar-actual-label { font-size: 10.5px; font-weight: 700; color: var(--ec-good); margin-top: -4px; }
-#enduranceSection .ec-bar-track { position: relative; width: 60%; height: 96px; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; }
-#enduranceSection .ec-bar-fill { width: 100%; border-radius: 6px 6px 3px 3px; background: rgba(255,255,255,0.13); transition: height .25s ease; }
-#enduranceSection .ec-bar-fill.current { background: var(--ec-gold); }
-#enduranceSection .ec-bar-actual {
-  position: absolute; left: 0; right: 0; bottom: 0; height: 0%;
-  background: var(--ec-good); opacity: 0.55;
-  border-radius: 6px 6px 3px 3px;
-  transition: height .25s ease;
+#enduranceSection .en-log-distance-row input[type="number"]::-webkit-outer-spin-button,
+#enduranceSection .en-log-distance-row input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none; margin: 0;
 }
-#enduranceSection .ec-bar-week { font-size: 11px; font-weight: 500; color: var(--ec-text-6); }
+#enduranceSection .en-distance-unit { font-size: 16px; font-weight: 600; color: var(--text-3); }
 
-/* Log this session */
-#enduranceSection .ec-log-card {
-  margin-top: 14px;
-  background: linear-gradient(180deg, var(--ec-card-1), var(--ec-card-2b));
-  border: 1px solid var(--ec-border); border-radius: 16px; overflow: hidden;
+#enduranceSection .en-log-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+#enduranceSection .en-field { display: flex; flex-direction: column; gap: 6px; }
+#enduranceSection .en-field label {
+  font-size: 10.5px; color: var(--text-3); font-weight: 700;
+  letter-spacing: 0.10em; text-transform: uppercase;
 }
-#enduranceSection .ec-log-toggle {
-  width: 100%; display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 18px; background: transparent; border: 0; cursor: pointer;
-  font-family: inherit; font-size: 13px; font-weight: 700; color: var(--ec-gold);
+#enduranceSection .en-field input {
+  width: 100%; padding: 12px;
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,0.28);
+  color: var(--text-1); border-radius: 10px;
+  font-family: inherit; font-size: 15px; font-weight: 600;
+  -moz-appearance: textfield;
 }
-#enduranceSection .ec-log-toggle-icon { font-size: 16px; line-height: 1; color: var(--ec-text-4); transition: transform .18s ease; }
-#enduranceSection .ec-log-card.open .ec-log-toggle-icon { transform: rotate(45deg); }
-#enduranceSection .ec-log-panel { display: none; padding: 0 18px 18px; }
-#enduranceSection .ec-log-card.open .ec-log-panel { display: block; }
-#enduranceSection .ec-log-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
-#enduranceSection .ec-log-field { display: flex; flex-direction: column; gap: 6px; }
-#enduranceSection .ec-log-field-label { font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ec-text-4); }
-#enduranceSection .ec-log-input {
-  padding: 10px 12px; border-radius: 10px;
-  border: 1px solid var(--ec-border); background: rgba(255,255,255,0.03);
-  color: var(--ec-text-1); font-family: inherit; font-size: 13px; outline: none;
+#enduranceSection .en-field input::-webkit-outer-spin-button,
+#enduranceSection .en-field input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+#enduranceSection .en-field input:focus {
+  outline: none; border-color: rgba(255,255,255,0.40);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.06);
 }
-#enduranceSection .ec-log-input:focus { border-color: var(--ec-gold); }
-#enduranceSection .ec-log-save {
-  width: 100%; margin-top: 14px; padding: 12px; border: 0; border-radius: 11px;
-  background: var(--ec-gold-pill-bg); color: var(--ec-gold-pill-text);
-  font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
+#enduranceSection .en-date-field { margin-bottom: 12px; max-width: 180px; }
+#enduranceSection .en-date-field input { font-size: 13px; font-weight: 500; padding: 10px; }
+
+#enduranceSection .en-optional-toggle {
+  display: inline-block; font-size: 12px; color: var(--text-3);
+  cursor: pointer; margin-bottom: 4px; user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
-#enduranceSection .ec-log-save:hover { filter: brightness(1.03); }
-#enduranceSection .ec-log-list { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
-#enduranceSection .ec-log-empty { font-size: 12px; color: var(--ec-text-5); text-align: center; padding: 6px 0; }
-#enduranceSection .ec-log-row {
-  display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  padding: 9px 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--ec-border-soft);
+#enduranceSection .en-optional-toggle:hover { color: var(--text-1); }
+#enduranceSection .en-optional-fields {
+  display: none; grid-template-columns: 1fr 1fr; gap: 10px;
+  margin-top: 10px; margin-bottom: 4px;
 }
-#enduranceSection .ec-log-row-main { display: flex; flex-direction: column; gap: 2px; }
-#enduranceSection .ec-log-row-date { font-size: 11px; color: var(--ec-text-5); }
-#enduranceSection .ec-log-row-detail { font-size: 13px; color: var(--ec-text-2); font-weight: 600; }
-#enduranceSection .ec-log-row-del { border: 0; background: transparent; color: var(--ec-text-5); font-size: 16px; cursor: pointer; padding: 0 4px; }
-#enduranceSection .ec-log-row-del:hover { color: var(--ec-text-1); }
+#enduranceSection .en-optional-fields.show { display: grid; }
+
+#enduranceSection .en-btn-primary {
+  width: 100%; padding: 14px; margin-top: 14px;
+  border: 1px solid rgba(255,255,255,0.85);
+  background: linear-gradient(180deg, #ffffff 0%, #e8e5dd 100%);
+  color: #0a0a0b; border-radius: 12px;
+  font-family: inherit; font-size: 13px; font-weight: 700;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 4px 14px rgba(0,0,0,0.40);
+  -webkit-tap-highlight-color: transparent;
+}
+#enduranceSection .en-btn-primary:hover { transform: translateY(-1px); }
+#enduranceSection .en-btn-primary:active { transform: translateY(0) scale(0.98); }
+
+/* ----- Next session card ----- */
+#enduranceSection .en-next-target { font-size: 28px; font-weight: 800; letter-spacing: -0.01em; }
+#enduranceSection .en-next-sub { margin-top: 6px; font-size: 12.5px; color: var(--text-3); }
+#enduranceSection .en-next-tag {
+  display: inline-block; margin-top: 12px; padding: 5px 11px;
+  border-radius: 999px; font-size: 11.5px; font-weight: 700;
+}
+#enduranceSection .en-next-tag.warn { background: rgba(251,191,36,0.14); color: var(--warn); }
+#enduranceSection .en-next-tag.good { background: rgba(110,231,183,0.14); color: var(--good); }
+
+/* ----- Weekly chart card ----- */
+#enduranceSection .en-chart-track-row { position: relative; height: 110px; margin-top: 4px; }
+#enduranceSection .en-chart-target-line {
+  position: absolute; left: 0; right: 0; display: none;
+  border-top: 1px dashed rgba(255,255,255,0.35); z-index: 2;
+}
+#enduranceSection .en-chart-target-label {
+  position: absolute; right: 0; top: -13px;
+  font-size: 9px; color: var(--text-3); white-space: nowrap;
+}
+#enduranceSection .en-chart-tracks { display: flex; gap: 6px; height: 100%; align-items: flex-end; }
+#enduranceSection .en-chart-col-track {
+  flex: 1; min-width: 0; height: 100%;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: flex-end; gap: 4px;
+}
+#enduranceSection .en-bar-val {
+  font-size: 9.5px; color: var(--text-4); white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+#enduranceSection .en-bar-val.current { color: var(--text-1); font-weight: 700; }
+#enduranceSection .en-bar-fill {
+  width: 65%; border-radius: 4px 4px 2px 2px;
+  background: rgba(255,255,255,0.15);
+  transition: height 0.2s ease;
+}
+#enduranceSection .en-bar-fill.current { background: var(--accent); }
+#enduranceSection .en-chart-labels-row { display: flex; gap: 6px; margin-top: 6px; }
+#enduranceSection .en-bar-label { flex: 1; text-align: center; font-size: 9.5px; color: var(--text-4); }
+
+/* ----- Section titles ----- */
+#enduranceSection .en-section-title {
+  display: flex; align-items: center; gap: 8px;
+  margin: 22px 0 10px;
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--text-3);
+}
+#enduranceSection .en-count-badge {
+  background: rgba(255,255,255,0.06); color: var(--text-2);
+  padding: 1px 8px; border-radius: 999px;
+  font-size: 11px; font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ----- History ----- */
+#enduranceSection .en-hist-card { padding: 6px 16px; }
+#enduranceSection .en-hist-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 0; border-bottom: 1px solid var(--border);
+}
+#enduranceSection .en-hist-row:last-child { border-bottom: none; }
+#enduranceSection .en-hist-date {
+  flex: none; font-size: 11px; color: var(--text-3);
+  font-family: var(--font-mono); min-width: 62px;
+}
+#enduranceSection .en-hist-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+#enduranceSection .en-hist-detail { font-size: 14px; font-weight: 700; }
+#enduranceSection .en-hist-meta { font-size: 11.5px; color: var(--text-3); }
+#enduranceSection .en-pr-badge {
+  display: inline-block; margin-left: 6px;
+  background: rgba(251,191,36,0.16); color: var(--warn);
+  font-size: 9px; font-weight: 800; letter-spacing: 0.06em;
+  padding: 2px 6px; border-radius: 999px; vertical-align: middle;
+  text-transform: uppercase;
+}
+#enduranceSection .en-hist-del {
+  flex: none; background: transparent; border: none; color: var(--text-4);
+  font-size: 16px; cursor: pointer; padding: 4px 6px;
+  -webkit-tap-highlight-color: transparent;
+}
+#enduranceSection .en-hist-del:hover { color: var(--bad); }
+#enduranceSection .en-empty {
+  padding: 18px 0; text-align: center; font-size: 13px; color: var(--text-3);
+}
+
+/* ----- PRs ----- */
+#enduranceSection .en-pr-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;
+}
+#enduranceSection .en-pr-cell {
+  padding: 14px; background: rgba(255,255,255,0.025);
+  border: 1px solid var(--border); border-radius: 12px;
+}
+#enduranceSection .en-pr-dist {
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-3); margin-bottom: 6px;
+}
+#enduranceSection .en-pr-pace { font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; }
+#enduranceSection .en-pr-pace.empty { color: var(--text-4); font-weight: 600; }
+#enduranceSection .en-pr-date { margin-top: 4px; font-size: 11px; color: var(--text-3); }
 
 @media (max-width: 480px) {
-  #enduranceSection .ec-shell { padding: 24px 14px 40px; }
-  #enduranceSection .ec-selector-row { grid-template-columns: 1fr; gap: 8px; }
-  #enduranceSection .ec-selector-label { font-size: 11px; }
+  #enduranceSection .en-shell { padding: 14px 10px calc(32px + env(safe-area-inset-bottom)); padding-top: max(14px, env(safe-area-inset-top)); padding-right: max(10px, env(safe-area-inset-right)); padding-left: max(10px, env(safe-area-inset-left)); }
+  #enduranceSection .en-title { font-size: 21px; }
+  #enduranceSection .card { padding: 16px 14px; }
+  #enduranceSection .en-hist-card { padding: 4px 12px; }
+  #enduranceSection .en-stat-box { padding: 12px 6px; }
+  #enduranceSection .en-stat-val { font-size: 22px; }
+  #enduranceSection .en-stat-label { font-size: 9.5px; letter-spacing: 0.06em; }
+  #enduranceSection .en-log-distance-row input[type="number"] { font-size: 32px; }
+  #enduranceSection .en-log-grid-2, #enduranceSection .en-optional-fields { grid-template-columns: 1fr; }
+  #enduranceSection .en-chart-tracks, #enduranceSection .en-chart-labels-row { gap: 4px; }
 }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1834,99 +1935,114 @@ img, video, canvas, svg { max-width: 100%; }
     </div>
   </div>
   </div>
-  <div id="enduranceSection" style="display:none;">
+<div id="enduranceSection" style="display:none;">
   <button class="po-day-pill" type="button" id="ecDayPill" title="Tap to edit your endurance rotation">
     <span class="po-day-date" id="ecDayPillDate">—</span>
     <span class="po-day-sep">·</span>
     <span class="po-day-split ec-day" id="ecDayPillSplit">—</span>
   </button>
-  <div class="ec-shell">
-  <div class="ec-inner">
+  <div class="en-shell">
+  <div class="en-inner">
 
-    <div class="ec-head">
+    <div class="en-header">
       <div>
-        <h1 class="ec-title">Progressive Endurance Coach</h1>
-        <div class="ec-subtitle" id="ecSubtitle">Pool training block</div>
-      </div>
-      <button class="ec-settings-btn" type="button" aria-label="Settings">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-      </button>
-    </div>
-
-    <div class="ec-progress-row">
-      <span class="ec-week-chip" id="ecWeekChip">WEEK 4 OF 6</span>
-      <div class="ec-progress-track"><div class="ec-progress-fill" id="ecProgressFill"></div></div>
-    </div>
-
-    <div class="ec-selector-card">
-      <div class="ec-selector-row">
-        <span class="ec-selector-label">SPORT</span>
-        <div class="ec-pill-group" id="ecSportPills"></div>
-      </div>
-      <div class="ec-selector-row">
-        <span class="ec-selector-label">FOCUS</span>
-        <div class="ec-pill-group" id="ecTypePills"></div>
+        <h1 class="en-title">Endurance</h1>
+        <div class="en-subtitle" id="enSubtitle">Running</div>
       </div>
     </div>
 
-    <div class="ec-week-head">
-      <h2 class="ec-week-title">This week&rsquo;s prescription</h2>
-      <span class="ec-week-note" id="ecPlanNote"></span>
+    <div class="en-sport-toggle" id="enSportToggle">
+      <button type="button" class="en-sport-pill" data-sport="run">Run</button>
+      <button type="button" class="en-sport-pill" data-sport="swim">Swim</button>
     </div>
 
-    <div class="ec-metrics-grid" id="ecMetrics"></div>
+    <div class="en-stats-row">
+      <div class="en-stat-box">
+        <div class="en-stat-val" id="enStatVolume">0</div>
+        <div class="en-stat-label">This week</div>
+      </div>
+      <div class="en-stat-box">
+        <div class="en-stat-val" id="enStatSessions">0</div>
+        <div class="en-stat-label">Sessions</div>
+      </div>
+      <div class="en-stat-box">
+        <div class="en-stat-val" id="enStatStreak">0</div>
+        <div class="en-stat-label">Streak (wks)</div>
+      </div>
+    </div>
 
-    <div class="ec-log-card" id="ecLogCard">
-      <button class="ec-log-toggle" id="ecLogToggle" type="button">
-        <span>Log this session</span>
-        <span class="ec-log-toggle-icon" id="ecLogToggleIcon">+</span>
-      </button>
-      <div class="ec-log-panel">
-        <div class="ec-log-grid">
-          <label class="ec-log-field">
-            <span class="ec-log-field-label">Date</span>
-            <input type="date" class="ec-log-input" id="ecLogDate">
-          </label>
-          <label class="ec-log-field">
-            <span class="ec-log-field-label" id="ecLogDistLabel">Distance (m)</span>
-            <input type="number" class="ec-log-input" id="ecLogDistance" min="0" step="50" inputmode="decimal" placeholder="0">
-          </label>
-          <label class="ec-log-field">
-            <span class="ec-log-field-label">Duration (min)</span>
-            <input type="number" class="ec-log-input" id="ecLogDuration" min="0" step="1" inputmode="decimal" placeholder="optional">
-          </label>
-          <label class="ec-log-field" id="ecLogPoolField">
-            <span class="ec-log-field-label">Pool length (m)</span>
-            <input type="number" class="ec-log-input" id="ecLogPool" min="0" step="5" inputmode="decimal" placeholder="optional">
-          </label>
-          <label class="ec-log-field" id="ecLogPaceField">
-            <span class="ec-log-field-label">Pace (optional)</span>
-            <input type="text" class="ec-log-input" id="ecLogPace" placeholder="e.g. 5:40">
-          </label>
-          <label class="ec-log-field" id="ecLogHrField">
-            <span class="ec-log-field-label">Heart rate (optional)</span>
-            <input type="text" class="ec-log-input" id="ecLogHr" placeholder="e.g. Z3 · 152">
-          </label>
+    <div class="card en-log-card">
+      <h2 class="en-card-title">Log session</h2>
+
+      <div class="en-log-distance-row">
+        <input type="number" id="enDistance" inputmode="decimal" min="0" step="0.1" placeholder="0" aria-label="Distance">
+        <span class="en-distance-unit" id="enDistanceUnit">km</span>
+      </div>
+
+      <div class="en-log-grid-2">
+        <div class="en-field">
+          <label for="enDuration">Duration (min)</label>
+          <input type="number" id="enDuration" inputmode="decimal" min="0" step="1" placeholder="optional">
         </div>
-        <button class="ec-log-save" id="ecLogSave" type="button">Save session</button>
-        <div class="ec-log-list" id="ecLogList"></div>
-      </div>
-    </div>
-
-    <div class="ec-chart-card">
-      <div class="ec-chart-head">
-        <span class="ec-chart-label" id="ecChartLabel">WEEKLY DISTANCE</span>
-        <div class="ec-chart-badges">
-          <span class="ec-chart-badge actual"><span class="dot"></span>logged</span>
-          <span class="ec-chart-badge"><span class="dot"></span>this week</span>
+        <div class="en-field" id="enPaceField">
+          <label for="enPace">Pace (M:SS)</label>
+          <input type="text" id="enPace" placeholder="e.g. 5:40">
+        </div>
+        <div class="en-field" id="enPoolField" style="display:none">
+          <label for="enPoolLen">Pool length (m)</label>
+          <input type="number" id="enPoolLen" inputmode="decimal" min="0" step="5" placeholder="optional">
         </div>
       </div>
-      <div class="ec-bars-row" id="ecBars"></div>
+
+      <div class="en-field en-date-field">
+        <label for="enDate">Date</label>
+        <input type="date" id="enDate">
+      </div>
+
+      <span class="en-optional-toggle" id="enOptionalToggle">＋ Heart rate · Notes</span>
+      <div class="en-optional-fields" id="enOptionalFields">
+        <div class="en-field">
+          <label for="enHr">Heart rate (bpm)</label>
+          <input type="number" id="enHr" inputmode="numeric" min="0" step="1" placeholder="optional">
+        </div>
+        <div class="en-field">
+          <label for="enNotes">Notes</label>
+          <input type="text" id="enNotes" placeholder="optional">
+        </div>
+      </div>
+
+      <button type="button" class="en-btn-primary" id="enSaveBtn">Save session</button>
+    </div>
+
+    <div class="card en-next-card">
+      <h2 class="en-card-title">Next session <span class="en-help-icon" id="enHelpIcon" title="More detail coming soon">?</span></h2>
+      <div class="en-next-target" id="enNextTarget">—</div>
+      <div class="en-next-sub" id="enNextSub">—</div>
+      <div id="enNextTag"></div>
+    </div>
+
+    <div class="card en-chart-card">
+      <h2 class="en-card-title">Weekly volume <span class="en-chart-sublabel" id="enChartSportLabel">· Running</span></h2>
+      <div class="en-chart-track-row">
+        <div class="en-chart-target-line" id="enChartTargetLine">
+          <span class="en-chart-target-label" id="enChartTargetLabel"></span>
+        </div>
+        <div class="en-chart-tracks" id="enChartTracks"></div>
+      </div>
+      <div class="en-chart-labels-row" id="enChartLabelsRow"></div>
+    </div>
+
+    <div class="en-section-title">Sessions <span class="en-count-badge" id="enHistCount">0</span></div>
+    <div class="card en-hist-card" id="enHistList"></div>
+
+    <div class="en-section-title">Personal records</div>
+    <div class="card en-pr-card">
+      <div class="en-pr-grid" id="enPrGrid"></div>
     </div>
 
   </div>
   </div>
-  </div>
+</div>
 </div>
 
 <!-- Add / Edit Exercise Modal -->
@@ -3885,76 +4001,396 @@ img, video, canvas, svg { max-width: 100%; }
 </script>
 
 <!-- ============================================================
-     Endurance — ported verbatim from endurance.html (body script),
-     scoped to #enduranceSection by its own element ids (ec*), which
-     are unique and don't collide with any gym id. Purely additive
-     line: window.__ecRender = render; near the end, so the picker
-     below can redraw this view on category switch.
+     Endurance — new session-first design (ported from endurance.html),
+     scoped to #enduranceSection by its own element ids (en*), which are
+     unique and don't collide with any gym id. The day-pill rotation
+     feature is kept from the prior design, but now only pre-selects
+     which sport pill is active by default for "today" — it no longer
+     drives a plan/metrics view (the new design has no such concept).
+     window.__ecRender lets the picker IIFE below redraw this view on
+     category switch.
      ============================================================ -->
 <script>
 (function () {
   'use strict';
 
   // ============================================================
-  // CONFIG — week-of-block and default sport. Edit if needed.
-  // ============================================================
-  const WEEK_OF_BLOCK = 4; // 1-6
-  const DEFAULT_SPORT = 'swim'; // 'swim' | 'run'
-
-  const swimTypes = ['Endurance', 'Intervals', 'Technique', 'Sprint', 'Recovery'];
-  const runTypes  = ['Easy', 'Tempo', 'Intervals', 'Long', 'Recovery'];
-
-  const swimBase = {
-    Endurance: { dist: 1600, dur: 48, pool: 25, step: 100 },
-    Intervals: { dist: 1200, dur: 42, pool: 25, step: 75 },
-    Technique: { dist: 900,  dur: 35, pool: 25, step: 50 },
-    Sprint:    { dist: 800,  dur: 30, pool: 50, step: 50 },
-    Recovery:  { dist: 1000, dur: 30, pool: 25, step: 0 },
-  };
-  const runBase = {
-    Easy:      { dist: 6.0,  dur: 38, pace: '6:20', hr: 'Z2 · 138', step: 0.4 },
-    Tempo:     { dist: 8.0,  dur: 42, pace: '5:15', hr: 'Z3 · 158', step: 0.5 },
-    Intervals: { dist: 7.0,  dur: 40, pace: '4:30', hr: 'Z4 · 172', step: 0.4 },
-    Long:      { dist: 14.0, dur: 85, pace: '6:40', hr: 'Z2 · 142', step: 1.0 },
-    Recovery:  { dist: 4.0,  dur: 26, pace: '7:05', hr: 'Z1 · 122', step: 0 },
-  };
-
-  // ============================================================
-  // STATE
-  // ============================================================
-  let state = { sport: DEFAULT_SPORT, swimType: 'Endurance', runType: 'Easy' };
-
-  function currentSport() { return state.sport; }
-  function currentType() { return currentSport() === 'swim' ? state.swimType : state.runType; }
-  function setSport(s) { state.sport = s; render(); }
-  function setType(t) {
-    if (currentSport() === 'swim') state.swimType = t; else state.runType = t;
-    render();
-  }
-
-  // ============================================================
-  // LOGGED SESSIONS — manual entry today; same localStorage key a
-  // future Garmin sync could also write into, since it's just an
-  // array of {date, sport, type, distance, duration, ...} entries.
+  // STORAGE SEAMS
   // ============================================================
   const LOGS_KEY = 'po_endurance_logs_v1';
+  const CONFIG_KEY = 'po_endurance_config_v1';
 
-  function loadLogs() {
+  function getLogs() {
     try { return JSON.parse(localStorage.getItem(LOGS_KEY)) || []; }
     catch (e) { return []; }
   }
-  function saveLogs(logs) { localStorage.setItem(LOGS_KEY, JSON.stringify(logs)); }
-  function addLog(entry) { const logs = loadLogs(); logs.push(entry); saveLogs(logs); }
-  function deleteLog(id) { saveLogs(loadLogs().filter(l => l.id !== id)); }
+  function setLogs(arr) { localStorage.setItem(LOGS_KEY, JSON.stringify(arr)); }
 
+  function getConfig() {
+    const defaults = {
+      activeSport: 'run',
+      progressionRate: 0.07,
+      runPRDistances: [1, 5, 10, 21.1, 42.2],
+      swimPRDistances: [100, 400, 1000, 1500],
+      lastAutoSportDate: null
+    };
+    try {
+      const stored = JSON.parse(localStorage.getItem(CONFIG_KEY));
+      return stored ? Object.assign({}, defaults, stored) : defaults;
+    } catch (e) { return defaults; }
+  }
+  function setConfig(obj) { localStorage.setItem(CONFIG_KEY, JSON.stringify(obj)); }
+
+  // ============================================================
+  // COMPUTATION LAYER — pure functions, no DOM reads
+  // ============================================================
   function dateKey(d) {
-    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    return d.getFullYear() + '-' +
+      String(d.getMonth() + 1).padStart(2, '0') + '-' +
+      String(d.getDate()).padStart(2, '0');
+  }
+  function mondayOf(d) {
+    const dt = new Date(d); const day = dt.getDay();
+    dt.setDate(dt.getDate() + (day === 0 ? -6 : 1 - day));
+    dt.setHours(0, 0, 0, 0); return dt;
+  }
+  function weekStart(weeksAgo) {
+    const d = mondayOf(new Date());
+    d.setDate(d.getDate() - weeksAgo * 7); return d;
+  }
+  function weekEnd(start) {
+    const d = new Date(start); d.setDate(d.getDate() + 6);
+    d.setHours(23, 59, 59, 999); return d;
+  }
+  function inRange(dateStr, start, end) {
+    const d = new Date(dateStr + 'T00:00:00');
+    return d >= start && d <= end;
+  }
+
+  function weeklyVolume(logs, sport, weeksAgo) {
+    const s = weekStart(weeksAgo), e = weekEnd(s);
+    return logs
+      .filter(l => l.sport === sport && inRange(l.date, s, e))
+      .reduce((sum, l) => sum + (Number(l.distance) || 0), 0);
+  }
+
+  function rollingAvg(logs, sport) {
+    const vols = [1, 2, 3, 4].map(w => weeklyVolume(logs, sport, w));
+    const nonZero = vols.filter(v => v > 0);
+    return nonZero.length ? nonZero.reduce((a, b) => a + b, 0) / nonZero.length : 0;
+  }
+
+  function nextTarget(logs, sport) {
+    const DEFAULTS = { run: 10, swim: 2000 };
+    const avg = rollingAvg(logs, sport);
+    if (avg === 0) return DEFAULTS[sport];
+    const cfg = getConfig();
+    const proposed = avg * (1 + cfg.progressionRate);
+    const lastWeek = weeklyVolume(logs, sport, 1);
+    if (lastWeek === 0) return Math.round(avg * 0.6 * 10) / 10; // deload
+    const maxIncrease = avg * 1.10;
+    const target = Math.min(proposed, maxIncrease);
+    return sport === 'swim' ? Math.round(target / 50) * 50 : Math.round(target * 10) / 10;
+  }
+
+  // Streak counts weeks (not days) — more meaningful for endurance training
+  // where 1 session/week is the minimum consistency signal.
+  function currentStreak(logs, sport) {
+    let streak = 0, weeksAgo = 0;
+    while (weeksAgo < 52) {
+      if (weeklyVolume(logs, sport, weeksAgo) > 0) { streak++; weeksAgo++; }
+      else { if (weeksAgo === 0) { weeksAgo++; continue; } break; }
+    }
+    return streak;
+  }
+
+  function parsePaceSeconds(paceStr) {
+    if (!paceStr) return null;
+    const m = String(paceStr).match(/^(\d+):(\d{2})$/);
+    return m ? parseInt(m[1]) * 60 + parseInt(m[2]) : null;
+  }
+  function computedPace(log) {
+    const stored = parsePaceSeconds(log.pace);
+    if (stored) return stored;
+    if (log.duration && log.distance && log.distance > 0) {
+      const durMin = Number(log.duration);
+      const dist = Number(log.distance);
+      if (log.sport === 'swim') return (durMin / dist) * 100 * 60; // seconds per 100m
+      return (durMin / dist) * 60; // seconds per km
+    }
+    return null;
+  }
+  function detectPRs(logs, sport) {
+    const cfg = getConfig();
+    const distances = sport === 'run' ? cfg.runPRDistances : cfg.swimPRDistances;
+    const prs = new Map();
+    const sportLogs = logs.filter(l => l.sport === sport);
+    for (const dist of distances) {
+      const tolerance = dist * 0.05;
+      const candidates = sportLogs.filter(l =>
+        Math.abs(Number(l.distance) - dist) <= tolerance && computedPace(l) !== null
+      );
+      if (!candidates.length) continue;
+      candidates.sort((a, b) => computedPace(a) - computedPace(b));
+      prs.set(dist, { log: candidates[0], paceSeconds: computedPace(candidates[0]) });
+    }
+    return prs;
+  }
+  function formatPace(seconds, sport) {
+    if (!seconds) return '—';
+    const m = Math.floor(seconds / 60), s = Math.round(seconds % 60);
+    return m + ':' + String(s).padStart(2, '0') + (sport === 'swim' ? '/100m' : '/km');
+  }
+
+  function sessionsThisWeek(logs, sport) {
+    const s = weekStart(0), e = weekEnd(s);
+    return logs.filter(l => l.sport === sport && inRange(l.date, s, e))
+      .sort((a, b) => b.date.localeCompare(a.date) || b.loggedAt - a.loggedAt);
+  }
+  function allSessions(logs, sport) {
+    return logs.filter(l => l.sport === sport)
+      .sort((a, b) => b.date.localeCompare(a.date) || b.loggedAt - a.loggedAt);
+  }
+
+  // 4-week rolling average uses PAST weeks (not including the current one)
+  // so today's logging doesn't alter tonight's target — the target stays
+  // stable for the whole week.
+  function weeklyVolumeHistory(logs, sport) {
+    return Array.from({ length: 8 }, (_, i) => {
+      const weeksAgo = 7 - i;
+      const mon = mondayOf(new Date()); mon.setDate(mon.getDate() - weeksAgo * 7);
+      const label = weeksAgo === 0 ? 'This wk' : (mon.getMonth() + 1) + '/' + mon.getDate();
+      return { label, vol: weeklyVolume(logs, sport, weeksAgo), isCurrent: weeksAgo === 0 };
+    });
+  }
+
+  function unitFor(sport) { return sport === 'run' ? 'km' : 'm'; }
+  function formatVolume(v, sport) {
+    return sport === 'run' ? v.toFixed(1) + ' km' : Math.round(v).toLocaleString() + ' m';
   }
 
   // ============================================================
-  // ROTATION — independent day-pill + editor for endurance, mirroring
-  // the gym section's #dayPill / #rotModalBg mechanism exactly, but
-  // fully separate storage and DOM ids so neither system can collide.
+  // RENDER
+  // ============================================================
+  function renderStats(thisWeekVol, sessionCount, streak, sport) {
+    const volEl = document.getElementById('enStatVolume');
+    const volText = sport === 'run' ? thisWeekVol.toFixed(1) : Math.round(thisWeekVol).toLocaleString();
+    volEl.innerHTML = volText + '<span class="en-stat-unit">' + unitFor(sport) + '</span>';
+    volEl.classList.toggle('muted', thisWeekVol === 0);
+    document.getElementById('enStatSessions').textContent = sessionCount;
+    document.getElementById('enStatStreak').textContent = streak;
+  }
+
+  function renderNext(target, avg, lastWk, thisWeekVol, sport) {
+    document.getElementById('enNextTarget').textContent = 'Target: ' + formatVolume(target, sport);
+
+    let sub;
+    if (avg > 0) {
+      sub = 'Based on your 4-week average (' + formatVolume(avg, sport) + '/wk)';
+    } else {
+      sub = 'Default starting target';
+    }
+    document.getElementById('enNextSub').textContent = sub;
+
+    let tagHtml = '';
+    if (avg > 0 && lastWk === 0) {
+      tagHtml = '<span class="en-next-tag warn">Deload week — easing back in</span>';
+    } else if (target > 0 && thisWeekVol >= target) {
+      tagHtml = '<span class="en-next-tag good">Target reached this week ✓</span>';
+    }
+    document.getElementById('enNextTag').innerHTML = tagHtml;
+  }
+
+  function renderChart(logs, sport, target, avg) {
+    const data = weeklyVolumeHistory(logs, sport);
+    const maxVol = Math.max(1, ...data.map(d => d.vol));
+    const chartMax = avg > 0 ? Math.max(maxVol, target) : maxVol;
+
+    document.getElementById('enChartTracks').innerHTML = data.map(d => {
+      const h = chartMax > 0 ? (d.vol / chartMax * 100) : 0;
+      const valText = sport === 'run' ? d.vol.toFixed(1) : Math.round(d.vol).toLocaleString();
+      return '<div class="en-chart-col-track">' +
+        '<span class="en-bar-val' + (d.isCurrent ? ' current' : '') + '">' + valText + '</span>' +
+        '<div class="en-bar-fill' + (d.isCurrent ? ' current' : '') + '" style="height:' + h.toFixed(1) + '%"></div>' +
+      '</div>';
+    }).join('');
+
+    document.getElementById('enChartLabelsRow').innerHTML = data.map(d =>
+      '<span class="en-bar-label">' + d.label + '</span>'
+    ).join('');
+
+    const lineEl = document.getElementById('enChartTargetLine');
+    if (avg > 0 && chartMax > 0) {
+      const pct = Math.min(100, (target / chartMax) * 100);
+      lineEl.style.bottom = pct + '%';
+      lineEl.style.display = 'block';
+      document.getElementById('enChartTargetLabel').textContent = 'Target';
+    } else {
+      lineEl.style.display = 'none';
+    }
+  }
+
+  function renderHistory(logs, sport) {
+    const sessions = allSessions(logs, sport);
+    const prs = detectPRs(logs, sport);
+    const prLogIds = new Set(Array.from(prs.values()).map(e => e.log.id));
+
+    document.getElementById('enHistCount').textContent = sessions.length;
+    const listEl = document.getElementById('enHistList');
+
+    if (!sessions.length) {
+      listEl.innerHTML = '<div class="en-empty">No ' + (sport === 'run' ? 'runs' : 'swims') +
+        ' logged yet. Log your first session above.</div>';
+      return;
+    }
+
+    listEl.innerHTML = sessions.map(l => {
+      const distText = sport === 'run'
+        ? Number(l.distance).toFixed(1) + ' km'
+        : Math.round(l.distance).toLocaleString() + ' m';
+      const paceSec = computedPace(l);
+      const metaParts = [];
+      if (paceSec) metaParts.push(formatPace(paceSec, sport));
+      if (l.duration) metaParts.push(l.duration + ' min');
+      const metaText = metaParts.join(' · ');
+      const prBadge = prLogIds.has(l.id) ? '<span class="en-pr-badge">PR</span>' : '';
+      return '<div class="en-hist-row">' +
+        '<span class="en-hist-date">' + l.date + '</span>' +
+        '<div class="en-hist-main">' +
+          '<span class="en-hist-detail">' + distText + prBadge + '</span>' +
+          (metaText ? '<span class="en-hist-meta">' + metaText + '</span>' : '') +
+        '</div>' +
+        '<button type="button" class="en-hist-del" data-del="' + l.id + '" aria-label="Delete">×</button>' +
+      '</div>';
+    }).join('');
+
+    listEl.querySelectorAll('[data-del]').forEach(btn =>
+      btn.addEventListener('click', () => {
+        setLogs(getLogs().filter(l => l.id !== btn.dataset.del));
+        render();
+      })
+    );
+  }
+
+  function renderPRs(logs, sport) {
+    const cfg = getConfig();
+    const distances = sport === 'run' ? cfg.runPRDistances : cfg.swimPRDistances;
+    const prs = detectPRs(logs, sport);
+
+    document.getElementById('enPrGrid').innerHTML = distances.map(dist => {
+      const distLabel = sport === 'run' ? dist + ' km' : dist + ' m';
+      const entry = prs.get(dist);
+      if (!entry) {
+        return '<div class="en-pr-cell"><div class="en-pr-dist">' + distLabel + '</div>' +
+          '<div class="en-pr-pace empty">—</div></div>';
+      }
+      return '<div class="en-pr-cell"><div class="en-pr-dist">' + distLabel + '</div>' +
+        '<div class="en-pr-pace">' + formatPace(entry.paceSeconds, sport) + '</div>' +
+        '<div class="en-pr-date">' + entry.log.date + '</div></div>';
+    }).join('');
+  }
+
+  function render() {
+    const logs = getLogs();
+    const cfg = getConfig();
+    const sport = cfg.activeSport;
+
+    document.querySelectorAll('#enSportToggle .en-sport-pill').forEach(btn =>
+      btn.classList.toggle('active', btn.dataset.sport === sport)
+    );
+    document.getElementById('enSubtitle').textContent = sport === 'run' ? 'Running' : 'Swimming';
+    document.getElementById('enDistanceUnit').textContent = unitFor(sport);
+    document.getElementById('enPaceField').style.display = sport === 'run' ? '' : 'none';
+    document.getElementById('enPoolField').style.display = sport === 'swim' ? '' : 'none';
+    document.getElementById('enChartSportLabel').textContent = '· ' + (sport === 'run' ? 'Running' : 'Swimming');
+
+    const thisWeekSessions = sessionsThisWeek(logs, sport);
+    const thisWeekVol = thisWeekSessions.reduce((s, l) => s + (Number(l.distance) || 0), 0);
+    const sessionCount = thisWeekSessions.length;
+    const streak = currentStreak(logs, sport);
+    const target = nextTarget(logs, sport);
+    const avg = rollingAvg(logs, sport);
+    const lastWk = weeklyVolume(logs, sport, 1);
+
+    renderStats(thisWeekVol, sessionCount, streak, sport);
+    renderNext(target, avg, lastWk, thisWeekVol, sport);
+    renderChart(logs, sport, target, avg);
+    renderHistory(logs, sport);
+    renderPRs(logs, sport);
+  }
+
+  // ============================================================
+  // EVENTS
+  // ============================================================
+  document.querySelectorAll('#enSportToggle .en-sport-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cfg = getConfig();
+      cfg.activeSport = btn.dataset.sport;
+      setConfig(cfg);
+      render();
+    });
+  });
+
+  document.getElementById('enOptionalToggle').addEventListener('click', () => {
+    document.getElementById('enOptionalFields').classList.toggle('show');
+  });
+
+  // The `type` sub-field (Endurance/Intervals/Technique etc.) has been
+  // removed. Session-first design tracks raw sessions, not prescribed
+  // types. Old logs that have `type` still render — the field is simply
+  // ignored everywhere above.
+  document.getElementById('enSaveBtn').addEventListener('click', () => {
+    const cfg = getConfig();
+    const sport = cfg.activeSport;
+
+    const distance = parseFloat(document.getElementById('enDistance').value);
+    if (!distance || distance <= 0) return;
+
+    const duration = parseFloat(document.getElementById('enDuration').value);
+    const date = document.getElementById('enDate').value || dateKey(new Date());
+    const hrVal = parseFloat(document.getElementById('enHr').value);
+    let notes = document.getElementById('enNotes').value.trim();
+    let pace = null;
+
+    if (sport === 'run') {
+      pace = document.getElementById('enPace').value.trim() || null;
+    } else {
+      // `pool` field removed from the schema. Not enough utility to justify
+      // the UX complexity of a dedicated column — folded into notes instead.
+      const poolLen = parseFloat(document.getElementById('enPoolLen').value);
+      if (poolLen) notes = 'Pool: ' + poolLen + 'm' + (notes ? ' · ' + notes : '');
+    }
+
+    const logs = getLogs();
+    logs.push({
+      id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+      date, sport, distance,
+      duration: isNaN(duration) ? null : duration,
+      pace,
+      hr: isNaN(hrVal) ? null : hrVal,
+      notes: notes || null,
+      loggedAt: Date.now()
+    });
+    setLogs(logs);
+
+    document.getElementById('enDistance').value = '';
+    document.getElementById('enDuration').value = '';
+    document.getElementById('enPace').value = '';
+    document.getElementById('enPoolLen').value = '';
+    document.getElementById('enHr').value = '';
+    document.getElementById('enNotes').value = '';
+    document.getElementById('enOptionalFields').classList.remove('show');
+
+    render();
+  });
+
+  // ============================================================
+  // DAY-PILL ROTATION — kept from the prior endurance design, mirroring
+  // the gym section's #dayPill / #rotModalBg mechanism (separate storage,
+  // separate DOM ids, so neither system can collide). It no longer
+  // drives a plan: it only pre-selects which sport pill is active by
+  // default for "today", at most once per calendar day, so a manual
+  // toggle later in the day is never overridden by a reload.
   // ============================================================
   const ECROT_KEY = 'po_endurance_rotation_v1';
 
@@ -4003,6 +4439,29 @@ img, video, canvas, svg { max-width: 100%; }
     const activity = ecTodayActivity();
     document.getElementById('ecDayPillDate').textContent = ecTodayDateLabel();
     document.getElementById('ecDayPillSplit').textContent = (activity.name || '—').toUpperCase();
+  }
+
+  // Maps a free-text rotation entry (e.g. "Run", "Bike") to a sport key,
+  // if recognizable. Unrecognized activities (anything that isn't a run
+  // or a swim) simply leave the sport toggle wherever it was.
+  function sportFromActivityName(name) {
+    const n = String(name || '').toLowerCase();
+    if (n.indexOf('run') !== -1) return 'run';
+    if (n.indexOf('swim') !== -1) return 'swim';
+    return null;
+  }
+
+  // `force` re-applies regardless of the once-per-day gate — used right
+  // after the user edits the rotation, since they just explicitly told
+  // the app what today is.
+  function applyTodaySportFromRotation(force) {
+    const today = dateKey(new Date());
+    const cfg = getConfig();
+    if (!force && cfg.lastAutoSportDate === today) return;
+    const sport = sportFromActivityName(ecTodayActivity().name);
+    cfg.lastAutoSportDate = today;
+    if (sport) cfg.activeSport = sport;
+    setConfig(cfg);
   }
 
   let ecRotDraft = null;
@@ -4095,273 +4554,19 @@ img, video, canvas, svg { max-width: 100%; }
     ecSaveRotation(ecRotState);
     document.getElementById('ecRotModalBg').classList.remove('show');
     ecRotDraft = null;
+    applyTodaySportFromRotation(true);
+    render();
     renderEcDayPill();
   });
 
-  // Monday-start week containing `d`.
-  function mondayOf(d) {
-    const date = new Date(d);
-    const day = date.getDay(); // 0=Sun..6=Sat
-    date.setDate(date.getDate() + (day === 0 ? -6 : 1 - day));
-    date.setHours(0, 0, 0, 0);
-    return date;
-  }
-  function thisWeekRange() {
-    const start = mondayOf(new Date());
-    const end = new Date(start);
-    end.setDate(start.getDate() + 6);
-    end.setHours(23, 59, 59, 999);
-    return { start, end };
-  }
-  function logsThisWeek(sport) {
-    const { start, end } = thisWeekRange();
-    return loadLogs().filter(l => {
-      if (l.sport !== sport) return false;
-      const d = new Date(l.date + 'T00:00:00');
-      return d >= start && d <= end;
-    });
-  }
-  function sumThisWeek(sport) {
-    const logs = logsThisWeek(sport);
-    return {
-      distance: logs.reduce((s, l) => s + (Number(l.distance) || 0), 0),
-      duration: logs.reduce((s, l) => s + (Number(l.duration) || 0), 0),
-      count: logs.length
-    };
-  }
+  document.getElementById('enDate').value = dateKey(new Date());
 
-  // Sport+type-scoped actual data for the metric cards (the weekly bar
-  // chart stays sport-only, per the prior change — this is separate).
-  // Distance/duration are summed across this week's matching sessions;
-  // pool/pace/hr are descriptive, not summable, so we take the most
-  // recently logged value instead.
-  function actualForCard(sport, type) {
-    const { start, end } = thisWeekRange();
-    const logs = loadLogs().filter(l => {
-      if (l.sport !== sport || l.type !== type) return false;
-      const d = new Date(l.date + 'T00:00:00');
-      return d >= start && d <= end;
-    });
-    if (!logs.length) return null;
-
-    const durLogs = logs.filter(l => l.duration != null && !isNaN(l.duration));
-    function latest(field) {
-      const withField = logs.filter(l => l[field] != null && l[field] !== '')
-        .sort((a, b) => b.loggedAt - a.loggedAt);
-      return withField.length ? withField[0][field] : null;
-    }
-
-    return {
-      count: logs.length,
-      distance: logs.reduce((s, l) => s + (Number(l.distance) || 0), 0),
-      duration: durLogs.length ? durLogs.reduce((s, l) => s + Number(l.duration), 0) : null,
-      pool: latest('pool'),
-      pace: latest('pace'),
-      hr: latest('hr')
-    };
-  }
-
-  // ============================================================
-  // PLAN BUILDER — same ramp/step logic as the design reference
-  // ============================================================
-  function ramp(center, step, currentWeek, fmt) {
-    const vals = [];
-    let min = Infinity, max = -Infinity;
-    for (let i = 1; i <= 6; i++) {
-      const v = center + step * (i - currentWeek);
-      vals.push(v);
-      if (v < min) min = v;
-      if (v > max) max = v;
-    }
-    return vals.map((v, idx) => {
-      const isCurrent = (idx + 1) === currentWeek;
-      const h = (max === min) ? 66 : (40 + (v - min) / (max - min) * 60);
-      return { label: 'W' + (idx + 1), valText: fmt(v), heightPct: h, current: isCurrent };
-    });
-  }
-
-  // A metric card shows the actual logged value when one exists for this
-  // sport+type+week; otherwise it's an explicit "not logged" state rather
-  // than silently falling back to the plan target (that's the confusion
-  // this whole change is meant to fix). No tag once real data is showing —
-  // the tag is only ever "Not logged this week" now.
-  function metricCard(label, value, unit, fmt) {
-    if (value == null) return { label, value: '—', unit: '', tag: 'Not logged this week' };
-    return { label, value: fmt(value), unit, tag: null };
-  }
-  function metricCardHr(value) {
-    if (value == null) return { label: 'Heart rate', value: '—', unit: '', tag: 'Not logged this week' };
-    const parts = value.split(' · ');
-    if (parts.length === 2) return { label: 'Heart rate', value: parts[0], unit: parts[1] + ' bpm', tag: null };
-    return { label: 'Heart rate', value, unit: '', tag: null };
-  }
-
-  function buildPlan(sport, type, week, actual) {
-    if (sport === 'swim') {
-      const b = swimBase[type];
-      const metrics = [
-        metricCard('Distance', actual && actual.distance, 'm', v => v.toLocaleString()),
-        metricCard('Duration', actual && actual.duration, 'min', v => String(v)),
-        metricCard('Pool length', actual && actual.pool, 'm', v => String(v)),
-      ];
-      const fmt = v => v >= 1000 ? (v / 1000).toFixed(1) + 'k' : String(Math.round(v));
-      const weeks = ramp(b.dist, b.step, week, fmt);
-      return { metrics, weeks, chartLabel: 'WEEKLY DISTANCE · METRES', targetDist: b.dist, fmt, unit: 'm' };
-    }
-    const b = runBase[type];
-    const metrics = [
-      metricCard('Distance', actual && actual.distance, 'km', v => v.toFixed(1)),
-      metricCard('Duration', actual && actual.duration, 'min', v => String(v)),
-      metricCard('Pace', actual && actual.pace, '/km', v => v),
-      metricCardHr(actual && actual.hr),
-    ];
-    const fmt = v => v.toFixed(1);
-    const weeks = ramp(b.dist, b.step, week, fmt);
-    return { metrics, weeks, chartLabel: 'WEEKLY DISTANCE · KM', targetDist: b.dist, fmt, unit: 'km' };
-  }
-
-  // ============================================================
-  // RENDER
-  // ============================================================
-  function pillsHtml(items, activeKey, dataAttr) {
-    return items.map(it =>
-      '<button type="button" class="ec-pill ' + (it.key === activeKey ? 'active' : '') + '" data-' + dataAttr + '="' + it.key + '">' + it.label + '</button>'
-    ).join('');
-  }
-
-  function render() {
-    const sport = currentSport();
-    const type = currentType();
-    const typeList = sport === 'swim' ? swimTypes : runTypes;
-    const week = Math.min(6, Math.max(1, WEEK_OF_BLOCK));
-
-    document.getElementById('ecSubtitle').textContent = sport === 'swim' ? 'Pool training block' : 'Road & track block';
-    document.getElementById('ecWeekChip').textContent = 'WEEK ' + week + ' OF 6';
-    document.getElementById('ecProgressFill').style.width = Math.round(week / 6 * 100) + '%';
-
-    document.getElementById('ecSportPills').innerHTML = pillsHtml(
-      [{ key: 'swim', label: 'Swimming' }, { key: 'run', label: 'Running' }], sport, 'sport'
-    );
-    document.getElementById('ecTypePills').innerHTML = pillsHtml(
-      typeList.map(n => ({ key: n, label: n })), type, 'type'
-    );
-
-    document.getElementById('ecPlanNote').textContent = type + ' · progressive build';
-
-    const plan = buildPlan(sport, type, week, actualForCard(sport, type));
-
-    document.getElementById('ecMetrics').innerHTML = plan.metrics.map(m =>
-      '<div class="ec-metric-card' + (m.tag ? ' ec-metric-card-empty' : '') + '">' +
-        '<div class="ec-metric-label">' + m.label + '</div>' +
-        '<div class="ec-metric-value-row"><span class="ec-metric-value">' + m.value + '</span><span class="ec-metric-unit">' + m.unit + '</span></div>' +
-        (m.tag ? '<div><span class="ec-tag neutral">' + m.tag + '</span></div>' : '') +
-      '</div>'
-    ).join('');
-
-    document.getElementById('ecChartLabel').textContent = plan.chartLabel;
-
-    // Actual logged distance this week, scaled against the current week's
-    // own bar height so "logged == target" lines the overlay up exactly
-    // with the gold prescription bar.
-    const actual = sumThisWeek(sport);
-    const currentWeekEntry = plan.weeks.find(w => w.current);
-    const actualPct = plan.targetDist > 0 ? Math.min(100, (actual.distance / plan.targetDist) * 100) : 0;
-    const actualHeightPct = currentWeekEntry ? (actualPct / 100) * currentWeekEntry.heightPct : 0;
-
-    document.getElementById('ecBars').innerHTML = plan.weeks.map(w => {
-      const actualOverlay = w.current ? '<div class="ec-bar-actual" style="height:' + actualHeightPct.toFixed(1) + '%;"></div>' : '';
-      const actualLabel = w.current ? '<span class="ec-bar-actual-label">● ' + plan.fmt(actual.distance) + '</span>' : '';
-      return '<div class="ec-bar-col">' +
-        '<span class="ec-bar-val ' + (w.current ? 'current' : '') + '">' + w.valText + '</span>' +
-        actualLabel +
-        '<div class="ec-bar-track"><div class="ec-bar-fill ' + (w.current ? 'current' : '') + '" style="height:' + w.heightPct + '%;"></div>' + actualOverlay + '</div>' +
-        '<span class="ec-bar-week">' + w.label + '</span>' +
-      '</div>';
-    }).join('');
-
-    document.querySelectorAll('#ecSportPills .ec-pill').forEach(btn =>
-      btn.addEventListener('click', () => setSport(btn.dataset.sport))
-    );
-    document.querySelectorAll('#ecTypePills .ec-pill').forEach(btn =>
-      btn.addEventListener('click', () => setType(btn.dataset.type))
-    );
-
-    updateLogFormFields(sport);
-    renderLogList(sport, plan.unit);
-  }
-
-  // ============================================================
-  // LOG FORM — sport-specific fields + this week's logged sessions.
-  // ============================================================
-  function updateLogFormFields(sport) {
-    document.getElementById('ecLogDistLabel').textContent = sport === 'swim' ? 'Distance (m)' : 'Distance (km)';
-    document.getElementById('ecLogPoolField').style.display = sport === 'swim' ? '' : 'none';
-    document.getElementById('ecLogPaceField').style.display = sport === 'run' ? '' : 'none';
-    document.getElementById('ecLogHrField').style.display = sport === 'run' ? '' : 'none';
-  }
-
-  function renderLogList(sport, unit) {
-    const logs = logsThisWeek(sport).sort((a, b) => b.date.localeCompare(a.date) || b.loggedAt - a.loggedAt);
-    const listEl = document.getElementById('ecLogList');
-    if (!logs.length) {
-      listEl.innerHTML = '<div class="ec-log-empty">No sessions logged this week yet.</div>';
-      return;
-    }
-    listEl.innerHTML = logs.map(l => {
-      const durText = l.duration ? ' · ' + l.duration + ' min' : '';
-      return '<div class="ec-log-row">' +
-        '<div class="ec-log-row-main">' +
-          '<span class="ec-log-row-detail">' + l.type + ' · ' + l.distance + unit + durText + '</span>' +
-          '<span class="ec-log-row-date">' + l.date + '</span>' +
-        '</div>' +
-        '<button class="ec-log-row-del" type="button" data-del="' + l.id + '">×</button>' +
-      '</div>';
-    }).join('');
-    listEl.querySelectorAll('[data-del]').forEach(btn =>
-      btn.addEventListener('click', () => { deleteLog(btn.dataset.del); render(); })
-    );
-  }
-
-  document.getElementById('ecLogToggle').addEventListener('click', () => {
-    document.getElementById('ecLogCard').classList.toggle('open');
-  });
-
-  document.getElementById('ecLogSave').addEventListener('click', () => {
-    const date = document.getElementById('ecLogDate').value || dateKey(new Date());
-    const distance = parseFloat(document.getElementById('ecLogDistance').value);
-    if (isNaN(distance) || distance <= 0) return;
-    const durationVal = parseFloat(document.getElementById('ecLogDuration').value);
-    const sport = currentSport();
-
-    addLog({
-      id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
-      date,
-      sport,
-      type: currentType(),
-      distance,
-      duration: isNaN(durationVal) ? null : durationVal,
-      pool: sport === 'swim' ? (parseFloat(document.getElementById('ecLogPool').value) || null) : null,
-      pace: sport === 'run' ? (document.getElementById('ecLogPace').value.trim() || null) : null,
-      hr: sport === 'run' ? (document.getElementById('ecLogHr').value.trim() || null) : null,
-      loggedAt: Date.now()
-    });
-
-    document.getElementById('ecLogDistance').value = '';
-    document.getElementById('ecLogDuration').value = '';
-    document.getElementById('ecLogPool').value = '';
-    document.getElementById('ecLogPace').value = '';
-    document.getElementById('ecLogHr').value = '';
-    render();
-  });
-
-  document.getElementById('ecLogDate').value = dateKey(new Date());
-
+  applyTodaySportFromRotation(false);
   render();
   renderEcDayPill();
 
   // Purely additive — lets the picker IIFE below redraw this view when
-  // the user switches back to the endurance category. Also refreshes
-  // the day-pill so its date stays current.
+  // the user switches back to the endurance category.
   window.__ecRender = function () { render(); renderEcDayPill(); };
 
   // initCloudSync is defined by sync.js, which loads with `defer` — its
@@ -4372,7 +4577,7 @@ img, video, canvas, svg { max-width: 100%; }
     if (typeof initCloudSync !== 'function') return;
     initCloudSync({
       appKey: 'endurance',
-      syncedKeys: [LOGS_KEY, ECROT_KEY],
+      syncedKeys: [LOGS_KEY, CONFIG_KEY, ECROT_KEY],
       onApplied: function () { render(); renderEcDayPill(); }
     });
   });
