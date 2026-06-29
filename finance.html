@@ -1725,6 +1725,45 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 @media (max-width: 520px) {
   .rcpt-fields { grid-template-columns: 1fr; }
 }
+
+/* ===== Pulse ===== */
+.pulse-verdict{display:flex;flex-direction:column;align-items:center;gap:10px;padding:28px 20px 22px;text-align:center}
+.verdict-badge{display:inline-block;padding:5px 16px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.verdict-badge.on-track{background:rgba(107,227,164,.15);color:#6BE3A4}
+.verdict-badge.watch-it{background:rgba(224,118,88,.15);color:#E07658}
+.verdict-badge.behind{background:rgba(255,138,138,.15);color:#FF8A8A}
+.pulse-nw{font-size:38px;font-weight:700;letter-spacing:-.5px;line-height:1.05}
+.pulse-delta{font-size:13px;color:var(--text-tertiary);margin-top:2px}
+.pulse-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pulse-stat{background:var(--glass-bg);border-radius:12px;padding:14px 10px;text-align:center}
+.pulse-stat-label{font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.pulse-stat-val{font-size:18px;font-weight:600;color:var(--text-primary)}
+.pulse-links{display:flex;gap:8px}
+.pulse-link-chip{flex:1;background:var(--glass-bg);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 8px;font-size:12px;color:var(--text-secondary);text-align:center;cursor:pointer;font-family:inherit}
+.pulse-link-chip:hover{color:var(--text-primary);background:rgba(255,255,255,.07)}
+/* ===== Flow ===== */
+.flow-bar-area{display:flex;align-items:flex-end;gap:6px;height:120px}
+.flow-bar-col{display:flex;flex-direction:column;align-items:center;flex:1;height:100%;justify-content:flex-end}
+.flow-bar{width:100%;border-radius:4px 4px 0 0;min-height:2px}
+.flow-bar.pos{background:#6BE3A4}
+.flow-bar.neg{background:#FF8A8A}
+.flow-bar-labels{display:flex;gap:6px;margin-top:6px}
+.flow-bar-lbl{flex:1;text-align:center;font-size:10px;color:var(--text-tertiary)}
+.flow-history-row{display:grid;grid-template-columns:64px 1fr 1fr 1fr 60px;gap:6px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px;align-items:center}
+.flow-history-row:last-child{border-bottom:none}
+.flow-history-head{color:var(--text-tertiary);font-size:10px;text-transform:uppercase;letter-spacing:.04em}
+.flow-input-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.flow-input{background:rgba(0,0,0,0.30);border:1px solid rgba(255,255,255,0.10);color:var(--text-primary);border-radius:8px;padding:9px 10px;font-family:inherit;font-size:13px;outline:none;width:100%}
+.flow-input::placeholder{color:var(--text-tertiary)}
+/* ===== Commitments ===== */
+.commit-pills{display:flex;gap:6px;margin-bottom:14px}
+.commit-pill{flex:1;padding:8px 4px;background:var(--glass-bg);border:1px solid rgba(255,255,255,.07);border-radius:10px;font-size:12px;font-weight:500;color:var(--text-secondary);text-align:center;cursor:pointer;font-family:inherit}
+.commit-pill.active{background:rgba(255,255,255,.1);color:var(--text-primary);border-color:rgba(255,255,255,.15)}
+.commit-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.commit-sum-item{background:var(--glass-bg);border-radius:10px;padding:12px 8px;text-align:center}
+.commit-sum-label{font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.commit-sum-val{font-size:14px;font-weight:600;color:var(--text-primary)}
+.commit-sum-pct{font-size:10px;color:var(--text-tertiary);margin-top:2px}
 </style>
 </head>
 <body>
@@ -1741,6 +1780,52 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   <span class="ticker-tag" id="tickerTag">RENEWS</span>
   <div class="ticker-stream" id="tickerStream"></div>
   <div class="ticker-dots" id="tickerDots"></div>
+</div>
+
+<!-- ===== PULSE ===== -->
+<div class="section" data-section="pulse">
+  <div class="section-title">
+    <span class="section-title-text">PULSE</span>
+  </div>
+
+  <div class="card pulse-verdict">
+    <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.08em;font-weight:700">FINANCIAL PULSE</div>
+    <span class="verdict-badge behind" id="pulseVerdictBadge">BEHIND</span>
+    <div class="pulse-nw" id="pulseNw">CHF 0</div>
+    <div class="pulse-delta" id="pulseDelta">No history yet</div>
+  </div>
+
+  <div class="card">
+    <div class="pulse-stats">
+      <div class="pulse-stat">
+        <div class="pulse-stat-label">Growth Rate</div>
+        <div class="pulse-stat-val" id="pulseStatGrowth">—</div>
+      </div>
+      <div class="pulse-stat">
+        <div class="pulse-stat-label">Savings Rate</div>
+        <div class="pulse-stat-val" id="pulseStatSavings">—</div>
+      </div>
+      <div class="pulse-stat">
+        <div class="pulse-stat-label">Runway</div>
+        <div class="pulse-stat-val" id="pulseStatRunway">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="label">Trajectory</div>
+    <svg class="nw-chart-svg" id="pulseChartSvg" viewBox="0 0 600 180" preserveAspectRatio="none" style="height:160px;color:#6BE3A4" aria-hidden="true">
+      <path id="pulseChartGoal" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 5" stroke-opacity="0.5" d=""/>
+      <path id="pulseChartLine" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" style="filter: drop-shadow(0 0 6px currentColor)" d=""/>
+    </svg>
+    <div class="pulse-delta" id="pulseChartCaption" style="margin-top:8px">Add net worth snapshots to see your trajectory.</div>
+  </div>
+
+  <div class="card pulse-links">
+    <button type="button" class="pulse-link-chip" id="pulseGoNet">Log Net Worth →</button>
+    <button type="button" class="pulse-link-chip" id="pulseGoFlow">Log Flow →</button>
+    <button type="button" class="pulse-link-chip" id="pulseGoNova">Ask Nova →</button>
+  </div>
 </div>
 
 <!-- ===== NET WORTH ===== -->
@@ -1965,139 +2050,210 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   </div>
 </div>
 
-<!-- ===== ACTIVE SUBSCRIPTIONS ===== -->
-<div class="section" data-section="subs">
+<!-- ===== FLOW ===== -->
+<div class="section" data-section="flow">
   <div class="section-title">
-    <span class="section-title-text">ACTIVE SUBSCRIPTIONS</span>
+    <span class="section-title-text">FLOW</span>
   </div>
-  <div class="card" style="background:linear-gradient(135deg, rgba(83,74,183,0.07), rgba(216,90,48,0.05));border:1px solid rgba(83,74,183,0.20)">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:12px">
-      <div>
-        <div style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.04em;font-weight:500">Monthly burn</div>
-        <div id="subsTotal" style="font-size:28px;font-weight:700;color:var(--text-primary);line-height:1.1;margin-top:2px">CHF 0 <span style="font-size:13px;color:var(--text-tertiary);font-weight:500">/ mo</span></div>
-        <div id="subsYearly" style="font-size:11px;color:var(--text-tertiary);margin-top:2px"></div>
-      </div>
-      <div id="subsCount" style="font-size:11px;color:var(--text-tertiary)"></div>
+
+  <div class="card" style="text-align:center;padding:24px 20px">
+    <div class="label" style="margin-bottom:6px">Net Saved · Last Month</div>
+    <div id="flowHeroFigure" style="font-size:34px;font-weight:700;line-height:1.05">0 Ft</div>
+    <div class="pulse-delta" id="flowHeroSub">No snapshots yet</div>
+  </div>
+
+  <div class="card-grid" style="gap:10px">
+    <div class="card nw-subcard" style="text-align:center">
+      <div class="label">Income</div>
+      <div id="flowStatIncome" style="font-size:16px;font-weight:600">—</div>
     </div>
-    <div id="subsList"></div>
-    <div class="empty-state" id="subsEmpty">No subscriptions yet</div>
-    <div class="quick-add" style="flex-wrap:wrap;gap:6px">
-      <input type="text" placeholder="Service (e.g. Netflix)" id="subName" style="flex:1.5;min-width:120px" />
-      <input type="number" placeholder="Amount" id="subAmount" step="0.01" style="flex:1;max-width:100px" />
-      <select id="subCurrency" style="padding:6px 10px;border:0.5px solid var(--border);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-card);color:var(--text-primary);max-width:90px">
-        <option value="CHF">CHF</option>
-        <option value="USD">USD</option>
-        <option value="EUR">EUR</option>
-        <option value="GBP">GBP</option>
-      </select>
-      <select id="subPeriod" style="padding:6px 10px;border:0.5px solid var(--border);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-card);color:var(--text-primary);max-width:100px">
-        <option value="monthly">Monthly</option>
-        <option value="yearly">Yearly</option>
-        <option value="weekly">Weekly</option>
-      </select>
-      <label class="date-field" title="Next renewal date" style="min-width:150px"><span class="date-emoji" aria-hidden="true">📅</span><input type="date" id="subRenewal" /></label>
-      <select id="subFromCat" title="Which net worth account to deduct from" style="padding:6px 10px;border:0.5px solid var(--border);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-card);color:var(--text-primary);min-width:130px">
-        <option value="">No accounts yet</option>
-      </select>
-      <label class="sub-auto-toggle" title="Auto-deduct from the linked account on each renewal">
-        <input type="checkbox" id="subAutoDeduct" />
-        <span class="sub-auto-track"><span class="sub-auto-thumb"></span></span>
-        <span class="sub-auto-label">Auto-deduct</span>
-      </label>
-      <button class="quick-add-btn" id="subAddBtn" onclick="window.__addSub && window.__addSub()">+ Add</button>
+    <div class="card nw-subcard" style="text-align:center">
+      <div class="label">Spend + Bills</div>
+      <div id="flowStatSpendBills" style="font-size:16px;font-weight:600">—</div>
     </div>
+    <div class="card nw-subcard" style="text-align:center">
+      <div class="label">Save Rate</div>
+      <div id="flowStatRate" style="font-size:16px;font-weight:600">—</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="label">Net Saved by Month</div>
+    <div class="flow-bar-area" id="flowBarArea"></div>
+    <div class="flow-bar-labels" id="flowBarLabels"></div>
+  </div>
+
+  <div class="card">
+    <div class="label">Log Snapshot</div>
+    <div class="flow-input-grid">
+      <label class="date-field" style="width:100%"><span class="date-emoji" aria-hidden="true">📅</span><input type="month" id="flowInputMonth" style="width:100%" /></label>
+      <input type="number" step="1" placeholder="Income (Ft)" id="flowInputIncome" class="flow-input" />
+      <input type="number" step="1" placeholder="Spending (Ft)" id="flowInputSpending" class="flow-input" />
+      <input type="number" step="1" placeholder="Bills (Ft)" id="flowInputBills" class="flow-input" />
+    </div>
+    <button type="button" class="quick-add-btn" id="flowSaveBtn" style="margin-top:10px;width:100%">Save Snapshot</button>
+  </div>
+
+  <div class="card">
+    <div class="label">History</div>
+    <div class="flow-history-row flow-history-head">
+      <span>Month</span><span>Income</span><span>Spend+Bills</span><span>Saved</span><span>Rate</span>
+    </div>
+    <div id="flowHistoryRows"></div>
   </div>
 </div>
 
-<!-- ===== INCOMING ORDERS ===== -->
-<div class="section" data-section="incoming">
+<!-- ===== COMMITMENTS ===== -->
+<div class="section" data-section="commit">
   <div class="section-title">
-    <span class="section-title-text">INCOMING ORDERS</span>
+    <span class="section-title-text">COMMITMENTS</span>
   </div>
 
-  <!-- Add card with cost + currency + from-category + arrival date -->
-  <div class="card ord-add-card">
-    <div class="ord-add-eyebrow">+ NEW ORDER</div>
-    <div class="ord-add-grid">
-      <input type="text"   id="ordName"   placeholder="Item (e.g. New iPhone)" class="ord-input ord-input-name">
-      <input type="number" id="ordCost"   placeholder="Cost" step="0.01" class="ord-input ord-input-cost">
-      <select id="ordCurrency" class="ord-input ord-input-ccy">
-        <option value="CHF">CHF</option>
-        <option value="USD">USD</option>
-        <option value="EUR">EUR</option>
-        <option value="GBP">GBP</option>
-      </select>
-      <select id="ordFromCat" class="ord-input ord-input-from" title="Which net worth account this comes out of">
-        <option value="">No accounts yet</option>
-      </select>
-      <label class="date-field ord-input-date" title="Expected arrival"><span class="date-emoji" aria-hidden="true">📅</span><input type="date" id="ordArrival" /></label>
-      <button class="ord-add-btn" id="ordAddBtn" onclick="window.__addOrder && window.__addOrder()">+ Add Order</button>
+  <div class="commit-summary">
+    <div class="commit-sum-item">
+      <div class="commit-sum-label">Recurring</div>
+      <div class="commit-sum-val" id="commitSumRecurring">CHF 0 / mo</div>
+      <div class="commit-sum-pct" id="commitPctRecurring">—</div>
     </div>
-    <div class="ord-add-preview" id="ordAddPreview">Type a cost — preview will show what % of net worth it takes.</div>
+    <div class="commit-sum-item">
+      <div class="commit-sum-label">Committed</div>
+      <div class="commit-sum-val" id="commitSumCommitted">CHF 0</div>
+      <div class="commit-sum-pct" id="commitPctCommitted">—</div>
+    </div>
+    <div class="commit-sum-item">
+      <div class="commit-sum-label">Considered</div>
+      <div class="commit-sum-val" id="commitSumConsidered">CHF 0</div>
+      <div class="commit-sum-pct" id="commitPctConsidered">—</div>
+    </div>
   </div>
 
-  <!-- Items list -->
-  <div class="ord-section-h">
-    <span class="ord-section-label">ITEMS ON THE WAY</span>
-    <span class="ord-section-count" id="ordCount">0 items</span>
+  <div class="commit-pills">
+    <button type="button" class="commit-pill active" data-commit-view="recurring">Recurring</button>
+    <button type="button" class="commit-pill" data-commit-view="committed">Committed</button>
+    <button type="button" class="commit-pill" data-commit-view="considered">Considered</button>
   </div>
-  <div id="ordList"></div>
-  <div class="ord-empty-card" id="ordEmpty">
-    <div class="ord-empty-icon">📦</div>
-    <div class="ord-empty-title">Nothing on the way</div>
-    <div class="ord-empty-sub">Log an order above. Pick the account it comes out of, the expected arrival date, and the dashboard will show what % of your net worth it costs.</div>
-  </div>
-</div>
 
-<!-- ===== WISHLIST ===== -->
-<div class="section" data-section="wish">
-  <div class="section-title">
-    <span class="section-title-text">WISHLIST</span>
-  </div>
-  <!-- Hero card with stats -->
-  <div class="card wish-hero">
-    <div class="wish-hero-top">
-      <div>
-        <div class="wish-hero-eyebrow">WISHLIST TOTAL</div>
-        <div class="wish-hero-num" id="wishTotal">CHF 0</div>
+  <div id="commitViewRecurring" data-section="subs">
+    <div class="card" style="background:linear-gradient(135deg, rgba(83,74,183,0.07), rgba(216,90,48,0.05));border:1px solid rgba(83,74,183,0.20)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:12px">
+        <div>
+          <div style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.04em;font-weight:500">Monthly burn</div>
+          <div id="subsTotal" style="font-size:28px;font-weight:700;color:var(--text-primary);line-height:1.1;margin-top:2px">CHF 0 <span style="font-size:13px;color:var(--text-tertiary);font-weight:500">/ mo</span></div>
+          <div id="subsYearly" style="font-size:11px;color:var(--text-tertiary);margin-top:2px"></div>
+        </div>
+        <div id="subsCount" style="font-size:11px;color:var(--text-tertiary)"></div>
       </div>
-      <div class="wish-hero-pct-wrap">
-        <div class="wish-hero-pct-label">% OF NET WORTH</div>
-        <div class="wish-hero-pct-num" id="wishPctOfNwHero">—</div>
+      <div id="subsList"></div>
+      <div class="empty-state" id="subsEmpty">No subscriptions yet</div>
+      <div class="quick-add" style="flex-wrap:wrap;gap:6px">
+        <input type="text" placeholder="Service (e.g. Netflix)" id="subName" style="flex:1.5;min-width:120px" />
+        <input type="number" placeholder="Amount" id="subAmount" step="0.01" style="flex:1;max-width:100px" />
+        <select id="subCurrency" style="padding:6px 10px;border:0.5px solid var(--border);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-card);color:var(--text-primary);max-width:90px">
+          <option value="CHF">CHF</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+          <option value="GBP">GBP</option>
+        </select>
+        <select id="subPeriod" style="padding:6px 10px;border:0.5px solid var(--border);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-card);color:var(--text-primary);max-width:100px">
+          <option value="monthly">Monthly</option>
+          <option value="yearly">Yearly</option>
+          <option value="weekly">Weekly</option>
+        </select>
+        <label class="date-field" title="Next renewal date" style="min-width:150px"><span class="date-emoji" aria-hidden="true">📅</span><input type="date" id="subRenewal" /></label>
+        <select id="subFromCat" title="Which net worth account to deduct from" style="padding:6px 10px;border:0.5px solid var(--border);border-radius:var(--radius-md);font-size:12px;font-family:inherit;background:var(--bg-card);color:var(--text-primary);min-width:130px">
+          <option value="">No accounts yet</option>
+        </select>
+        <label class="sub-auto-toggle" title="Auto-deduct from the linked account on each renewal">
+          <input type="checkbox" id="subAutoDeduct" />
+          <span class="sub-auto-track"><span class="sub-auto-thumb"></span></span>
+          <span class="sub-auto-label">Auto-deduct</span>
+        </label>
+        <button class="quick-add-btn" id="subAddBtn" onclick="window.__addSub && window.__addSub()">+ Add</button>
       </div>
     </div>
-    <div class="wish-hero-bar">
-      <div class="wish-hero-bar-fill" id="wishHeroFill" style="width:0%"></div>
-    </div>
-    <div class="wish-hero-foot" id="wishPctOfNw">Add net worth first to see this as a %</div>
   </div>
 
-  <!-- Add row -->
-  <div class="card wish-add-card">
-    <div class="wish-add-eyebrow">+ ADD AN ITEM</div>
-    <div class="wish-add-row">
-      <input type="text"   id="wishName"   placeholder="Item name (e.g. New iPhone Pro Max)" class="wish-input wish-input-name">
-      <input type="number" id="wishAmount" placeholder="Cost" step="0.01" class="wish-input wish-input-amt">
-      <select id="wishCurrency" class="wish-input wish-input-ccy">
-        <option value="CHF">CHF</option>
-        <option value="USD">USD</option>
-        <option value="EUR">EUR</option>
-        <option value="GBP">GBP</option>
-      </select>
-      <button class="wish-add-btn" id="wishAddBtn" onclick="window.__addWish && window.__addWish()">+ Add</button>
+  <div id="commitViewCommitted" data-section="incoming" hidden>
+    <!-- Add card with cost + currency + from-category + arrival date -->
+    <div class="card ord-add-card">
+      <div class="ord-add-eyebrow">+ NEW ORDER</div>
+      <div class="ord-add-grid">
+        <input type="text"   id="ordName"   placeholder="Item (e.g. New iPhone)" class="ord-input ord-input-name">
+        <input type="number" id="ordCost"   placeholder="Cost" step="0.01" class="ord-input ord-input-cost">
+        <select id="ordCurrency" class="ord-input ord-input-ccy">
+          <option value="CHF">CHF</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+          <option value="GBP">GBP</option>
+        </select>
+        <select id="ordFromCat" class="ord-input ord-input-from" title="Which net worth account this comes out of">
+          <option value="">No accounts yet</option>
+        </select>
+        <label class="date-field ord-input-date" title="Expected arrival"><span class="date-emoji" aria-hidden="true">📅</span><input type="date" id="ordArrival" /></label>
+        <button class="ord-add-btn" id="ordAddBtn" onclick="window.__addOrder && window.__addOrder()">+ Add Order</button>
+      </div>
+      <div class="ord-add-preview" id="ordAddPreview">Type a cost — preview will show what % of net worth it takes.</div>
+    </div>
+
+    <!-- Items list -->
+    <div class="ord-section-h">
+      <span class="ord-section-label">ITEMS ON THE WAY</span>
+      <span class="ord-section-count" id="ordCount">0 items</span>
+    </div>
+    <div id="ordList"></div>
+    <div class="ord-empty-card" id="ordEmpty">
+      <div class="ord-empty-icon">📦</div>
+      <div class="ord-empty-title">Nothing on the way</div>
+      <div class="ord-empty-sub">Log an order above. Pick the account it comes out of, the expected arrival date, and the dashboard will show what % of your net worth it costs.</div>
     </div>
   </div>
 
-  <!-- Items list -->
-  <div class="wish-section-h">
-    <span class="wish-section-label">YOUR WISHES</span>
-    <span class="wish-section-count" id="wishCount">0 items</span>
-  </div>
-  <div id="wishList"></div>
-  <div class="wish-empty-card" id="wishEmpty">
-    <div class="wish-empty-icon">🎯</div>
-    <div class="wish-empty-title">No wishes yet</div>
-    <div class="wish-empty-sub">Add anything you're saving for — the dashboard will calculate what % of your net worth it'd cost.</div>
+  <div id="commitViewConsidered" data-section="wish" hidden>
+    <!-- Hero card with stats -->
+    <div class="card wish-hero">
+      <div class="wish-hero-top">
+        <div>
+          <div class="wish-hero-eyebrow">WISHLIST TOTAL</div>
+          <div class="wish-hero-num" id="wishTotal">CHF 0</div>
+        </div>
+        <div class="wish-hero-pct-wrap">
+          <div class="wish-hero-pct-label">% OF NET WORTH</div>
+          <div class="wish-hero-pct-num" id="wishPctOfNwHero">—</div>
+        </div>
+      </div>
+      <div class="wish-hero-bar">
+        <div class="wish-hero-bar-fill" id="wishHeroFill" style="width:0%"></div>
+      </div>
+      <div class="wish-hero-foot" id="wishPctOfNw">Add net worth first to see this as a %</div>
+    </div>
+
+    <!-- Add row -->
+    <div class="card wish-add-card">
+      <div class="wish-add-eyebrow">+ ADD AN ITEM</div>
+      <div class="wish-add-row">
+        <input type="text"   id="wishName"   placeholder="Item name (e.g. New iPhone Pro Max)" class="wish-input wish-input-name">
+        <input type="number" id="wishAmount" placeholder="Cost" step="0.01" class="wish-input wish-input-amt">
+        <select id="wishCurrency" class="wish-input wish-input-ccy">
+          <option value="CHF">CHF</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+          <option value="GBP">GBP</option>
+        </select>
+        <button class="wish-add-btn" id="wishAddBtn" onclick="window.__addWish && window.__addWish()">+ Add</button>
+      </div>
+    </div>
+
+    <!-- Items list -->
+    <div class="wish-section-h">
+      <span class="wish-section-label">YOUR WISHES</span>
+      <span class="wish-section-count" id="wishCount">0 items</span>
+    </div>
+    <div id="wishList"></div>
+    <div class="wish-empty-card" id="wishEmpty">
+      <div class="wish-empty-icon">🎯</div>
+      <div class="wish-empty-title">No wishes yet</div>
+      <div class="wish-empty-sub">Add anything you're saving for — the dashboard will calculate what % of your net worth it'd cost.</div>
+    </div>
   </div>
 </div>
 
@@ -2108,13 +2264,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   </div>
   <div class="card nova-wrap">
     <div class="nova-messages" id="novaMessages">
-      <div class="nova-msg nova-msg-nova">Hey — I'm Nova, your money coach. I can see your net worth, subscriptions, incoming orders and wishlist. Ask me anything, or tap a starter below.</div>
+      <div class="nova-msg nova-msg-nova">Hey — I'm Nova, your money coach. I can see your net worth, cashflow, subscriptions, orders and wishlist. Ask me anything.</div>
     </div>
     <div class="nova-suggestions" id="novaSuggestions">
-      <button class="nova-chip" data-q="How am I doing financially? Give me a quick read on my net worth.">How am I doing?</button>
-      <button class="nova-chip" data-q="Where can I realistically cut back on my spending?">Where can I cut back?</button>
-      <button class="nova-chip" data-q="Can I afford everything on my wishlist right now?">Afford my wishlist?</button>
-      <button class="nova-chip" data-q="Which of my subscriptions should I review or cancel?">Review my subs</button>
+      <button class="nova-chip" data-q="How am I doing financially? Give me a quick read on my net worth and cashflow.">How am I doing financially?</button>
+      <button class="nova-chip" data-q="What's my savings rate trend been over the last few months?">What's my savings rate trend?</button>
+      <button class="nova-chip" data-q="Can I afford everything on my wishlist right now?">Can I afford my wishlist?</button>
+      <button class="nova-chip" data-q="Which of my subscriptions should I cut?">Which subscriptions should I cut?</button>
     </div>
     <div class="nova-composer">
       <textarea id="novaInput" class="nova-input" rows="1" placeholder="Ask Nova about your money…"></textarea>
@@ -2128,21 +2284,21 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 <!-- ===== BOTTOM TAB BAR ===== -->
 <nav class="bottom-tabs" id="bottomTabs" aria-label="Sections">
-  <button class="bot-tab active" data-tab="net">
+  <button class="bot-tab active" data-tab="pulse">
+    <span class="bot-tab-icon">📈</span>
+    <span class="bot-tab-label">Pulse</span>
+  </button>
+  <button class="bot-tab" data-tab="net">
     <span class="bot-tab-icon">📊</span>
     <span class="bot-tab-label">Net Worth</span>
   </button>
-  <button class="bot-tab" data-tab="subs">
-    <span class="bot-tab-icon">🔁</span>
-    <span class="bot-tab-label">Subs</span>
+  <button class="bot-tab" data-tab="flow">
+    <span class="bot-tab-icon">💸</span>
+    <span class="bot-tab-label">Flow</span>
   </button>
-  <button class="bot-tab" data-tab="incoming">
-    <span class="bot-tab-icon">📦</span>
-    <span class="bot-tab-label">Orders</span>
-  </button>
-  <button class="bot-tab" data-tab="wish">
-    <span class="bot-tab-icon">🎯</span>
-    <span class="bot-tab-label">Wishlist</span>
+  <button class="bot-tab" data-tab="commit">
+    <span class="bot-tab-icon">🗂️</span>
+    <span class="bot-tab-label">Commitments</span>
   </button>
   <button class="bot-tab" data-tab="nova">
     <span class="bot-tab-icon">✨</span>
@@ -2163,6 +2319,36 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   }
   function storeSet(key, value) {
     try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
+  }
+
+  // ============================================================
+  // FLOW — HUF-only monthly cashflow snapshots. Never call fmtMoney()
+  // in this block; fmtHUF / fmtHUFShort are the only formatters.
+  // ============================================================
+  function getFlowSnapshots() { return storeGet('flow:snapshots_v1') || []; }
+  function setFlowSnapshots(arr) { storeSet('flow:snapshots_v1', arr); }
+  function flowNetSaved(s) { return (s.income||0)-(s.spending||0)-(s.bills||0); }
+  function flowSaveRate(s) { return s.income ? flowNetSaved(s)/s.income : 0; }
+  function fmtHUF(n) {
+    const abs=Math.abs(Math.round(n));
+    return (n<0?'−':'')+abs.toLocaleString('hu-HU')+' Ft';
+  }
+  function fmtHUFShort(n) {
+    const sign=n<0?'−':'+'; const abs=Math.abs(n);
+    if(abs>=1000000) return sign+(abs/1000000).toFixed(1).replace('.',',')+' M Ft';
+    if(abs>=1000) return sign+Math.round(abs/1000)+' e Ft';
+    return sign+Math.round(abs)+' Ft';
+  }
+  function seedFlowIfEmpty() {
+    if (getFlowSnapshots().length) return;
+    setFlowSnapshots([
+      {month:'2026-01',income:450000,spending:180000,bills:95000},
+      {month:'2026-02',income:450000,spending:210000,bills:95000},
+      {month:'2026-03',income:450000,spending:165000,bills:95000},
+      {month:'2026-04',income:450000,spending:220000,bills:95000},
+      {month:'2026-05',income:480000,spending:195000,bills:95000},
+      {month:'2026-06',income:480000,spending:175000,bills:95000}
+    ]);
   }
 
   // ============================================================
@@ -2218,6 +2404,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   const TAB_KEY = 'finance_active_tab';
   const tabs = document.querySelectorAll('.bot-tab');
   const sections = document.querySelectorAll('.section[data-section]');
+  let currentFinanceTab = 'pulse';
   function setActiveTab(name) {
     tabs.forEach(b => b.classList.toggle('active', b.dataset.tab === name));
     sections.forEach(s => {
@@ -2225,11 +2412,25 @@ input[type="date"]::-webkit-calendar-picker-indicator {
       else s.setAttribute('hidden', '');
     });
     storeSet(TAB_KEY, name);
+    currentFinanceTab = name;
+    const tickerEl = document.getElementById('financeTicker');
+    if (tickerEl && name !== 'commit') tickerEl.classList.add('hidden');
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
-  tabs.forEach(b => b.addEventListener('click', () => setActiveTab(b.dataset.tab)));
+  tabs.forEach(b => b.addEventListener('click', () => {
+    setActiveTab(b.dataset.tab);
+    if (b.dataset.tab === 'pulse' && typeof renderPulse === 'function') renderPulse();
+    if (b.dataset.tab === 'flow' && typeof renderFlow === 'function') renderFlow();
+    if (b.dataset.tab === 'commit') {
+      if (typeof renderSubs === 'function') renderSubs();
+      if (typeof renderOrders === 'function') renderOrders();
+      if (typeof renderWishlist === 'function') renderWishlist();
+      if (typeof renderCommitSummary === 'function') renderCommitSummary();
+      if (typeof safeRenderTicker === 'function') safeRenderTicker();
+    }
+  }));
   const savedTab = storeGet(TAB_KEY);
-  setActiveTab(savedTab && ['net','subs','incoming','wish','nova'].includes(savedTab) ? savedTab : 'net');
+  setActiveTab(savedTab && ['pulse','net','flow','commit','nova'].includes(savedTab) ? savedTab : 'pulse');
 
   // ============================================================
   // NET WORTH (copied from the main dashboard, verbatim logic)
@@ -2392,6 +2593,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     if (typeof renderWishlist === 'function') renderWishlist();
     if (typeof renderOrders   === 'function') renderOrders();
     if (typeof updateOrdPreview === 'function') updateOrdPreview();
+    if (typeof renderCommitSummary === 'function') renderCommitSummary();
   }
 
   // ============================================================
@@ -3545,6 +3747,242 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   updateOrdPreview();
 
   // ============================================================
+  // FLOW — render the HUF cashflow tab. Reads/writes flow:snapshots_v1
+  // via the seam functions declared at the top of this IIFE.
+  // ============================================================
+  function renderFlow() {
+    const heroFigure   = document.getElementById('flowHeroFigure');
+    const heroSub      = document.getElementById('flowHeroSub');
+    const statIncome   = document.getElementById('flowStatIncome');
+    const statSpend    = document.getElementById('flowStatSpendBills');
+    const statRate     = document.getElementById('flowStatRate');
+    const barArea      = document.getElementById('flowBarArea');
+    const barLabels     = document.getElementById('flowBarLabels');
+    const historyRows   = document.getElementById('flowHistoryRows');
+    if (!heroFigure) return;
+    const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const snaps = getFlowSnapshots().slice().sort((a, b) => String(a.month).localeCompare(String(b.month)));
+    if (!snaps.length) {
+      heroFigure.textContent = fmtHUFShort(0);
+      heroFigure.style.color = '#6BE3A4';
+      heroSub.textContent = 'No snapshots yet';
+      statIncome.textContent = '—';
+      statSpend.textContent = '—';
+      statRate.textContent = '—';
+      statRate.style.color = '';
+      barArea.innerHTML = '';
+      barLabels.innerHTML = '';
+      historyRows.innerHTML = '';
+      return;
+    }
+    const latest = snaps[snaps.length - 1];
+    const net = flowNetSaved(latest);
+    const rate = flowSaveRate(latest) * 100;
+    heroFigure.textContent = fmtHUFShort(net);
+    heroFigure.style.color = net >= 0 ? '#6BE3A4' : '#FF8A8A';
+    heroSub.textContent = latest.month + ' · ' + rate.toFixed(1) + '% saved';
+
+    statIncome.textContent = fmtHUF(latest.income || 0);
+    statSpend.textContent = fmtHUF((latest.spending || 0) + (latest.bills || 0));
+    statRate.textContent = rate.toFixed(1) + '%';
+    statRate.style.color = rate >= 20 ? '#6BE3A4' : (rate >= 10 ? '#E07658' : '#FF8A8A');
+
+    const maxAbs = Math.max(1, ...snaps.map(s => Math.abs(flowNetSaved(s))));
+    barArea.innerHTML = snaps.map(s => {
+      const v = flowNetSaved(s);
+      const h = Math.max(2, (Math.abs(v) / maxAbs) * 100);
+      const cls = v >= 0 ? 'pos' : 'neg';
+      return '<div class="flow-bar-col"><div class="flow-bar ' + cls + '" style="height:' + h + '%" title="' + escapeHtml(s.month) + ' · ' + fmtHUF(v) + '"></div></div>';
+    }).join('');
+    barLabels.innerHTML = snaps.map(s => {
+      const mi = parseInt(String(s.month).split('-')[1], 10) - 1;
+      return '<span class="flow-bar-lbl">' + (MONTHS[mi] || '') + '</span>';
+    }).join('');
+
+    historyRows.innerHTML = snaps.slice().reverse().map(s => {
+      const n = flowNetSaved(s);
+      const r = flowSaveRate(s) * 100;
+      const nCls = n >= 0 ? '#6BE3A4' : '#FF8A8A';
+      const rCls = r >= 20 ? '#6BE3A4' : (r >= 10 ? '#E07658' : '#FF8A8A');
+      return '<div class="flow-history-row">'
+        + '<span>' + escapeHtml(s.month) + '</span>'
+        + '<span>' + fmtHUF(s.income || 0) + '</span>'
+        + '<span>' + fmtHUF((s.spending || 0) + (s.bills || 0)) + '</span>'
+        + '<span style="color:' + nCls + '">' + fmtHUF(n) + '</span>'
+        + '<span style="color:' + rCls + '">' + r.toFixed(1) + '%</span>'
+        + '</div>';
+    }).join('');
+  }
+  function doFlowSave() {
+    const mEl = document.getElementById('flowInputMonth');
+    const iEl = document.getElementById('flowInputIncome');
+    const sEl = document.getElementById('flowInputSpending');
+    const bEl = document.getElementById('flowInputBills');
+    if (!mEl || !mEl.value) { if (mEl) mEl.focus(); return; }
+    const rec = {
+      month: mEl.value,
+      income: parseFloat(iEl.value) || 0,
+      spending: parseFloat(sEl.value) || 0,
+      bills: parseFloat(bEl.value) || 0
+    };
+    const snaps = getFlowSnapshots();
+    const idx = snaps.findIndex(s => s.month === rec.month);
+    if (idx >= 0) snaps[idx] = rec; else snaps.push(rec);
+    setFlowSnapshots(snaps);
+    iEl.value = ''; sEl.value = ''; bEl.value = '';
+    renderFlow();
+  }
+  const flowSaveBtn = document.getElementById('flowSaveBtn');
+  if (flowSaveBtn) flowSaveBtn.addEventListener('click', doFlowSave);
+
+  // ============================================================
+  // PULSE — read-only cockpit summarizing Net Worth + Flow.
+  // ============================================================
+  function renderPulse() {
+    const badge   = document.getElementById('pulseVerdictBadge');
+    const nwEl    = document.getElementById('pulseNw');
+    const deltaEl = document.getElementById('pulseDelta');
+    const gEl     = document.getElementById('pulseStatGrowth');
+    const sEl     = document.getElementById('pulseStatSavings');
+    const rEl     = document.getElementById('pulseStatRunway');
+    const lineEl  = document.getElementById('pulseChartLine');
+    const goalEl  = document.getElementById('pulseChartGoal');
+    const capEl   = document.getElementById('pulseChartCaption');
+    if (!badge) return;
+
+    const nw = nwGrandCHF();
+    nwEl.textContent = fmtMoney(nw);
+
+    const hist = storeGet('nw:history') || [];
+    if (hist.length >= 2) {
+      const delta = hist[hist.length - 1].v - hist[hist.length - 2].v;
+      deltaEl.textContent = (delta >= 0 ? '+' : '−') + fmtMoney(Math.abs(delta)) + ' since last snapshot';
+    } else {
+      deltaEl.textContent = 'No history yet';
+    }
+
+    const flowSnaps = getFlowSnapshots().slice().sort((a, b) => String(a.month).localeCompare(String(b.month)));
+    const latestFlow = flowSnaps[flowSnaps.length - 1];
+    const saveRate = latestFlow ? flowSaveRate(latestFlow) : null;
+
+    let verdictCls, verdictText;
+    if (saveRate != null && saveRate >= 0.20) { verdictCls = 'on-track'; verdictText = 'ON TRACK'; }
+    else if (saveRate != null && saveRate >= 0.10) { verdictCls = 'watch-it'; verdictText = 'WATCH IT'; }
+    else { verdictCls = 'behind'; verdictText = 'BEHIND'; }
+    badge.className = 'verdict-badge ' + verdictCls;
+    badge.textContent = verdictText;
+
+    if (hist.length >= 2) {
+      const last = hist[hist.length - 1].v, prev = hist[hist.length - 2].v;
+      gEl.textContent = prev !== 0 ? (((last - prev) / Math.abs(prev)) * 100).toFixed(1) + '%' : '—';
+    } else {
+      gEl.textContent = '—';
+    }
+
+    sEl.textContent = saveRate != null ? (saveRate * 100).toFixed(1) + '%' : '—';
+
+    if (flowSnaps.length) {
+      const avgMonthlySpend = flowSnaps.reduce((s, x) => s + (x.spending || 0) + (x.bills || 0), 0) / flowSnaps.length;
+      rEl.textContent = avgMonthlySpend > 0 ? (nw / avgMonthlySpend).toFixed(0) + 'mo' : '—';
+    } else {
+      rEl.textContent = '—';
+    }
+
+    if (hist.length < 2) {
+      if (lineEl) lineEl.setAttribute('d', '');
+      if (goalEl) goalEl.setAttribute('d', '');
+      capEl.textContent = 'Add net worth snapshots to see your trajectory.';
+      return;
+    }
+    const W = 600, H = 180, pad = 8;
+    const lastV = hist[hist.length - 1].v;
+    const goalV = lastV * 1.5;
+    const vals = hist.map(p => p.v).concat([goalV]);
+    const minV = Math.min.apply(null, vals);
+    const maxV = Math.max.apply(null, vals);
+    const range = (maxV - minV) || Math.max(1, Math.abs(maxV));
+    const points = hist.map((p, i) => ({
+      x: (i / (hist.length - 1)) * W,
+      y: H - pad - ((p.v - minV) / range) * (H - pad * 2)
+    }));
+    if (lineEl) lineEl.setAttribute('d', nwSmoothPath(points));
+    const yToday = H - pad - ((lastV - minV) / range) * (H - pad * 2);
+    const yGoal  = H - pad - ((goalV - minV) / range) * (H - pad * 2);
+    if (goalEl) goalEl.setAttribute('d', 'M0,' + yToday + ' L' + W + ',' + yGoal);
+
+    const recent = hist.slice(-6);
+    if (recent.length >= 2) {
+      const xs = recent.map(p => p.t);
+      const ys = recent.map(p => p.v);
+      const n = xs.length;
+      const xMean = xs.reduce((a, b) => a + b, 0) / n;
+      const yMean = ys.reduce((a, b) => a + b, 0) / n;
+      let num = 0, den = 0;
+      for (let i = 0; i < n; i++) { num += (xs[i] - xMean) * (ys[i] - yMean); den += (xs[i] - xMean) * (xs[i] - xMean); }
+      const slope = den !== 0 ? num / den : 0;
+      const intercept = yMean - slope * xMean;
+      const target = lastV * 1.5;
+      if (slope > 0 && target > intercept) {
+        const targetT = (target - intercept) / slope;
+        const d = new Date(targetT);
+        const ym = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+        capEl.textContent = 'At this rate you reach ' + fmtMoney(target) + ' by ' + ym + '.';
+      } else {
+        capEl.textContent = 'Growth has flattened — log more snapshots to refresh the trend.';
+      }
+    } else {
+      capEl.textContent = 'Add net worth snapshots to see your trajectory.';
+    }
+  }
+  const pulseGoNet  = document.getElementById('pulseGoNet');
+  const pulseGoFlow = document.getElementById('pulseGoFlow');
+  const pulseGoNova = document.getElementById('pulseGoNova');
+  if (pulseGoNet)  pulseGoNet.addEventListener('click', () => setActiveTab('net'));
+  if (pulseGoFlow) pulseGoFlow.addEventListener('click', () => { setActiveTab('flow'); renderFlow(); });
+  if (pulseGoNova) pulseGoNova.addEventListener('click', () => setActiveTab('nova'));
+
+  // ============================================================
+  // COMMITMENTS — summary strip + pill switcher over the merged
+  // Recurring (subs) / Committed (orders) / Considered (wishlist) views.
+  // ============================================================
+  function renderCommitSummary() {
+    const recurringEl = document.getElementById('commitSumRecurring');
+    if (!recurringEl) return;
+    const subItems = storeGet('subs') || [];
+    const monthly = subItems.reduce((s, it) => s + monthlyEquivalent(it), 0);
+    const orders = storeGet('incoming_orders') || [];
+    const committed = orders.reduce((s, o) => s + (Number(o.amount) || 0), 0);
+    const wish = storeGet('wishlist') || [];
+    const considered = wish.reduce((s, it) => s + (Number(it.amount) || 0), 0);
+    const nw = nwGrandCHF();
+    const pct = (v) => nw > 0 ? ((v / nw) * 100).toFixed(1) + '% of NW' : '—';
+    recurringEl.textContent = fmtMoney(monthly) + ' / mo';
+    document.getElementById('commitPctRecurring').textContent = pct(monthly);
+    document.getElementById('commitSumCommitted').textContent = fmtMoney(committed);
+    document.getElementById('commitPctCommitted').textContent = pct(committed);
+    document.getElementById('commitSumConsidered').textContent = fmtMoney(considered);
+    document.getElementById('commitPctConsidered').textContent = pct(considered);
+  }
+  const commitPills = document.querySelectorAll('.commit-pill');
+  const commitViews = {
+    recurring: document.getElementById('commitViewRecurring'),
+    committed: document.getElementById('commitViewCommitted'),
+    considered: document.getElementById('commitViewConsidered')
+  };
+  commitPills.forEach(p => p.addEventListener('click', () => {
+    commitPills.forEach(x => x.classList.toggle('active', x === p));
+    const view = p.dataset.commitView;
+    Object.keys(commitViews).forEach(k => {
+      if (commitViews[k]) commitViews[k].hidden = (k !== view);
+    });
+  }));
+
+  seedFlowIfEmpty();
+  renderFlow();
+  renderPulse();
+  renderCommitSummary();
+
+  // ============================================================
   // FINANCE TICKER — rotates through upcoming subscription renewals
   // every 5 seconds. Flashes red whenever the currently displayed sub
   // renews in 5 days or fewer. Hides itself if there are no renewals.
@@ -3609,6 +4047,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     const stream = document.getElementById('tickerStream');
     const dots   = document.getElementById('tickerDots');
     if (!wrap || !stream || !dots) return;
+    if (currentFinanceTab !== 'commit') { wrap.classList.add('hidden'); return; }
     const entries = buildTickerEntries();
     const sig = tickerSig(entries);
     // Fast path: nothing changed — don't repaint, don't disturb rotation.
@@ -3699,7 +4138,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         accounts: breakdown,
         subscriptions: storeGet('subs') || [],
         incomingOrders: storeGet('incoming_orders') || [],
-        wishlist: storeGet('wishlist') || []
+        wishlist: storeGet('wishlist') || [],
+        flowSnapshots: getFlowSnapshots()
       };
     }
 
@@ -4125,7 +4565,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (typeof initCloudSync !== 'function') return;
   initCloudSync({
     appKey: 'finance',
-    syncedKeys: ['subs', 'wishlist', 'incoming_orders', 'nw_currency', 'nw:activity', 'nw:history'],
+    syncedKeys: ['subs', 'wishlist', 'incoming_orders', 'nw_currency', 'nw:activity', 'nw:history', 'flow:snapshots_v1'],
     syncedPrefixes: ['nw:'],
     onApplied: function () {
       window.dispatchEvent(new Event('storage'));
