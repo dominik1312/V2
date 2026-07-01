@@ -2117,6 +2117,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     <div id="flowLedgerInner"></div>
   </div>
 
+  <!-- Google Sheets sync card -->
+  <div class="card">
+    <div class="label">Google Sheets Sync</div>
+    <div style="display:flex;gap:8px;align-items:stretch;margin-bottom:8px">
+      <input type="url" id="flowSheetUrlInput" class="flow-input" style="flex:1" placeholder="Paste your published CSV URL" />
+      <button type="button" class="quick-add-btn" id="flowSheetSyncBtn" style="flex-shrink:0;padding:0 14px">Save &amp; Sync</button>
+    </div>
+    <div id="flowSyncStatus" style="font-size:11px;color:var(--text-tertiary)">Not connected</div>
+  </div>
+
   <!-- Log Snapshot form -->
   <div class="card">
     <div class="label">Log Snapshot</div>
@@ -2359,6 +2369,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   // ============================================================
   function getFlowSnapshots() { return storeGet('flow:snapshots_v1') || []; }
   function setFlowSnapshots(arr) { storeSet('flow:snapshots_v1', arr); }
+  function getFlowSheetUrl() { return storeGet('flow:sheet_url_v1') || ''; }
+  function setFlowSheetUrl(url) { storeSet('flow:sheet_url_v1', url); }
+  function getFlowLastSynced() { return storeGet('flow:last_synced_v1') || ''; }
+  function setFlowLastSynced(iso) { storeSet('flow:last_synced_v1', iso); }
   function flowNetSaved(s) { return (s.income||0)-(s.spending||0)-(s.bills||0); }
   function flowSaveRate(s) { return s.income ? flowNetSaved(s)/s.income : 0; }
   function fmtHUF(n) {
@@ -2452,7 +2466,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   tabs.forEach(b => b.addEventListener('click', () => {
     setActiveTab(b.dataset.tab);
     if (b.dataset.tab === 'pulse' && typeof renderPulse === 'function') renderPulse();
-    if (b.dataset.tab === 'flow' && typeof renderFlow === 'function') renderFlow();
+    if (b.dataset.tab === 'flow' && typeof renderFlow === 'function') {
+      renderFlow();
+      if (getFlowSheetUrl && getFlowSheetUrl()) syncFlowFromSheet();
+    }
     if (b.dataset.tab === 'commit') {
       if (typeof renderSubs === 'function') renderSubs();
       if (typeof renderOrders === 'function') renderOrders();
@@ -3981,12 +3998,120 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     });
   }
 
+  function flowRelTime(iso) {
+    if (!iso) return '';
+    const diff = Math.round((Date.now() - new Date(iso).getTime()) / 1000);
+    if (diff < 10) return 'just now';
+    if (diff < 60) return diff + 's ago';
+    if (diff < 3600) return Math.round(diff / 60) + ' min ago';
+    if (diff < 86400) return Math.round(diff / 3600) + ' hr ago';
+    return Math.round(diff / 86400) + ' day' + (Math.round(diff / 86400) !== 1 ? 's' : '') + ' ago';
+  }
+
   function updateFlowFooter(allSnaps) {
     const ft = document.getElementById('flowFooterText');
     if (!ft) return;
-    const sorted = allSnaps.slice().sort(function(a, b) { return String(a.month).localeCompare(String(b.month)); });
-    const last = sorted[sorted.length - 1];
-    ft.textContent = 'Manual entry · last snapshot ' + (last ? last.month : '—');
+    const lastSynced = getFlowLastSynced();
+    const sheetUrl  = getFlowSheetUrl();
+    if (sheetUrl && lastSynced) {
+      ft.textContent = 'Synced from Google Sheets · ' + flowRelTime(lastSynced);
+    } else {
+      const sorted = allSnaps.slice().sort(function(a, b) { return String(a.month).localeCompare(String(b.month)); });
+      const last = sorted[sorted.length - 1];
+      ft.textContent = 'Manual entry · last snapshot ' + (last ? last.month : '—');
+    }
+  }
+
+  function setFlowSyncStatus(msg, isError) {
+    const el = document.getElementById('flowSyncStatus');
+    if (!el) return;
+    el.textContent = msg;
+    el.style.color = isError ? 'var(--danger)' : 'var(--text-tertiary)';
+  }
+
+  function parseFlowCsv(text) {
+    // Minimal RFC-4180-compatible CSV parser (handles double-quoted fields with commas).
+    function parseRow(line) {
+      const fields = [];
+      let cur = '', inQ = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (inQ) {
+          if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++; }
+          else if (ch === '"') { inQ = false; }
+          else { cur += ch; }
+        } else {
+          if (ch === '"') { inQ = true; }
+          else if (ch === ',') { fields.push(cur); cur = ''; }
+          else { cur += ch; }
+        }
+      }
+      fields.push(cur);
+      return fields;
+    }
+    const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').filter(function(l) { return l.trim() !== ''; });
+    if (!lines.length) return null;
+    const headers = parseRow(lines[0]).map(function(h) { return h.trim().toLowerCase(); });
+    const monthIdx = headers.indexOf('month');
+    if (monthIdx < 0) return null;
+    function col(row, name) { const i = headers.indexOf(name); return i >= 0 ? (row[i] || '').trim() : ''; }
+    function parseNum(v) {
+      if (!v) return NaN;
+      return parseFloat(v.replace(/[^\d.\-]/g, ''));
+    }
+    const rows = [], skipped = [];
+    for (let i = 1; i < lines.length; i++) {
+      const row = parseRow(lines[i]);
+      const month = col(row, 'month');
+      if (!/^\d{4}-\d{2}$/.test(month)) { if (month) skipped.push(i + 1); continue; }
+      const cats = [];
+      for (let c = 1; c <= 3; c++) {
+        const name = col(row, 'cat' + c + '_name');
+        if (name) cats.push({ name: name, amount: parseFloat(col(row, 'cat' + c + '_amount')) || 0 });
+      }
+      const poRaw = col(row, 'planned_out');
+      rows.push({
+        month:      month,
+        income:     parseFloat(parseNum(col(row, 'income')))  || 0,
+        spending:   parseFloat(parseNum(col(row, 'spending'))) || 0,
+        bills:      parseFloat(parseNum(col(row, 'bills')))    || 0,
+        reserve:    parseFloat(parseNum(col(row, 'reserve')))  || 0,
+        plannedOut: poRaw === '' ? null : (parseFloat(parseNum(poRaw)) || null),
+        categories: cats
+      });
+    }
+    return { rows: rows, skipped: skipped };
+  }
+
+  async function syncFlowFromSheet() {
+    const url = getFlowSheetUrl();
+    if (!url) { setFlowSyncStatus('Not connected'); return; }
+    setFlowSyncStatus('Syncing…');
+    let text;
+    try {
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      text = await resp.text();
+    } catch (e) {
+      setFlowSyncStatus("Couldn't reach that sheet — check the URL is published as CSV", true);
+      return;
+    }
+    const parsed = parseFlowCsv(text);
+    if (!parsed) {
+      setFlowSyncStatus("Couldn't read that sheet — check the column headers match the expected format", true);
+      return;
+    }
+    const snaps = getFlowSnapshots();
+    parsed.rows.forEach(function(rec) {
+      const idx = snaps.findIndex(function(s) { return s.month === rec.month; });
+      if (idx >= 0) snaps[idx] = rec; else snaps.push(rec);
+    });
+    setFlowSnapshots(snaps);
+    setFlowLastSynced(new Date().toISOString());
+    renderFlow();
+    let statusMsg = 'Synced just now';
+    if (parsed.skipped.length) statusMsg += ' (' + parsed.skipped.length + ' row' + (parsed.skipped.length !== 1 ? 's' : '') + ' skipped — check month format)';
+    setFlowSyncStatus(statusMsg);
   }
 
   function renderFlow() {
@@ -4110,6 +4235,26 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   }
   const flowSaveBtn = document.getElementById('flowSaveBtn');
   if (flowSaveBtn) flowSaveBtn.addEventListener('click', doFlowSave);
+
+  // Sheets sync wiring
+  const flowSheetSyncBtn = document.getElementById('flowSheetSyncBtn');
+  if (flowSheetSyncBtn) {
+    flowSheetSyncBtn.addEventListener('click', function() {
+      const inp = document.getElementById('flowSheetUrlInput');
+      const url = inp ? inp.value.trim() : '';
+      setFlowSheetUrl(url);
+      syncFlowFromSheet();
+    });
+  }
+  // Pre-fill URL input with saved value and set initial status
+  (function() {
+    const inp = document.getElementById('flowSheetUrlInput');
+    const savedUrl = getFlowSheetUrl();
+    if (inp && savedUrl) inp.value = savedUrl;
+    const lastSynced = getFlowLastSynced();
+    if (savedUrl && lastSynced) setFlowSyncStatus('Synced ' + flowRelTime(lastSynced) + ' ago');
+    else if (!savedUrl) setFlowSyncStatus('Not connected');
+  })();
 
   // ============================================================
   // PULSE — read-only cockpit summarizing Net Worth + Flow.
@@ -4841,7 +4986,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (typeof initCloudSync !== 'function') return;
   initCloudSync({
     appKey: 'finance',
-    syncedKeys: ['subs', 'wishlist', 'incoming_orders', 'nw_currency', 'nw:activity', 'nw:history', 'flow:snapshots_v1'],
+    syncedKeys: ['subs', 'wishlist', 'incoming_orders', 'nw_currency', 'nw:activity', 'nw:history', 'flow:snapshots_v1', 'flow:sheet_url_v1', 'flow:last_synced_v1'],
     syncedPrefixes: ['nw:'],
     onApplied: function () {
       window.dispatchEvent(new Event('storage'));
