@@ -2105,26 +2105,26 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
   <div class="commit-summary">
     <div class="commit-sum-item">
-      <div class="commit-sum-label">Recurring</div>
+      <div class="commit-sum-label">Subscriptions</div>
       <div class="commit-sum-val" id="commitSumRecurring">0 Ft / mo</div>
       <div class="commit-sum-pct" id="commitPctRecurring">—</div>
     </div>
     <div class="commit-sum-item">
-      <div class="commit-sum-label">Committed</div>
+      <div class="commit-sum-label">Orders</div>
       <div class="commit-sum-val" id="commitSumCommitted">0 Ft</div>
       <div class="commit-sum-pct" id="commitPctCommitted">—</div>
     </div>
     <div class="commit-sum-item">
-      <div class="commit-sum-label">Considered</div>
+      <div class="commit-sum-label">Wishlist</div>
       <div class="commit-sum-val" id="commitSumConsidered">0 Ft</div>
       <div class="commit-sum-pct" id="commitPctConsidered">—</div>
     </div>
   </div>
 
   <div class="commit-pills">
-    <button type="button" class="commit-pill active" data-commit-view="recurring">Recurring</button>
-    <button type="button" class="commit-pill" data-commit-view="committed">Committed</button>
-    <button type="button" class="commit-pill" data-commit-view="considered">Considered</button>
+    <button type="button" class="commit-pill active" data-commit-view="recurring">Subscriptions</button>
+    <button type="button" class="commit-pill" data-commit-view="committed" title="Incoming purchases">Orders</button>
+    <button type="button" class="commit-pill" data-commit-view="considered">Wishlist</button>
   </div>
 
   <div id="commitViewRecurring" data-section="subs">
@@ -2922,7 +2922,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     if (diffDays < 0) prefix = 'past · ';
     else if (diffDays === 0) prefix = 'today · ';
     else if (diffDays === 1) prefix = 'tomorrow · ';
-    else if (diffDays <= 7) prefix = 'in ' + diffDays + 'd · ';
+    else if (diffDays <= 7) prefix = 'in ' + diffDays + ' days · ';
     return prefix + dateLabel;
   }
 
@@ -3402,7 +3402,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     if (diffDays < 0)        { cls = 'past';  prefix = 'late · '; }
     else if (diffDays === 0) { cls = 'today'; prefix = 'today · '; }
     else if (diffDays === 1) { cls = 'soon';  prefix = 'tomorrow · '; }
-    else if (diffDays <= 7)  { cls = 'soon';  prefix = 'in ' + diffDays + 'd · '; }
+    else if (diffDays <= 7)  { cls = 'soon';  prefix = 'in ' + diffDays + ' days · '; }
     return { cls, label: prefix + dateLabel };
   }
   // Build the flat list of every NW account (across all 4 categories) so
