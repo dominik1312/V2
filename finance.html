@@ -1742,19 +1742,63 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .pulse-link-chip{flex:1;background:var(--glass-bg);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 8px;font-size:12px;color:var(--text-secondary);text-align:center;cursor:pointer;font-family:inherit}
 .pulse-link-chip:hover{color:var(--text-primary);background:rgba(255,255,255,.07)}
 /* ===== Flow ===== */
-.flow-bar-area{display:flex;align-items:flex-end;gap:6px;height:120px}
-.flow-bar-col{display:flex;flex-direction:column;align-items:center;flex:1;height:100%;justify-content:flex-end}
-.flow-bar{width:100%;border-radius:4px 4px 0 0;min-height:2px}
-.flow-bar.pos{background:#6BE3A4}
-.flow-bar.neg{background:#FF8A8A}
-.flow-bar-labels{display:flex;gap:6px;margin-top:6px}
-.flow-bar-lbl{flex:1;text-align:center;font-size:10px;color:var(--text-tertiary)}
-.flow-history-row{display:grid;grid-template-columns:64px 1fr 1fr 1fr 60px;gap:6px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px;align-items:center}
-.flow-history-row:last-child{border-bottom:none}
-.flow-history-head{color:var(--text-tertiary);font-size:10px;text-transform:uppercase;letter-spacing:.04em}
+.flow-year-pills{display:flex;gap:6px;flex-wrap:wrap}
+.flow-year-pill{padding:4px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.12);font-size:11px;font-weight:600;color:var(--text-secondary);cursor:pointer;background:transparent;font-family:var(--font)}
+.flow-year-pill.active{background:rgba(255,255,255,.10);color:var(--text-primary);border-color:rgba(255,255,255,.2)}
+.flow-row1{display:grid;grid-template-columns:5fr 7fr;gap:10px;margin-bottom:10px;align-items:start}
+.flow-row2{display:grid;grid-template-columns:8fr 4fr;gap:10px;margin-bottom:10px;align-items:start}
+.flow-hero-eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-tertiary);margin-bottom:6px;font-family:var(--font-mono)}
+.flow-hero-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;color:var(--warning);background:rgba(242,192,99,.10);border:1px solid rgba(242,192,99,.25);border-radius:999px;padding:2px 8px;margin-bottom:8px}
+.flow-hero-fig{font-size:28px;font-weight:700;font-family:var(--font-mono);line-height:1.1}
+.flow-hero-rate{font-size:11.5px;color:var(--text-tertiary);margin-top:6px;display:flex;align-items:center;gap:4px}
+.flow-hero-footer{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.06)}
+.flow-hero-foot-label{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-tertiary);margin-bottom:2px;font-family:var(--font-mono)}
+.flow-hero-foot-val{font-size:12px;font-weight:600;font-family:var(--font-mono)}
+.flow-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.flow-stat-card{background:var(--glass-bg);border-radius:var(--radius-md);padding:12px;box-shadow:var(--glass-shadow)}
+.flow-stat-label{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-tertiary);margin-bottom:6px;font-family:var(--font-mono)}
+.flow-stat-val{font-size:14px;font-weight:700;font-family:var(--font-mono);margin-bottom:2px}
+.flow-stat-note{font-size:9px;color:var(--text-tertiary);margin-top:4px}
+.flow-chart-legend{display:flex;gap:12px;margin-top:10px}
+.flow-chart-legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-tertiary)}
+.flow-chart-legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.flow-chart-lbl{font-size:9.5px;color:var(--text-tertiary);text-align:center;margin-top:4px}
+.flow-chart-lbl.current{color:var(--warning)}
+.flow-plan-empty{font-size:11px;color:var(--text-tertiary);text-align:center;padding:16px 0}
+.flow-plan-bar-wrap{background:rgba(255,255,255,.06);border-radius:4px;height:10px;position:relative;overflow:visible;margin:8px 0}
+.flow-plan-bar-fill{height:100%;border-radius:4px;background:#6BE3A4;transition:width .3s}
+.flow-plan-bar-fill.over{background:#FF8A8A}
+.flow-plan-bar-marker{position:absolute;top:-3px;width:2px;height:16px;background:rgba(255,255,255,.55);border-radius:1px}
+.flow-plan-badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:999px}
+.flow-plan-badge.under{background:rgba(107,227,164,.12);color:#6BE3A4}
+.flow-plan-badge.over{background:rgba(255,138,138,.12);color:#FF8A8A}
+.flow-ledger-wrap{border-bottom:1px solid rgba(255,255,255,.05)}
+.flow-ledger-wrap:last-child{border-bottom:none}
+.flow-ledger-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 90px 24px;gap:4px;padding:9px 0;font-size:12px;align-items:center;cursor:pointer}
+.flow-ledger-head{color:var(--text-tertiary);font-size:10px;text-transform:uppercase;letter-spacing:.04em;cursor:default;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.08)}
+.flow-ledger-partial{display:inline-flex;align-items:center;font-size:9px;font-weight:700;color:var(--warning);border:1px solid rgba(242,192,99,.3);border-radius:999px;padding:1px 5px;margin-left:4px;vertical-align:middle;line-height:1.4}
+.flow-ledger-expand{display:flex;align-items:center;justify-content:center;color:var(--text-tertiary)}
+.flow-ledger-expand-panel{background:rgba(0,0,0,.2);border-radius:var(--radius-md);padding:12px;margin:0 0 8px}
+.flow-cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.flow-cat-item{background:rgba(255,255,255,.04);border-radius:8px;padding:8px 10px}
+.flow-cat-item-name{font-size:10px;color:var(--text-tertiary);margin-bottom:2px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.04em}
+.flow-cat-item-amt{font-size:13px;font-weight:600;font-family:var(--font-mono)}
+.flow-ledger-ratebar{display:inline-flex;width:34px;height:5px;background:rgba(255,255,255,.08);border-radius:3px;vertical-align:middle;margin-left:3px;overflow:hidden;flex-shrink:0}
+.flow-ledger-ratebar-fill{height:100%;border-radius:3px;background:#6BE3A4}
+.flow-ledger-ratebar-fill.neg{background:#FF8A8A}
+.flow-footer-status{font-size:11.5px;color:var(--text-tertiary);display:flex;align-items:center;gap:6px;padding:6px 0 2px}
 .flow-input-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.flow-input{background:rgba(0,0,0,0.30);border:1px solid rgba(255,255,255,0.10);color:var(--text-primary);border-radius:8px;padding:9px 10px;font-family:inherit;font-size:13px;outline:none;width:100%}
+.flow-cat-row{display:grid;grid-template-columns:3fr 2fr;gap:8px}
+.flow-input{background:rgba(0,0,0,0.30);border:1px solid rgba(255,255,255,0.10);color:var(--text-primary);border-radius:8px;padding:9px 10px;font-family:var(--font);font-size:13px;outline:none;width:100%}
 .flow-input::placeholder{color:var(--text-tertiary)}
+.flow-input:focus{border-color:rgba(107,227,164,.4)}
+@media(max-width:560px){
+  .flow-row1,.flow-row2{grid-template-columns:1fr}
+  .flow-stat-grid{grid-template-columns:1fr 1fr 1fr}
+  .flow-ledger-row{grid-template-columns:1fr 1fr 1fr 70px 22px;font-size:11px}
+  .flow-ledger-row>span:nth-child(3){display:none}
+  .flow-cat-grid{grid-template-columns:1fr 1fr}
+}
 /* ===== Commitments ===== */
 .commit-pills{display:flex;gap:6px;margin-bottom:14px}
 .commit-pill{flex:1;padding:8px 4px;background:var(--glass-bg);border:1px solid rgba(255,255,255,.07);border-radius:10px;font-size:12px;font-weight:500;color:var(--text-secondary);text-align:center;cursor:pointer;font-family:inherit}
@@ -2048,52 +2092,55 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 <div class="section" data-section="flow">
   <div class="section-title">
     <span class="section-title-text">FLOW</span>
+    <span style="font-size:10px;color:var(--text-tertiary);font-weight:400;letter-spacing:.02em;text-transform:none;margin-left:2px">Monthly cashflow</span>
+    <span style="font-size:9.5px;font-weight:700;letter-spacing:.04em;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10);border-radius:999px;padding:2px 9px;color:var(--text-secondary);font-family:var(--font-mono)">HUF</span>
   </div>
 
-  <div class="card" style="text-align:center;padding:24px 20px">
-    <div class="label" style="margin-bottom:6px">Net Saved · Last Month</div>
-    <div id="flowHeroFigure" style="font-size:34px;font-weight:700;line-height:1.05">0 Ft</div>
-    <div class="pulse-delta" id="flowHeroSub">No snapshots yet</div>
+  <!-- Year selector -->
+  <div class="flow-year-pills" id="flowYearPills" style="margin-bottom:12px"></div>
+
+  <!-- ROW 1: hero 5fr / stat cards 7fr -->
+  <div class="flow-row1">
+    <div class="card" id="flowHeroCard" style="margin-bottom:0"></div>
+    <div class="flow-stat-grid" id="flowStatCards"></div>
   </div>
 
-  <div class="card-grid" style="gap:10px">
-    <div class="card nw-subcard" style="text-align:center">
-      <div class="label">Income</div>
-      <div id="flowStatIncome" style="font-size:16px;font-weight:600">—</div>
-    </div>
-    <div class="card nw-subcard" style="text-align:center">
-      <div class="label">Spend + Bills</div>
-      <div id="flowStatSpendBills" style="font-size:16px;font-weight:600">—</div>
-    </div>
-    <div class="card nw-subcard" style="text-align:center">
-      <div class="label">Save Rate</div>
-      <div id="flowStatRate" style="font-size:16px;font-weight:600">—</div>
-    </div>
+  <!-- ROW 2: chart 8fr / planned vs actual 4fr -->
+  <div class="flow-row2" style="margin-top:10px">
+    <div class="card" id="flowChartCard" style="margin-bottom:0"></div>
+    <div class="card" id="flowPlanCard" style="margin-bottom:0"></div>
   </div>
 
-  <div class="card">
-    <div class="label">Net Saved by Month</div>
-    <div class="flow-bar-area" id="flowBarArea"></div>
-    <div class="flow-bar-labels" id="flowBarLabels"></div>
+  <!-- ROW 3: Month ledger -->
+  <div class="card" style="margin-top:10px">
+    <div class="label">Month Ledger</div>
+    <div id="flowLedgerInner"></div>
   </div>
 
+  <!-- Log Snapshot form -->
   <div class="card">
     <div class="label">Log Snapshot</div>
-    <div class="flow-input-grid">
-      <label class="date-field" style="width:100%"><span class="date-emoji" aria-hidden="true">📅</span><input type="month" id="flowInputMonth" style="width:100%" /></label>
+    <div class="flow-input-grid" style="margin-bottom:8px">
+      <label class="date-field" style="grid-column:1/-1"><span class="date-emoji" aria-hidden="true">📅</span><input type="month" id="flowInputMonth" style="width:100%" /></label>
       <input type="number" step="1" placeholder="Income (Ft)" id="flowInputIncome" class="flow-input" />
       <input type="number" step="1" placeholder="Spending (Ft)" id="flowInputSpending" class="flow-input" />
       <input type="number" step="1" placeholder="Bills (Ft)" id="flowInputBills" class="flow-input" />
+      <input type="number" step="1" placeholder="Moved to reserve (Ft)" id="flowInputReserve" class="flow-input" />
+      <input type="number" step="1" placeholder="Planned out (Ft, optional)" id="flowInputPlannedOut" class="flow-input" />
     </div>
-    <button type="button" class="quick-add-btn" id="flowSaveBtn" style="margin-top:10px;width:100%">Save Snapshot</button>
+    <div style="font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-tertiary);font-family:var(--font-mono);margin:4px 0 8px">Spending Breakdown (optional)</div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
+      <div class="flow-cat-row"><input type="text" placeholder="Category 1" id="flowInputCat1Name" class="flow-input" /><input type="number" step="1" placeholder="Amount" id="flowInputCat1Amt" class="flow-input" /></div>
+      <div class="flow-cat-row"><input type="text" placeholder="Category 2" id="flowInputCat2Name" class="flow-input" /><input type="number" step="1" placeholder="Amount" id="flowInputCat2Amt" class="flow-input" /></div>
+      <div class="flow-cat-row"><input type="text" placeholder="Category 3" id="flowInputCat3Name" class="flow-input" /><input type="number" step="1" placeholder="Amount" id="flowInputCat3Amt" class="flow-input" /></div>
+    </div>
+    <button type="button" class="quick-add-btn" id="flowSaveBtn" style="width:100%">Save Snapshot</button>
   </div>
 
-  <div class="card">
-    <div class="label">History</div>
-    <div class="flow-history-row flow-history-head">
-      <span>Month</span><span>Income</span><span>Spend+Bills</span><span>Saved</span><span>Rate</span>
-    </div>
-    <div id="flowHistoryRows"></div>
+  <!-- FOOTER STATUS: replaced by real Sheets sync status in a later prompt -->
+  <div class="flow-footer-status">
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" stroke-opacity=".4" stroke-width="1"/><path d="M4 6.5l1.8 1.8 3.2-3.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span id="flowFooterText">Manual entry · last snapshot —</span>
   </div>
 </div>
 
@@ -3719,86 +3766,346 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   // FLOW — render the HUF cashflow tab. Reads/writes flow:snapshots_v1
   // via the seam functions declared at the top of this IIFE.
   // ============================================================
-  function renderFlow() {
-    const heroFigure   = document.getElementById('flowHeroFigure');
-    const heroSub      = document.getElementById('flowHeroSub');
-    const statIncome   = document.getElementById('flowStatIncome');
-    const statSpend    = document.getElementById('flowStatSpendBills');
-    const statRate     = document.getElementById('flowStatRate');
-    const barArea      = document.getElementById('flowBarArea');
-    const barLabels     = document.getElementById('flowBarLabels');
-    const historyRows   = document.getElementById('flowHistoryRows');
-    if (!heroFigure) return;
-    const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const snaps = getFlowSnapshots().slice().sort((a, b) => String(a.month).localeCompare(String(b.month)));
-    if (!snaps.length) {
-      heroFigure.textContent = fmtHUFShort(0);
-      heroFigure.style.color = '#6BE3A4';
-      heroSub.textContent = 'No snapshots yet';
-      statIncome.textContent = '—';
-      statSpend.textContent = '—';
-      statRate.textContent = '—';
-      statRate.style.color = '';
-      barArea.innerHTML = '';
-      barLabels.innerHTML = '';
-      historyRows.innerHTML = '';
-      return;
+  let _flowSelectedYear = null;
+  const _flowExpandState = {};
+
+  function isCurrentMonth(monthStr) {
+    const now = new Date();
+    return monthStr === now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+  }
+
+  function flowSparkline(values, color) {
+    if (!values || values.length < 2) return '';
+    const minV = Math.min.apply(null, values), maxV = Math.max.apply(null, values);
+    const range = maxV - minV;
+    const pad = (range || 1) * 0.15;
+    const lo = minV - pad, hi = maxV + pad;
+    const hRange = hi - lo || 1;
+    const pts = values.map(function(v, i) {
+      const x = ((i / (values.length - 1)) * 120).toFixed(1);
+      const y = (32 - ((v - lo) / hRange) * 30).toFixed(1);
+      return x + ',' + y;
+    }).join(' ');
+    return '<svg viewBox="0 0 120 34" width="100%" height="34" style="display:block;opacity:.5"><polyline points="' + pts + '" fill="none" stroke="' + color + '" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+  }
+
+  function flowNiceTicks(lo, hi) {
+    function niceStep(raw) {
+      if (!raw || raw <= 0) return 5;
+      const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+      const n = raw / mag;
+      if (n < 1.5) return mag; if (n < 3.5) return 2 * mag; if (n < 7.5) return 5 * mag; return 10 * mag;
     }
-    const latest = snaps[snaps.length - 1];
-    const net = flowNetSaved(latest);
-    const rate = flowSaveRate(latest) * 100;
-    heroFigure.textContent = fmtHUFShort(net);
-    heroFigure.style.color = net >= 0 ? '#6BE3A4' : '#FF8A8A';
-    heroSub.textContent = latest.month + ' · ' + rate.toFixed(1) + '% saved';
+    const step = niceStep((hi - lo) / 3);
+    const start = Math.ceil(lo / step) * step;
+    const ticks = [];
+    let zeroAdded = false;
+    for (let t = start; t <= hi + step * 0.01; t = Math.round((t + step) * 1e6) / 1e6) {
+      const r = Math.round(t * 10) / 10;
+      if (Math.abs(r) < 0.05) zeroAdded = true;
+      if (ticks.indexOf(r) < 0) ticks.push(r);
+    }
+    if (!zeroAdded && lo <= 0 && hi >= 0) ticks.push(0);
+    return ticks.filter(function(v, i, a) { return a.indexOf(v) === i; }).sort(function(a, b) { return a - b; });
+  }
 
-    statIncome.textContent = fmtHUF(latest.income || 0);
-    statSpend.textContent = fmtHUF((latest.spending || 0) + (latest.bills || 0));
-    statRate.textContent = rate.toFixed(1) + '%';
-    statRate.style.color = rate >= 20 ? '#6BE3A4' : (rate >= 10 ? '#E07658' : '#FF8A8A');
+  function flowStatCard(label, val, note, values, color) {
+    return '<div class="flow-stat-card">'
+      + '<div class="flow-stat-label">' + escapeHtml(label) + '</div>'
+      + '<div class="flow-stat-val">' + val + '</div>'
+      + flowSparkline(values, color)
+      + '<div class="flow-stat-note">' + escapeHtml(note) + '</div>'
+      + '</div>';
+  }
 
-    const maxAbs = Math.max(1, ...snaps.map(s => Math.abs(flowNetSaved(s))));
-    barArea.innerHTML = snaps.map(s => {
-      const v = flowNetSaved(s);
-      const h = Math.max(2, (Math.abs(v) / maxAbs) * 100);
-      const cls = v >= 0 ? 'pos' : 'neg';
-      return '<div class="flow-bar-col"><div class="flow-bar ' + cls + '" style="height:' + h + '%" title="' + escapeHtml(s.month) + ' · ' + fmtHUF(v) + '"></div></div>';
-    }).join('');
-    barLabels.innerHTML = snaps.map(s => {
-      const mi = parseInt(String(s.month).split('-')[1], 10) - 1;
-      return '<span class="flow-bar-lbl">' + (MONTHS[mi] || '') + '</span>';
-    }).join('');
-
-    historyRows.innerHTML = snaps.slice().reverse().map(s => {
-      const n = flowNetSaved(s);
-      const r = flowSaveRate(s) * 100;
-      const nCls = n >= 0 ? '#6BE3A4' : '#FF8A8A';
-      const rCls = r >= 20 ? '#6BE3A4' : (r >= 10 ? '#E07658' : '#FF8A8A');
-      return '<div class="flow-history-row">'
-        + '<span>' + escapeHtml(s.month) + '</span>'
-        + '<span>' + fmtHUF(s.income || 0) + '</span>'
-        + '<span>' + fmtHUF((s.spending || 0) + (s.bills || 0)) + '</span>'
-        + '<span style="color:' + nCls + '">' + fmtHUF(n) + '</span>'
-        + '<span style="color:' + rCls + '">' + r.toFixed(1) + '%</span>'
+  function renderFlowChart(yearSnaps, MONTHS) {
+    const cc = document.getElementById('flowChartCard');
+    if (!cc) return;
+    const view = yearSnaps.slice(-6);
+    if (!view.length) { cc.innerHTML = ''; return; }
+    const rates = view.map(function(s) { return flowSaveRate(s) * 100; });
+    const dataMax = Math.max.apply(null, [0].concat(rates));
+    const dataMin = Math.min.apply(null, [0].concat(rates));
+    const dataRange = dataMax - dataMin || 10;
+    const pad = dataRange * 0.15;
+    const maxY = dataMax + pad, minY = dataMin - pad;
+    const totalRange = maxY - minY;
+    const chartH = 110;
+    const zoneAbove = Math.round(chartH * maxY / totalRange);
+    const zoneBelow = chartH - zoneAbove;
+    const ticks = flowNiceTicks(minY, maxY);
+    const gridHtml = ticks.map(function(t) {
+      const topPct = ((maxY - t) / totalRange * 100).toFixed(1);
+      const isZero = Math.abs(t) < 0.05;
+      return '<div style="position:absolute;left:0;right:0;top:' + topPct + '%;display:flex;align-items:center;pointer-events:none;gap:4px">'
+        + '<div style="flex:1;height:1px;background:rgba(255,255,255,' + (isZero ? '.15' : '.06') + ')"></div>'
+        + '<span style="font-size:8px;color:var(--text-tertiary);white-space:nowrap;line-height:1;flex-shrink:0">' + (isZero ? '0' : t.toFixed(0)) + '%</span>'
         + '</div>';
     }).join('');
+    const barCols = view.map(function(s) {
+      const rate = flowSaveRate(s) * 100;
+      const pos = rate >= 0;
+      const inProg = isCurrentMonth(s.month);
+      const mi = parseInt(String(s.month).split('-')[1], 10) - 1;
+      const lbl = MONTHS[mi] || '';
+      const color = pos ? '#6BE3A4' : '#FF8A8A';
+      const barH = Math.max(2, Math.round(chartH * Math.abs(rate) / totalRange));
+      const bg = inProg
+        ? 'repeating-linear-gradient(45deg,' + color + ',' + color + ' 3px,transparent 3px,transparent 7px)'
+        : color;
+      const aboveEl = pos ? '<div style="width:70%;height:' + barH + 'px;background:' + bg + ';border-radius:3px 3px 0 0"></div>' : '';
+      const belowEl = !pos ? '<div style="width:70%;height:' + barH + 'px;background:' + bg + ';border-radius:0 0 3px 3px"></div>' : '';
+      const lblCls = inProg ? 'flow-chart-lbl current' : 'flow-chart-lbl';
+      return '<div style="display:flex;flex-direction:column;align-items:center;flex:1">'
+        + '<div style="height:' + zoneAbove + 'px;width:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center">' + aboveEl + '</div>'
+        + '<div style="height:' + zoneBelow + 'px;width:100%;display:flex;flex-direction:column;justify-content:flex-start;align-items:center">' + belowEl + '</div>'
+        + '<div class="' + lblCls + '">' + escapeHtml(lbl) + '</div>'
+        + '</div>';
+    }).join('');
+    cc.innerHTML = '<div class="label" style="margin-bottom:10px">Kept Rate Trend</div>'
+      + '<div style="position:relative;height:' + chartH + 'px">'
+      + '<div style="position:absolute;inset:0;pointer-events:none">' + gridHtml + '</div>'
+      + '<div style="display:flex;gap:5px;height:100%;position:relative">' + barCols + '</div>'
+      + '</div>'
+      + '<div class="flow-chart-legend">'
+      + '<div class="flow-chart-legend-item"><div class="flow-chart-legend-dot" style="background:#6BE3A4"></div>Kept</div>'
+      + '<div class="flow-chart-legend-item"><div class="flow-chart-legend-dot" style="background:#FF8A8A"></div>Overspent</div>'
+      + '</div>';
   }
+
+  function renderFlowPlan(yearSnaps, MONTHS) {
+    const pc = document.getElementById('flowPlanCard');
+    if (!pc) return;
+    if (!yearSnaps.length) { pc.innerHTML = ''; return; }
+    const latest = yearSnaps[yearSnaps.length - 1];
+    const mi = parseInt(String(latest.month).split('-')[1], 10) - 1;
+    const latestLabel = MONTHS[mi] || latest.month;
+    const actualOut = (latest.spending || 0) + (latest.bills || 0);
+    let mainHtml;
+    if (latest.plannedOut != null) {
+      const planned = latest.plannedOut;
+      const isOver = actualOut > planned;
+      const maxBar = Math.max(planned, actualOut, 1);
+      const fillPct = Math.min(100, (actualOut / maxBar) * 100).toFixed(1);
+      const markerPct = Math.min(100, (planned / maxBar) * 100).toFixed(1);
+      const delta = Math.abs(actualOut - planned);
+      mainHtml = '<div style="font-size:10.5px;color:var(--text-secondary);margin-bottom:6px;font-weight:600">' + escapeHtml(latestLabel) + '</div>'
+        + '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-tertiary);margin-bottom:4px"><span>Planned</span><span>Actual</span></div>'
+        + '<div class="flow-plan-bar-wrap">'
+        + '<div class="flow-plan-bar-fill' + (isOver ? ' over' : '') + '" style="width:' + fillPct + '%"></div>'
+        + '<div class="flow-plan-bar-marker" style="left:calc(' + markerPct + '% - 1px)"></div>'
+        + '</div>'
+        + '<div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--text-tertiary);margin-bottom:8px;font-family:var(--font-mono)">'
+        + '<span>' + fmtHUF(planned) + '</span><span>' + fmtHUF(actualOut) + '</span></div>'
+        + '<span class="flow-plan-badge ' + (isOver ? 'over' : 'under') + '">'
+        + (isOver ? '+' + fmtHUF(delta) + ' over plan' : fmtHUF(delta) + ' under plan') + '</span>';
+    } else {
+      mainHtml = '<div style="font-size:10.5px;color:var(--text-secondary);margin-bottom:4px;font-weight:600">' + escapeHtml(latestLabel) + '</div>'
+        + '<div class="flow-plan-empty">No plan set for this month</div>';
+    }
+    const others = yearSnaps.slice(0, -1).filter(function(s) { return s.plannedOut != null; });
+    let othersHtml = '';
+    if (others.length) {
+      const maxDelta = Math.max.apply(null, others.map(function(s) {
+        return Math.abs(((s.spending || 0) + (s.bills || 0)) - s.plannedOut);
+      }).concat([1]));
+      othersHtml = '<div style="font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-tertiary);margin:10px 0 6px;font-family:var(--font-mono)">Other months</div>'
+        + others.slice().reverse().map(function(s) {
+          const omi = parseInt(String(s.month).split('-')[1], 10) - 1;
+          const oLbl = MONTHS[omi] || s.month;
+          const oActual = (s.spending || 0) + (s.bills || 0);
+          const delta = oActual - s.plannedOut;
+          const isOver = delta > 0;
+          const pct = (Math.abs(delta) / maxDelta * 100).toFixed(1);
+          const color = isOver ? '#FF8A8A' : '#6BE3A4';
+          return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">'
+            + '<span style="font-size:10px;color:var(--text-tertiary);width:26px;flex-shrink:0">' + escapeHtml(oLbl) + '</span>'
+            + '<div style="flex:1;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden">'
+            + '<div style="height:100%;width:' + pct + '%;background:' + color + ';border-radius:2px"></div></div>'
+            + '<span style="font-size:10px;color:' + color + ';width:70px;text-align:right;flex-shrink:0;font-family:var(--font-mono)">'
+            + (isOver ? '+' : '−') + fmtHUF(Math.abs(delta)) + '</span>'
+            + '</div>';
+        }).join('');
+    }
+    pc.innerHTML = '<div class="label" style="margin-bottom:10px">Planned vs Actual</div>' + mainHtml + othersHtml;
+  }
+
+  function renderFlowLedger(yearSnaps, MONTHS) {
+    const li = document.getElementById('flowLedgerInner');
+    if (!li) return;
+    const reversed = yearSnaps.slice().reverse();
+    const head = '<div class="flow-ledger-row flow-ledger-head">'
+      + '<span>Month</span><span>Income</span><span>Out</span><span>Kept</span><span>Rate</span><span></span></div>';
+    const rows = reversed.map(function(s) {
+      const net = flowNetSaved(s);
+      const rate = flowSaveRate(s) * 100;
+      const mi = parseInt(String(s.month).split('-')[1], 10) - 1;
+      const lbl = MONTHS[mi] || s.month;
+      const inProg = isCurrentMonth(s.month);
+      const exp = _flowExpandState[s.month] || false;
+      const netColor = net >= 0 ? '#6BE3A4' : '#FF8A8A';
+      const rateColor = rate >= 20 ? '#6BE3A4' : (rate >= 10 ? 'var(--warning)' : '#FF8A8A');
+      const barFillCls = rate >= 0 ? '' : ' neg';
+      const barW = Math.min(100, Math.abs(rate)).toFixed(0);
+      const partial = inProg ? '<span class="flow-ledger-partial">Partial</span>' : '';
+      const chevron = exp
+        ? '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 7l3-4 3 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+        : '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 3l3 4 3-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      const cats = s.categories || [];
+      const expandPanel = exp ? '<div class="flow-ledger-expand-panel">'
+        + (cats.length
+          ? '<div class="flow-cat-grid">' + cats.map(function(c) {
+              return '<div class="flow-cat-item"><div class="flow-cat-item-name">' + escapeHtml(c.name) + '</div>'
+                + '<div class="flow-cat-item-amt">' + fmtHUF(c.amount || 0) + '</div></div>';
+            }).join('') + '</div>'
+          : '<div class="flow-plan-empty" style="padding:10px 0">No category breakdown logged for this month</div>'
+        ) + '</div>' : '';
+      return '<div class="flow-ledger-wrap" data-month="' + escapeHtml(s.month) + '">'
+        + '<div class="flow-ledger-row">'
+        + '<span>' + escapeHtml(lbl) + partial + '</span>'
+        + '<span style="font-family:var(--font-mono);font-size:11px">' + fmtHUF(s.income || 0) + '</span>'
+        + '<span style="font-family:var(--font-mono);font-size:11px">' + fmtHUF((s.spending || 0) + (s.bills || 0)) + '</span>'
+        + '<span style="color:' + netColor + ';font-family:var(--font-mono);font-size:11px">' + fmtHUF(net) + '</span>'
+        + '<span style="display:flex;align-items:center;gap:3px;color:' + rateColor + ';font-size:11px">'
+        + rate.toFixed(1) + '%<span class="flow-ledger-ratebar"><span class="flow-ledger-ratebar-fill' + barFillCls + '" style="width:' + barW + '%"></span></span></span>'
+        + '<span class="flow-ledger-expand">' + chevron + '</span>'
+        + '</div>' + expandPanel + '</div>';
+    }).join('');
+    li.innerHTML = head + rows;
+    li.querySelectorAll('.flow-ledger-wrap').forEach(function(wrap) {
+      wrap.querySelector('.flow-ledger-row').addEventListener('click', function() {
+        const m = wrap.dataset.month;
+        _flowExpandState[m] = !(_flowExpandState[m] || false);
+        renderFlowLedger(yearSnaps, MONTHS);
+      });
+    });
+  }
+
+  function updateFlowFooter(allSnaps) {
+    const ft = document.getElementById('flowFooterText');
+    if (!ft) return;
+    const sorted = allSnaps.slice().sort(function(a, b) { return String(a.month).localeCompare(String(b.month)); });
+    const last = sorted[sorted.length - 1];
+    ft.textContent = 'Manual entry · last snapshot ' + (last ? last.month : '—');
+  }
+
+  function renderFlow() {
+    const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const allSnaps = getFlowSnapshots().slice().sort(function(a, b) { return String(a.month).localeCompare(String(b.month)); });
+    const nowYear = String(new Date().getFullYear());
+    const yearSet = new Set(allSnaps.map(function(s) { return String(s.month).split('-')[0]; }));
+    yearSet.add(nowYear);
+    const years = Array.from(yearSet).sort();
+    const defaultYear = allSnaps.length ? String(allSnaps[allSnaps.length - 1].month).split('-')[0] : nowYear;
+    if (!_flowSelectedYear || !yearSet.has(_flowSelectedYear)) _flowSelectedYear = defaultYear;
+    const selYear = _flowSelectedYear;
+
+    const pillsEl = document.getElementById('flowYearPills');
+    if (pillsEl) {
+      pillsEl.innerHTML = years.map(function(y) {
+        return '<button type="button" class="flow-year-pill' + (y === selYear ? ' active' : '') + '" data-year="' + y + '">' + y + '</button>';
+      }).join('');
+      pillsEl.querySelectorAll('.flow-year-pill').forEach(function(b) {
+        b.addEventListener('click', function() { _flowSelectedYear = b.dataset.year; renderFlow(); });
+      });
+    }
+
+    const yearSnaps = allSnaps.filter(function(s) { return String(s.month).startsWith(selYear); });
+    const heroCard = document.getElementById('flowHeroCard');
+    if (!heroCard) return;
+
+    if (!yearSnaps.length) {
+      heroCard.innerHTML = '<div class="flow-plan-empty">No snapshots for ' + escapeHtml(selYear) + '</div>';
+      const sc = document.getElementById('flowStatCards'); if (sc) sc.innerHTML = '';
+      const cc = document.getElementById('flowChartCard'); if (cc) cc.innerHTML = '';
+      const pc = document.getElementById('flowPlanCard'); if (pc) pc.innerHTML = '';
+      const li = document.getElementById('flowLedgerInner'); if (li) li.innerHTML = '';
+      updateFlowFooter(allSnaps);
+      return;
+    }
+
+    const latest = yearSnaps[yearSnaps.length - 1];
+    const latestNet = flowNetSaved(latest);
+    const latestRate = flowSaveRate(latest) * 100;
+    const inProgress = isCurrentMonth(latest.month);
+    const latestMi = parseInt(String(latest.month).split('-')[1], 10) - 1;
+    const latestLabel = MONTHS[latestMi] || latest.month;
+    const avgRate = yearSnaps.reduce(function(s, sn) { return s + flowSaveRate(sn); }, 0) / yearSnaps.length * 100;
+    const rateDiff = latestRate - avgRate;
+    const chevUp = '<svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M2 8l3.5-5 3.5 5" stroke="#6BE3A4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    const chevDn = '<svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M2 3l3.5 5 3.5-5" stroke="#FF8A8A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+    heroCard.innerHTML =
+      '<div class="flow-hero-eyebrow">' + escapeHtml(latestLabel) + ' · Net kept</div>'
+      + (inProgress ? '<div class="flow-hero-badge"><span style="width:5px;height:5px;border-radius:50%;background:var(--warning);display:inline-block;flex-shrink:0"></span>Month in progress</div>' : '')
+      + '<div class="flow-hero-fig" style="color:' + (latestNet >= 0 ? '#6BE3A4' : '#FF8A8A') + '">' + fmtHUFShort(latestNet) + '</div>'
+      + '<div class="flow-hero-rate">'
+      + (rateDiff >= 0 ? chevUp : chevDn)
+      + '<span style="color:' + (rateDiff >= 0 ? '#6BE3A4' : '#FF8A8A') + '">' + latestRate.toFixed(1) + '%</span>'
+      + '<span style="margin-left:3px">vs ' + avgRate.toFixed(1) + '% yr avg</span>'
+      + '</div>'
+      + '<div class="flow-hero-footer">'
+      + '<div><div class="flow-hero-foot-label">Income</div><div class="flow-hero-foot-val">' + fmtHUF(latest.income || 0) + '</div></div>'
+      + '<div><div class="flow-hero-foot-label">Out</div><div class="flow-hero-foot-val">' + fmtHUF((latest.spending || 0) + (latest.bills || 0)) + '</div></div>'
+      + '<div><div class="flow-hero-foot-label">Reserve</div><div class="flow-hero-foot-val">' + fmtHUF(latest.reserve || 0) + '</div></div>'
+      + '</div>';
+
+    const statCards = document.getElementById('flowStatCards');
+    if (statCards) {
+      const n = yearSnaps.length;
+      const avgIncome = yearSnaps.reduce(function(s, sn) { return s + (sn.income || 0); }, 0) / n;
+      const avgOut = yearSnaps.reduce(function(s, sn) { return s + (sn.spending || 0) + (sn.bills || 0); }, 0) / n;
+      const avgKept = yearSnaps.reduce(function(s, sn) { return s + flowNetSaved(sn); }, 0) / n;
+      statCards.innerHTML =
+        flowStatCard('Avg income / mo', fmtHUFShort(avgIncome), 'across ' + n + ' month' + (n !== 1 ? 's' : ''),
+          yearSnaps.map(function(sn) { return sn.income || 0; }), '#6BE3A4')
+        + flowStatCard('Avg out / mo', fmtHUFShort(avgOut), 'incl. bills',
+          yearSnaps.map(function(sn) { return (sn.spending || 0) + (sn.bills || 0); }), '#FF8A8A')
+        + flowStatCard('Avg kept / mo', fmtHUFShort(avgKept), 'income − out',
+          yearSnaps.map(function(sn) { return flowNetSaved(sn); }), avgKept >= 0 ? '#6BE3A4' : '#FF8A8A');
+    }
+
+    renderFlowChart(yearSnaps, MONTHS);
+    renderFlowPlan(yearSnaps, MONTHS);
+    renderFlowLedger(yearSnaps, MONTHS);
+    updateFlowFooter(allSnaps);
+  }
+
   function doFlowSave() {
     const mEl = document.getElementById('flowInputMonth');
     const iEl = document.getElementById('flowInputIncome');
     const sEl = document.getElementById('flowInputSpending');
     const bEl = document.getElementById('flowInputBills');
+    const rEl = document.getElementById('flowInputReserve');
+    const pEl = document.getElementById('flowInputPlannedOut');
     if (!mEl || !mEl.value) { if (mEl) mEl.focus(); return; }
+    const cats = [];
+    for (let i = 1; i <= 3; i++) {
+      const nameEl = document.getElementById('flowInputCat' + i + 'Name');
+      const amtEl  = document.getElementById('flowInputCat' + i + 'Amt');
+      if (nameEl && nameEl.value.trim()) {
+        cats.push({ name: nameEl.value.trim(), amount: parseFloat(amtEl && amtEl.value) || 0 });
+      }
+    }
     const rec = {
-      month: mEl.value,
-      income: parseFloat(iEl.value) || 0,
-      spending: parseFloat(sEl.value) || 0,
-      bills: parseFloat(bEl.value) || 0
+      month:      mEl.value,
+      income:     parseFloat(iEl && iEl.value) || 0,
+      spending:   parseFloat(sEl && sEl.value) || 0,
+      bills:      parseFloat(bEl && bEl.value) || 0,
+      reserve:    parseFloat(rEl && rEl.value) || 0,
+      plannedOut: (pEl && pEl.value.trim()) ? parseFloat(pEl.value) : null,
+      categories: cats
     };
     const snaps = getFlowSnapshots();
-    const idx = snaps.findIndex(s => s.month === rec.month);
+    const idx = snaps.findIndex(function(s) { return s.month === rec.month; });
     if (idx >= 0) snaps[idx] = rec; else snaps.push(rec);
     setFlowSnapshots(snaps);
-    iEl.value = ''; sEl.value = ''; bEl.value = '';
+    [iEl, sEl, bEl, rEl, pEl].forEach(function(el) { if (el) el.value = ''; });
+    for (let i = 1; i <= 3; i++) {
+      const ne = document.getElementById('flowInputCat' + i + 'Name');
+      const ae = document.getElementById('flowInputCat' + i + 'Amt');
+      if (ne) ne.value = ''; if (ae) ae.value = '';
+    }
     renderFlow();
   }
   const flowSaveBtn = document.getElementById('flowSaveBtn');
