@@ -1768,6 +1768,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .flow-plan-bar-wrap{background:rgba(255,255,255,.06);border-radius:4px;height:10px;position:relative;overflow:visible;margin:8px 0}
 .flow-plan-bar-fill{height:100%;border-radius:4px;background:#6BE3A4;transition:width .3s}
 .flow-plan-bar-fill.over{background:#FF8A8A}
+.flow-plan-bar-base{position:absolute;top:0;height:100%;background:rgba(255,255,255,.18)}
+.flow-plan-bar-delta{position:absolute;top:0;height:100%}
 .flow-plan-bar-marker{position:absolute;top:-3px;width:2px;height:16px;background:rgba(255,255,255,.55);border-radius:1px}
 .flow-plan-badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:999px}
 .flow-plan-badge.under{background:rgba(107,227,164,.12);color:#6BE3A4}
@@ -2384,6 +2386,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     if(abs>=1000000) return sign+(abs/1000000).toFixed(1).replace('.',',')+' M Ft';
     if(abs>=1000) return sign+Math.round(abs/1000)+' e Ft';
     return sign+Math.round(abs)+' Ft';
+  }
+  function fmtHUFSigned(n) {
+    const sign = n > 0 ? '+' : (n < 0 ? '−' : '');
+    return sign + Math.abs(Math.round(n)).toLocaleString('hu-HU') + ' Ft';
   }
   function seedFlowIfEmpty() {
     if (getFlowSnapshots().length) return;
@@ -3851,13 +3857,15 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     const zoneAbove = Math.round(chartH * maxY / totalRange);
     const zoneBelow = chartH - zoneAbove;
     const ticks = flowNiceTicks(minY, maxY);
+    const tickColHtml = ticks.map(function(t) {
+      const topPct = ((maxY - t) / totalRange * 100).toFixed(1);
+      const isZero = Math.abs(t) < 0.05;
+      return '<span style="position:absolute;right:0;top:' + topPct + '%;transform:translateY(-50%);font-size:8px;color:var(--text-tertiary);white-space:nowrap;line-height:1">' + (isZero ? '0' : t.toFixed(0)) + '%</span>';
+    }).join('');
     const gridHtml = ticks.map(function(t) {
       const topPct = ((maxY - t) / totalRange * 100).toFixed(1);
       const isZero = Math.abs(t) < 0.05;
-      return '<div style="position:absolute;left:0;right:0;top:' + topPct + '%;display:flex;align-items:center;pointer-events:none;gap:4px">'
-        + '<div style="flex:1;height:1px;background:rgba(255,255,255,' + (isZero ? '.15' : '.06') + ')"></div>'
-        + '<span style="font-size:8px;color:var(--text-tertiary);white-space:nowrap;line-height:1;flex-shrink:0">' + (isZero ? '0' : t.toFixed(0)) + '%</span>'
-        + '</div>';
+      return '<div style="position:absolute;left:0;right:0;top:' + topPct + '%;height:1px;background:rgba(255,255,255,' + (isZero ? '.15' : '.06') + ');pointer-events:none"></div>';
     }).join('');
     const barCols = view.map(function(s) {
       const rate = flowSaveRate(s) * 100;
@@ -3880,9 +3888,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         + '</div>';
     }).join('');
     cc.innerHTML = '<div class="label" style="margin-bottom:10px">Kept Rate Trend</div>'
-      + '<div style="position:relative;height:' + chartH + 'px">'
+      + '<div style="display:flex;height:' + chartH + 'px">'
+      + '<div style="position:relative;width:32px;flex-shrink:0">' + tickColHtml + '</div>'
+      + '<div style="position:relative;flex:1;height:100%">'
       + '<div style="position:absolute;inset:0;pointer-events:none">' + gridHtml + '</div>'
       + '<div style="display:flex;gap:5px;height:100%;position:relative">' + barCols + '</div>'
+      + '</div>'
       + '</div>'
       + '<div class="flow-chart-legend">'
       + '<div class="flow-chart-legend-item"><div class="flow-chart-legend-dot" style="background:#6BE3A4"></div>Kept</div>'
@@ -3903,13 +3914,19 @@ input[type="date"]::-webkit-calendar-picker-indicator {
       const planned = latest.plannedOut;
       const isOver = actualOut > planned;
       const maxBar = Math.max(planned, actualOut, 1);
-      const fillPct = Math.min(100, (actualOut / maxBar) * 100).toFixed(1);
       const markerPct = Math.min(100, (planned / maxBar) * 100).toFixed(1);
       const delta = Math.abs(actualOut - planned);
+      const baseVal = Math.min(planned, actualOut);
+      const deltaVal = Math.abs(actualOut - planned);
+      const basePct = (baseVal / maxBar * 100).toFixed(1);
+      const deltaPct = (deltaVal / maxBar * 100).toFixed(1);
+      const deltaColor = isOver ? '#FF8A8A' : '#6BE3A4';
+      const baseRadius = (+deltaPct === 0) ? '4px' : '4px 0 0 4px';
       mainHtml = '<div style="font-size:10.5px;color:var(--text-secondary);margin-bottom:6px;font-weight:600">' + escapeHtml(latestLabel) + '</div>'
         + '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-tertiary);margin-bottom:4px"><span>Planned</span><span>Actual</span></div>'
         + '<div class="flow-plan-bar-wrap">'
-        + '<div class="flow-plan-bar-fill' + (isOver ? ' over' : '') + '" style="width:' + fillPct + '%"></div>'
+        + '<div class="flow-plan-bar-base" style="left:0;width:' + basePct + '%;border-radius:' + baseRadius + '"></div>'
+        + '<div class="flow-plan-bar-delta" style="left:' + basePct + '%;width:' + deltaPct + '%;background:' + deltaColor + ';border-radius:0 4px 4px 0"></div>'
         + '<div class="flow-plan-bar-marker" style="left:calc(' + markerPct + '% - 1px)"></div>'
         + '</div>'
         + '<div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--text-tertiary);margin-bottom:8px;font-family:var(--font-mono)">'
@@ -3951,6 +3968,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     const li = document.getElementById('flowLedgerInner');
     if (!li) return;
     const reversed = yearSnaps.slice().reverse();
+    const maxAbsRate = Math.max.apply(null, yearSnaps.map(function(s) { return Math.abs(flowSaveRate(s) * 100); }).concat([1]));
     const head = '<div class="flow-ledger-row flow-ledger-head">'
       + '<span>Month</span><span>Income</span><span>Out</span><span>Kept</span><span>Rate</span><span></span></div>';
     const rows = reversed.map(function(s) {
@@ -3963,7 +3981,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
       const netColor = net >= 0 ? '#6BE3A4' : '#FF8A8A';
       const rateColor = rate >= 20 ? '#6BE3A4' : (rate >= 10 ? 'var(--warning)' : '#FF8A8A');
       const barFillCls = rate >= 0 ? '' : ' neg';
-      const barW = Math.min(100, Math.abs(rate)).toFixed(0);
+      const barW = Math.min(100, (Math.abs(rate) / maxAbsRate) * 100).toFixed(0);
       const partial = inProg ? '<span class="flow-ledger-partial">Partial</span>' : '';
       const chevron = exp
         ? '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 7l3-4 3 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
@@ -4163,7 +4181,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     heroCard.innerHTML =
       '<div class="flow-hero-eyebrow">' + escapeHtml(latestLabel) + ' · Net kept</div>'
       + (inProgress ? '<div class="flow-hero-badge"><span style="width:5px;height:5px;border-radius:50%;background:var(--warning);display:inline-block;flex-shrink:0"></span>Month in progress</div>' : '')
-      + '<div class="flow-hero-fig" style="color:' + (latestNet >= 0 ? '#6BE3A4' : '#FF8A8A') + '">' + fmtHUFShort(latestNet) + '</div>'
+      + '<div class="flow-hero-fig" style="color:' + (latestNet >= 0 ? '#6BE3A4' : '#FF8A8A') + '">' + fmtHUFSigned(latestNet) + '</div>'
       + '<div class="flow-hero-rate">'
       + (rateDiff >= 0 ? chevUp : chevDn)
       + '<span style="color:' + (rateDiff >= 0 ? '#6BE3A4' : '#FF8A8A') + '">' + latestRate.toFixed(1) + '%</span>'
@@ -4182,11 +4200,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
       const avgOut = yearSnaps.reduce(function(s, sn) { return s + (sn.spending || 0) + (sn.bills || 0); }, 0) / n;
       const avgKept = yearSnaps.reduce(function(s, sn) { return s + flowNetSaved(sn); }, 0) / n;
       statCards.innerHTML =
-        flowStatCard('Avg income / mo', fmtHUFShort(avgIncome), 'across ' + n + ' month' + (n !== 1 ? 's' : ''),
+        flowStatCard('Avg income / mo', fmtHUF(avgIncome), 'across ' + n + ' month' + (n !== 1 ? 's' : ''),
           yearSnaps.map(function(sn) { return sn.income || 0; }), '#6BE3A4')
-        + flowStatCard('Avg out / mo', fmtHUFShort(avgOut), 'incl. bills',
+        + flowStatCard('Avg out / mo', fmtHUF(avgOut), 'incl. bills',
           yearSnaps.map(function(sn) { return (sn.spending || 0) + (sn.bills || 0); }), '#FF8A8A')
-        + flowStatCard('Avg kept / mo', fmtHUFShort(avgKept), 'income − out',
+        + flowStatCard('Avg kept / mo', fmtHUFSigned(avgKept), 'income − out',
           yearSnaps.map(function(sn) { return flowNetSaved(sn); }), avgKept >= 0 ? '#6BE3A4' : '#FF8A8A');
     }
 
