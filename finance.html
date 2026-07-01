@@ -1746,6 +1746,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .flow-year-pill{padding:4px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.12);font-size:11px;font-weight:600;color:var(--text-secondary);cursor:pointer;background:transparent;font-family:var(--font)}
 .flow-year-pill.active{background:rgba(255,255,255,.10);color:var(--text-primary);border-color:rgba(255,255,255,.2)}
 .flow-row1{display:grid;grid-template-columns:5fr 7fr;gap:10px;margin-bottom:10px;align-items:start}
+.flow-row15{display:grid;grid-template-columns:6fr 6fr;gap:10px;margin-bottom:10px;align-items:start}
 .flow-row2{display:grid;grid-template-columns:8fr 4fr;gap:10px;margin-bottom:10px;align-items:start}
 .flow-hero-eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-tertiary);margin-bottom:6px;font-family:var(--font-mono)}
 .flow-hero-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;color:var(--warning);background:rgba(242,192,99,.10);border:1px solid rgba(242,192,99,.25);border-radius:999px;padding:2px 8px;margin-bottom:8px}
@@ -1795,7 +1796,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .flow-input::placeholder{color:var(--text-tertiary)}
 .flow-input:focus{border-color:rgba(107,227,164,.4)}
 @media(max-width:560px){
-  .flow-row1,.flow-row2{grid-template-columns:1fr}
+  .flow-row1,.flow-row15,.flow-row2{grid-template-columns:1fr}
   .flow-stat-grid{grid-template-columns:1fr 1fr 1fr}
   .flow-ledger-row{grid-template-columns:1fr 1fr 1fr 70px 22px;font-size:11px}
   .flow-ledger-row>span:nth-child(3){display:none}
@@ -2107,8 +2108,17 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     <div class="flow-stat-grid" id="flowStatCards"></div>
   </div>
 
+  <!-- ROW 1.5: income breakdown + outflow breakdown -->
+  <div class="flow-row15">
+    <div class="card" id="flowIncomeBreakdownCard" style="margin-bottom:0"></div>
+    <div class="card" id="flowOutflowBreakdownCard" style="margin-bottom:0"></div>
+  </div>
+
+  <!-- Category trends -->
+  <div class="card" id="flowTrendCard" style="margin-bottom:10px"></div>
+
   <!-- ROW 2: chart 8fr / planned vs actual 4fr -->
-  <div class="flow-row2" style="margin-top:10px">
+  <div class="flow-row2" style="margin-top:0">
     <div class="card" id="flowChartCard" style="margin-bottom:0"></div>
     <div class="card" id="flowPlanCard" style="margin-bottom:0"></div>
   </div>
@@ -2145,6 +2155,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
       <div class="flow-cat-row"><input type="text" placeholder="Category 1" id="flowInputCat1Name" class="flow-input" /><input type="number" step="1" placeholder="Amount" id="flowInputCat1Amt" class="flow-input" /></div>
       <div class="flow-cat-row"><input type="text" placeholder="Category 2" id="flowInputCat2Name" class="flow-input" /><input type="number" step="1" placeholder="Amount" id="flowInputCat2Amt" class="flow-input" /></div>
       <div class="flow-cat-row"><input type="text" placeholder="Category 3" id="flowInputCat3Name" class="flow-input" /><input type="number" step="1" placeholder="Amount" id="flowInputCat3Amt" class="flow-input" /></div>
+      <div class="flow-cat-row"><input type="text" placeholder="Category 4" id="flowInputCat4Name" class="flow-input" /><input type="number" step="1" placeholder="Amount" id="flowInputCat4Amt" class="flow-input" /></div>
+      <div class="flow-cat-row"><input type="text" placeholder="Category 5" id="flowInputCat5Name" class="flow-input" /><input type="number" step="1" placeholder="Amount" id="flowInputCat5Amt" class="flow-input" /></div>
     </div>
     <button type="button" class="quick-add-btn" id="flowSaveBtn" style="width:100%">Save Snapshot</button>
   </div>
@@ -4132,6 +4144,88 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     setFlowSyncStatus(statusMsg);
   }
 
+  function renderFlowBreakdown(containerId, title, items, colorPalette) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    const BILLS_COLOR = '#F2C063', RESERVE_COLOR = '#8FA3FF';
+    el.innerHTML = '<div class="label" style="margin-bottom:10px">' + escapeHtml(title) + '</div>';
+    if (!items || !items.length) {
+      el.innerHTML += '<div class="flow-plan-empty">No breakdown logged for this month</div>';
+      return;
+    }
+    const sorted = items.slice().sort(function(a, b) { return b.amount - a.amount; });
+    const total = sorted.reduce(function(s, i) { return s + (i.amount || 0); }, 0) || 1;
+    let paletteIdx = 0;
+    const colored = sorted.map(function(item) {
+      let color;
+      if (item.name === 'Bills') color = BILLS_COLOR;
+      else if (item.name === 'Reserve') color = RESERVE_COLOR;
+      else { color = colorPalette[paletteIdx % colorPalette.length]; paletteIdx++; }
+      return { name: item.name, amount: item.amount || 0, color: color };
+    });
+    const barSegs = colored.map(function(item) {
+      const pct = (item.amount / total * 100).toFixed(2);
+      return '<div style="flex-basis:' + pct + '%;background:' + item.color + ';min-width:2px" title="' + escapeHtml(item.name) + ' · ' + fmtHUF(item.amount) + '"></div>';
+    }).join('');
+    const showItems = colored.slice(0, 6);
+    const rest = colored.slice(6);
+    let legendHtml = showItems.map(function(item) {
+      const pct = (item.amount / total * 100).toFixed(1);
+      return '<div style="display:flex;align-items:center;gap:8px;padding:3px 0">'
+        + '<div style="width:10px;height:10px;border-radius:2px;background:' + item.color + ';flex-shrink:0"></div>'
+        + '<span style="flex:1;font-size:11.5px;color:var(--text-primary);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(item.name) + '</span>'
+        + '<span style="font-size:11px;font-family:var(--font-mono);color:var(--text-secondary);flex-shrink:0;margin-left:4px">' + fmtHUF(item.amount) + '</span>'
+        + '<span style="font-size:10px;color:var(--text-tertiary);width:38px;text-align:right;flex-shrink:0">' + pct + '%</span>'
+        + '</div>';
+    }).join('');
+    if (rest.length) {
+      const restTotal = rest.reduce(function(s, i) { return s + i.amount; }, 0);
+      legendHtml += '<div style="display:flex;align-items:center;gap:8px;padding:3px 0">'
+        + '<div style="width:10px;height:10px;border-radius:2px;background:rgba(255,255,255,.15);flex-shrink:0"></div>'
+        + '<span style="flex:1;font-size:11.5px;color:var(--text-tertiary)">+' + rest.length + ' more</span>'
+        + '<span style="font-size:11px;font-family:var(--font-mono);color:var(--text-tertiary);flex-shrink:0;margin-left:4px">' + fmtHUF(restTotal) + '</span>'
+        + '<span style="font-size:10px;color:var(--text-tertiary);width:38px;text-align:right;flex-shrink:0">'
+        + (restTotal / total * 100).toFixed(1) + '%</span>'
+        + '</div>';
+    }
+    el.innerHTML += '<div style="display:flex;height:14px;border-radius:7px;overflow:hidden;margin-bottom:12px">' + barSegs + '</div>' + legendHtml;
+  }
+
+  function renderFlowTrends(yearSnaps) {
+    const tc = document.getElementById('flowTrendCard');
+    if (!tc) return;
+    const catMap = {};
+    yearSnaps.forEach(function(s) {
+      (s.categories || []).forEach(function(c) {
+        if (!c.name) return;
+        if (!catMap[c.name]) catMap[c.name] = { total: 0, byMonth: {} };
+        catMap[c.name].total += c.amount || 0;
+        catMap[c.name].byMonth[s.month] = (catMap[c.name].byMonth[s.month] || 0) + (c.amount || 0);
+      });
+    });
+    const catNames = Object.keys(catMap);
+    const monthsWithCats = yearSnaps.filter(function(s) { return (s.categories || []).length > 0; }).length;
+    if (!catNames.length || monthsWithCats < 2) {
+      tc.innerHTML = '<div class="label" style="margin-bottom:10px">Category Trends</div>'
+        + '<div class="flow-plan-empty">Not enough category data yet to show trends</div>';
+      return;
+    }
+    const TREND_COLORS = ['#6BE3A4', '#F2C063', '#8FA3FF', '#FF8A8A', '#E07658'];
+    const top5 = catNames.sort(function(a, b) { return catMap[b].total - catMap[a].total; }).slice(0, 5);
+    const rows = top5.map(function(name, idx) {
+      const values = yearSnaps.map(function(s) { return catMap[name].byMonth[s.month] || 0; });
+      const color = TREND_COLORS[idx % TREND_COLORS.length];
+      return '<div style="display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)">'
+        + '<span style="font-size:11.5px;color:var(--text-primary);width:100px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(name) + '</span>'
+        + '<div style="flex:1;min-width:0">' + flowSparkline(values, color) + '</div>'
+        + '<span style="font-size:11px;font-family:var(--font-mono);color:var(--text-secondary);flex-shrink:0;width:100px;text-align:right">' + fmtHUF(catMap[name].total) + '</span>'
+        + '</div>';
+    }).join('');
+    tc.innerHTML = '<div class="label" style="margin-bottom:6px">Category Trends</div>'
+      + '<div style="font-size:10px;color:var(--text-tertiary);margin-bottom:10px">Top categories · ' + escapeHtml(_flowSelectedYear || '') + ' · yr total</div>'
+      + rows;
+  }
+
   function renderFlow() {
     const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     const allSnaps = getFlowSnapshots().slice().sort(function(a, b) { return String(a.month).localeCompare(String(b.month)); });
@@ -4163,6 +4257,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
       const cc = document.getElementById('flowChartCard'); if (cc) cc.innerHTML = '';
       const pc = document.getElementById('flowPlanCard'); if (pc) pc.innerHTML = '';
       const li = document.getElementById('flowLedgerInner'); if (li) li.innerHTML = '';
+      const ib = document.getElementById('flowIncomeBreakdownCard'); if (ib) ib.innerHTML = '';
+      const ob = document.getElementById('flowOutflowBreakdownCard'); if (ob) ob.innerHTML = '';
+      const tc = document.getElementById('flowTrendCard'); if (tc) tc.innerHTML = '';
       updateFlowFooter(allSnaps);
       return;
     }
@@ -4208,6 +4305,18 @@ input[type="date"]::-webkit-calendar-picker-indicator {
           yearSnaps.map(function(sn) { return flowNetSaved(sn); }), avgKept >= 0 ? '#6BE3A4' : '#FF8A8A');
     }
 
+    // Income breakdown
+    renderFlowBreakdown('flowIncomeBreakdownCard', 'Where it came from',
+      latest.incomeBreakdown || [],
+      ['#6BE3A4', '#8FE8BD', '#4FCB8A', '#A8F0D1', '#3AAE73']);
+    // Outflow breakdown: spending categories + synthetic Bills + Reserve entries
+    const outItems = (latest.categories || []).slice();
+    if ((latest.bills || 0) > 0) outItems.push({ name: 'Bills', amount: latest.bills });
+    if ((latest.reserve || 0) > 0) outItems.push({ name: 'Reserve', amount: latest.reserve });
+    renderFlowBreakdown('flowOutflowBreakdownCard', 'Where it went',
+      outItems,
+      ['#FF8A8A', '#FFB0B0', '#E07658', '#FFC38A']);
+    renderFlowTrends(yearSnaps);
     renderFlowChart(yearSnaps, MONTHS);
     renderFlowPlan(yearSnaps, MONTHS);
     renderFlowLedger(yearSnaps, MONTHS);
@@ -4223,7 +4332,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     const pEl = document.getElementById('flowInputPlannedOut');
     if (!mEl || !mEl.value) { if (mEl) mEl.focus(); return; }
     const cats = [];
-    for (let i = 1; i <= 3; i++) {
+    for (let i = 1; i <= 5; i++) {
       const nameEl = document.getElementById('flowInputCat' + i + 'Name');
       const amtEl  = document.getElementById('flowInputCat' + i + 'Amt');
       if (nameEl && nameEl.value.trim()) {
@@ -4231,20 +4340,21 @@ input[type="date"]::-webkit-calendar-picker-indicator {
       }
     }
     const rec = {
-      month:      mEl.value,
-      income:     parseFloat(iEl && iEl.value) || 0,
-      spending:   parseFloat(sEl && sEl.value) || 0,
-      bills:      parseFloat(bEl && bEl.value) || 0,
-      reserve:    parseFloat(rEl && rEl.value) || 0,
-      plannedOut: (pEl && pEl.value.trim()) ? parseFloat(pEl.value) : null,
-      categories: cats
+      month:           mEl.value,
+      income:          parseFloat(iEl && iEl.value) || 0,
+      spending:        parseFloat(sEl && sEl.value) || 0,
+      bills:           parseFloat(bEl && bEl.value) || 0,
+      reserve:         parseFloat(rEl && rEl.value) || 0,
+      plannedOut:      (pEl && pEl.value.trim()) ? parseFloat(pEl.value) : null,
+      categories:      cats,
+      incomeBreakdown: []
     };
     const snaps = getFlowSnapshots();
     const idx = snaps.findIndex(function(s) { return s.month === rec.month; });
     if (idx >= 0) snaps[idx] = rec; else snaps.push(rec);
     setFlowSnapshots(snaps);
     [iEl, sEl, bEl, rEl, pEl].forEach(function(el) { if (el) el.value = ''; });
-    for (let i = 1; i <= 3; i++) {
+    for (let i = 1; i <= 5; i++) {
       const ne = document.getElementById('flowInputCat' + i + 'Name');
       const ae = document.getElementById('flowInputCat' + i + 'Amt');
       if (ne) ne.value = ''; if (ae) ae.value = '';
